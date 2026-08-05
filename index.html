@@ -1288,9 +1288,11 @@ function shock1(){
   $('shockTit').textContent='¡Se rompió la bici del reparto!';
   $('shockTxt').textContent='Justo cuando Juan arrancaba el mes. El arreglo no espera: $2.000, ya.';
   $('shockFx').textContent='−$2.000'; $('shockFx').style.color='var(--rojo)';
-  $('shockVer').innerHTML=G.shock1Ok
+  $('shockVer').innerHTML=(G.shock1Ok
     ? 'Su plan tenía <b>'+fmt(cubre)+'</b> entre imprevistos y fondo: <span style="color:var(--verdeTxt)">LO CUBRE SIN DEUDA. +2.000 pts</span>'
-    : 'Su plan tenía <b>'+fmt(cubre)+'</b> para imprevistos: <span style="color:var(--rojo)">NO ALCANZA — Juan termina pidiendo fiado. −2.000 pts</span>';
+    : 'Su plan tenía <b>'+fmt(cubre)+'</b> para imprevistos: <span style="color:var(--rojo)">NO ALCANZA — Juan termina pidiendo fiado. −2.000 pts</span>')
+    +(G.resto1>0?'<br><br><span style="color:var(--rojo)">Quedaron '+fmt(G.resto1)+' sin nombre: se evaporaron (−'+Math.round(G.resto1/2)+' pts)</span>':'')
+    +(vida1<2000?'<br><br><span style="color:var(--rojo)">Juan vivió a agua y laburo: un plan que no se banca también se cae (−1.000 pts)</span>':'');
   $('shockBtn').innerHTML='Seguir al mes 2 <svg class="ic"><use href="#i-flecha"/></svg>';
   $('shockBtn').onclick=mostrarInterludio;
   show('shock'); thump();
