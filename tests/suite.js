@@ -16,7 +16,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
 
 (async () => {
   const browser = await chromium.launch();
-  const mk = async () => { const pg = await (await browser.newContext({ viewport: { width: 1280, height: 800 } })).newPage(); pg._errs = []; pg.on('pageerror', e => pg._errs.push(e.message)); return pg; };
+  const mk = async () => { const pg = await (await browser.newContext({ viewport: { width: 1280, height: 800 } })).newPage(); pg._errs = []; pg.on('pageerror', e => pg._errs.push(e.message)); await pg.addInitScript(() => { try { sessionStorage.setItem('cpvCoach1', '1'); sessionStorage.setItem('cpvCoach2', '1'); } catch (e) {} }); return pg; };
 
   /* ══════════ T1 · HERRAMIENTA PERSONAL: matemática exacta + persistencia ══════════ */
   console.log('\n[T1] Herramienta personal');

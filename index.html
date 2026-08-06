@@ -212,6 +212,17 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 #goN{font-family:var(--font-display);font-weight:900;font-size:clamp(140px,30vw,320px);color:#fff;line-height:1;text-shadow:0 8px 60px rgba(0,0,0,.45)}
 #goN.pop{animation:chipPop .35s var(--pop)}
 .gtimer::before{content:'⏱ '}
+#coachOv{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(43,10,80,.55);backdrop-filter:blur(3px);z-index:70;padding:18px}
+#coachOv.on{display:flex}
+#coachCard{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--sombra-3);max-width:640px;width:100%;padding:24px 28px 22px;position:relative;overflow:hidden;animation:chipPop .35s var(--pop)}
+#coachCard::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;background:var(--cinta)}
+.coachRow{display:flex;gap:14px;align-items:flex-start;margin:13px 0;font-weight:600;line-height:1.45;color:var(--ink)}
+.coachRow .icb{width:44px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:12px;background:var(--surface-violeta);color:var(--violeta)}
+.coachRow .icb .ic{width:24px;height:24px}
+.coachRow b{color:var(--violeta)}
+#lobbyComo .cRow{display:flex;gap:12px;align-items:flex-start;margin:10px 0;color:var(--ink);font-weight:600;font-size:clamp(14px,1.9vw,19px);line-height:1.45}
+#lobbyComo .cRow b{color:var(--violeta)}
+#lobbyComo .cNum{font-family:var(--font-display);font-weight:900;color:var(--violeta);font-size:clamp(18px,2.4vw,26px);line-height:1.3;flex-shrink:0}
 .dato.flashN{animation:bumpD .4s}
 .opCard.sel .icb svg{display:none}
 .opCard.sel .icb::after{content:'✓';font-weight:900;font-size:22px;line-height:1}
@@ -363,6 +374,12 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
     <h1 class="dsp" id="lobbyCode" style="font-size:clamp(64px,14vw,140px);letter-spacing:14px;line-height:1"></h1>
     <div id="lobbyEstado" style="font-weight:800;letter-spacing:1.5px;color:var(--azul);max-width:560px">CONECTANDO…</div>
     <div id="lobbyList" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center"></div>
+    <div id="lobbyComo" class="caja" style="max-width:640px;text-align:left;background:var(--surface-violeta);border:1px solid var(--glass-borde);padding:16px 22px">
+      <div class="kick" style="margin-bottom:6px;color:var(--magenta-txt)">MIENTRAS ESPERAN · ASÍ SE JUEGA</div>
+      <div class="cRow"><span class="cNum">1</span><span><b>Consíganle plata a Juan</b> tocando tarjetas de changas y ventas. Cada trabajo gasta horas — y no todo lo que brilla es ingreso.</span></div>
+      <div class="cRow"><span class="cNum">2</span><span><b>Repartan el mes con − y +</b>: cada peso con nombre. Las etiquetas de amarillo (imprevistos, fondo, tableta) dan puntos.</span></div>
+      <div class="cRow"><span class="cNum">3</span><span><b>Aguanten los golpes.</b> La vida no avisa: el equipo que guarda, no se funde. Son 2 meses — gana el mejor plan.</span></div>
+    </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
       <button class="btn amarillo grande dsp" id="btnArrancar" style="display:none" onclick="arrancar()">¡Arrancar! <svg class="ic"><use href="#i-flecha"/></svg></button>
       <button class="btn amarillo" id="btnRetomar" style="display:none" onclick="retomarTrimestre()">Retomar el trimestre</button>
@@ -372,12 +389,20 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
   </div>
 </section>
 
+<div id="coachOv" onclick="if(event.target===this)cerrarCoach()">
+  <div id="coachCard">
+    <div class="kick" style="color:var(--magenta-txt)">ASÍ SE JUEGA</div>
+    <h3 class="dsp" id="coachTit" style="font-size:clamp(22px,4vw,30px);margin:4px 0 2px"></h3>
+    <div id="coachRows"></div>
+    <button class="btn amarillo grande dsp" id="coachBtn" onclick="cerrarCoach()" style="width:100%;justify-content:center;margin-top:8px"></button>
+  </div>
+</div>
 <div id="goOv"><div class="kick" id="goCode"></div><div id="goN" class="dsp">3</div><div class="kick">MISMO CASO PARA TODOS · 2 MESES DE DECISIONES · GANA EL MEJOR PLAN</div></div>
 
 <!-- ================= SALA: fase 1 (expandir) ================= -->
 <section class="screen" id="f1">
   <div class="wiz" style="padding-bottom:150px">
-    <div class="wizHead"><div class="paso dsp" style="background:var(--azul);color:#fff">FASE 1 · EXPANDIR</div><h2 class="dsp">La misión: +plata para Juan</h2><div id="timer1" class="gtimer mono">4:00</div></div>
+    <div class="wizHead"><div class="paso dsp" style="background:var(--azul);color:#fff">PASO 1 · CONSEGUIR PLATA</div><h2 class="dsp">La misión: +plata para Juan</h2><div id="timer1" class="gtimer mono">4:00</div></div>
     <div class="caja" style="padding:12px 16px;margin-bottom:14px;font-weight:700;font-size:clamp(13px,1.9vw,15.5px)">
       <b>Juan Ignacio, 19.</b> Gana $10.000 en el café y aporta $3.000 en casa. Estudia de noche: le quedan <b>12 horas libres por semana</b>. Su sueño: la tableta gráfica ($8.000). Elijan qué oportunidades recomendarle — sin fundir al pibe.
     </div>
@@ -392,8 +417,8 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 <!-- ================= SALA: fase 2 (ordenar) ================= -->
 <section class="screen" id="f2">
   <div class="wiz" style="padding-bottom:150px">
-    <div class="wizHead"><div class="paso dsp" style="background:var(--rosa);color:#fff">FASE 2 · ORDENAR</div><h2 class="dsp">El mes de Juan, etiquetado</h2><div id="timer2" class="gtimer mono">4:00</div></div>
-    <p class="wizSub">Repartan el ingreso del mes. Los mínimos son sagrados (la casa no se negocia)… y las etiquetas del final, si quedan en $0, restan puntos.</p>
+    <div class="wizHead"><div class="paso dsp" style="background:var(--rosa);color:#fff">PASO 2 · REPARTIR LA PLATA</div><h2 class="dsp">El mes de Juan, etiquetado</h2><div id="timer2" class="gtimer mono">4:00</div></div>
+    <p class="wizSub">Repartan el ingreso del mes. Los mínimos son sagrados (la casa no se negocia)… y las etiquetas del final, si quedan en $0, restan puntos. Los <b>− y +</b> van de a $500: mantené apretado y corre solo.</p>
     <div id="gRows"></div>
   </div>
 </section>
@@ -1025,6 +1050,28 @@ function mercadoMes2(){
   if(m1.iva) L.push({id:'iva2', f:'Devolución', n:'IVA electrónico: ya es hábito', d:'Automático, todos los meses', m:400, h:0, fija:1});
   return L;
 }
+const COACH={
+ 1:{t:'Son los asesores de Juan', b:'¡Jugamos!', r:[
+   ['i-mano','<b>Toquen las tarjetas</b> para conseguirle plata extra a Juan. Cada trabajo gasta horas: tiene 12 por semana (arriba se cuentan).'],
+   ['i-rayo','Ojo con la <b>PLATA RÁPIDA</b>: parece el mejor negocio de la grilla… y siempre tiene trampa.'],
+   ['i-flecha','Cuando estén listos, toquen <b>A ORDENAR EL MES</b>. Atentos: la vida pega golpes sorpresa — el que guarda, aguanta.']]},
+ 2:{t:'Ahora repartan la plata', b:'¡A repartir!', r:[
+   ['i-bille','Con <b>− y +</b> le ponen nombre a cada peso del mes. Van de a $500: mantengan apretado y corre solo.'],
+   ['i-estrella','Las etiquetas de <b>AMARILLO</b> (imprevistos, fondo, tableta) son las que dan puntos. Si quedan en $0, restan.'],
+   ['i-chancho','Que no sobre <b>plata sin nombre</b> (se evapora)… y no fundan a Juan: dejarlo a agua y laburo también resta.']]}};
+function mostrarCoach(n){
+  try{ if(sessionStorage.getItem('cpvCoach'+n)) return; }catch(e){}
+  const c=COACH[n]; COACH.abierto=n;
+  $('coachTit').textContent=c.t;
+  $('coachRows').innerHTML=c.r.map(x=>'<div class="coachRow"><div class="icb"><svg class="ic"><use href="#'+x[0]+'"/></svg></div><span>'+x[1]+'</span></div>').join('');
+  $('coachBtn').innerHTML=c.b+' <svg class="ic"><use href="#i-flecha"/></svg>';
+  $('coachOv').classList.add('on');
+}
+function cerrarCoach(){
+  $('coachOv').classList.remove('on');
+  try{ sessionStorage.setItem('cpvCoach'+(COACH.abierto||1),'1'); }catch(e){}
+  sfxTap();
+}
 function empezarJuego(){
   G={mes:1, fase:1, ops:{}, plan:{}, pts:0, evPlata1:0, trampas:0, ev1:null, ev2:null,
      shock1Ok:null, shock2Ok:null, horas:12, opsM1:null, plan1:null, extra1:0, tabAcum:0, soltoPerrosOK:false,
@@ -1033,7 +1080,7 @@ function empezarJuego(){
   JGASTOS.forEach(c=>G.plan[c.id]=c.ini);
   JOLV.forEach(c=>G.plan[c.id]=0);
   SALA.playing=true;
-  pintarF1(); show('f1'); $('gBarra').classList.add('on'); gBarra(); gTimer(1,240);
+  pintarF1(); show('f1'); $('gBarra').classList.add('on'); gBarra(); gTimer(1,240); mostrarCoach(1);
   gProg();
 }
 const extraTot=()=>OPS.reduce((a,o)=>a+(G.ops[o.id]?o.m:0),0);
@@ -1066,10 +1113,10 @@ function gTimer(fase,seg){
 function pintarF1(){
   const p=document.querySelector('#f1 .paso'), h=document.querySelector('#f1 h2'), caso=document.querySelector('#f1 .caja');
   if(G.mes===1){
-    p.textContent='MES 1 · EXPANDIR'; h.textContent='La misión: +plata para Juan';
+    p.textContent='MES 1 · PASO 1 · CONSEGUIR PLATA'; h.textContent='La misión: +plata para Juan';
     caso.innerHTML='<b>Juan Ignacio, 19.</b> Gana $10.000 en el café y aporta $3.000 en casa. Estudia de noche: le quedan <b>12 horas libres por semana</b>. Su sueño: la tableta gráfica ($8.000). <b>Toquen las tarjetas</b> para elegir qué recomendarle (tocar de nuevo = soltar) — sin fundir al pibe. Ojo: no todo lo que brilla es ingreso.';
   } else {
-    p.textContent='MES 2 · RENEGOCIAR'; h.textContent='Nada quedó igual';
+    p.textContent='MES 2 · PASO 1 · RENEGOCIAR'; h.textContent='Nada quedó igual';
     caso.innerHTML='<b>Pasó un mes y el mercado se movió.</b> Sostener también es decidir: hay ofertas que crecieron, otras que se pincharon y puertas que se cerraron. Semana de parciales: <b>'+G.horas+' horas libres</b>.'
       +(G.fiado?' <b style="color:var(--rojo)">Y el almacén no se olvidó del fiado.</b>':'')
       +(horasTot()>G.horas?' <b style="color:var(--rojo)">Arrancan pasados: '+horasTot()+' de '+G.horas+' h — algo hay que soltar.</b>':'');
@@ -1113,7 +1160,7 @@ function pintarHoras(){
 /* ----- fase ORDENAR (mes 1 y mes 2) ----- */
 function pintarF2(){
   const p=document.querySelector('#f2 .paso'), h=document.querySelector('#f2 h2');
-  p.textContent=G.mes===1?'MES 1 · ORDENAR':'MES 2 · CERRAR EL TRIMESTRE';
+  p.textContent=G.mes===1?'MES 1 · PASO 2 · REPARTIR LA PLATA':'MES 2 · PASO 2 · EL PLAN FINAL';
   h.textContent=G.mes===1?'El mes de Juan, etiquetado':'El plan final, con lo aprendido';
   const olvs=JOLV.slice();
   const rows=JGASTOS.map(c=>gRowHTML(c,false)).concat(olvs.map(c=>gRowHTML(c,true)));
@@ -1231,7 +1278,7 @@ function avisoTimeout(letra,txt){
     seg:0, auto:0, ops:['Seguir'], al:()=>pasarAOrdenar()});
 }
 function pasarAOrdenar(){
-  G.fase=2; pintarF2(); show('f2'); $('gBarra').classList.add('on'); gTimer(2, G.mes===1?195:240); gBarra(); gProg();
+  G.fase=2; pintarF2(); show('f2'); $('gBarra').classList.add('on'); gTimer(2, G.mes===1?195:240); gBarra(); gProg(); if(G.mes===1) mostrarCoach(2);
 }
 /* ----- confirmar / shocks / interludio ----- */
 const confirmarFase=conLock(function(){
@@ -1421,7 +1468,7 @@ function pintarEsp(fuerza){
   /* en juego: orden estable alfabético y puntajes ocultos — el final no se quema */
   if(enJuego) rows.sort((a,b)=>a.ini.localeCompare(b.ini));
   else rows.sort((a,b)=>(b.score||0)-(a.score||0));
-  const FASES={1:'MES 1 · BUSCANDO OPORTUNIDADES',2:'MES 1 · ORDENANDO EL PLAN',3:'MES 2 · RENEGOCIANDO',4:'MES 2 · CERRANDO EL TRIMESTRE'};
+  const FASES={1:'MES 1 · CONSIGUIENDO PLATA',2:'MES 1 · REPARTIENDO EL MES',3:'MES 2 · RENEGOCIANDO',4:'MES 2 · CERRANDO EL PLAN'};
   $('espEstado').textContent = rows.length===0?'ESPERANDO EQUIPOS…' : todos?'¡TRIMESTRE CERRADO!' : enJuego?'ASESORANDO EL TRIMESTRE':'EQUIPOS LISTOS';
   /* en el lobby, lo importante es el código: gigante para copiarlo desde las otras máquinas */
   const lobby=!enJuego&&!todos;
