@@ -51,14 +51,15 @@ cambialo en `:root` y en el scope de `#espectador` (modo noche del proyector).
 ## Los tests (importantísimo si tocás la economía)
 
 ```bash
-# desde la raíz del repo:
-python3 -m http.server 8124 &            # servidor local
-cd tests && npm init -y && npm i playwright
-node suite.js                            # corre los 41 tests
+cd tests
+npm install                  # playwright
+npx playwright install chromium
+node server.js &             # servidor estático en :8124 (sin dependencias)
+node suite.js                # corre la suite
 ```
 
 - **T1** herramienta personal, **T2** el trimestre completo, **T3** revancha, **T4** timeout real de 60s, **T5** estáticos.
-- **OJO:** T2 tiene **puntajes exactos calculados a mano** como test de regresión: `LOS CAPOS = 31.775`, `TIBURONES = −12.450`.
+- **OJO:** T2 tiene **puntajes exactos calculados a mano** como test de regresión: `LOS CAPOS = 31.775`, `TIBURONES = −11.950`.
   Esos números dependen de **todas** las constantes de la economía (puntos por destino, trampas −1.500, eventos, shocks, bonus).
   **Si tocás cualquier constante, los tests van a fallar** — no es un bug: recalculá a mano el esperado y actualizá la suite.
 - Los tests desactivan el tutorial (coach) vía `sessionStorage` para poder correr directo.

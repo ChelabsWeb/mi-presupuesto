@@ -1,6 +1,9 @@
 /* SUITE INTEGRAL — Mi Presupuesto (herramienta + Trimestre) */
 const { chromium } = require('playwright');
-const U = 'http://localhost:8124/index.html';
+const path = require('path');
+const ROOT = path.join(__dirname, '..');
+const OUT = path.join(__dirname, 'out');
+const U = 'http://localhost:' + (process.env.PORT || 8124) + '/index.html';
 const esp = ms => new Promise(r => setTimeout(r, ms));
 const R = []; // resultados
 function ok(nombre, cond, detalle) { R.push([cond ? 'PASS' : 'FAIL', nombre, detalle || '']); if (!cond) console.log('  ✗', nombre, '→', detalle || ''); else console.log('  ✓', nombre); }
@@ -15,7 +18,9 @@ async function entrar(p, code, nom) {
 async function confirmar(p) { await esp(600); await p.locator('#gbSig').click(); }
 
 (async () => {
-  const browser = await chromium.launch();
+  require('fs').mkdirSync(OUT, { recursive: true });
+  /* PW_CHANNEL=chrome usa el Chrome instalado en el sistema (si no se puede bajar el chromium de playwright) */
+  const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {});
   const mk = async () => { const pg = await (await browser.newContext({ viewport: { width: 1280, height: 800 } })).newPage(); pg._errs = []; pg.on('pageerror', e => pg._errs.push(e.message)); await pg.addInitScript(() => { try { sessionStorage.setItem('cpvCoach1', '1'); sessionStorage.setItem('cpvCoach2', '1'); } catch (e) {} }); return pg; };
 
   /* ══════════ T1 · HERRAMIENTA PERSONAL: matemática exacta + persistencia ══════════ */
@@ -164,7 +169,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     ok('T2.18 podio ordena A primero', podio.indexOf('LOS CAPOS') < podio.indexOf('TIBURONES'));
     const analisis = await P.locator('#espMalas').textContent();
     ok('T2.19 análisis: acero + trampa + diferencia mula', analisis.includes('DOS tormentas') && analisis.includes('plata rápida') && analisis.includes('parte del delito'));
-    await P.screenshot({ path: '/tmp/sui_podio.png', fullPage: true });
+    await P.screenshot({ path: path.join(OUT, 'sui_podio.png'), fullPage: true });
     /* ══════════ T3 · REVANCHA ══════════ */
     console.log('\n[T3] Revancha');
     await P.locator('#espArrancar').click();
@@ -208,12 +213,12 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
   console.log('\n[T5] Chequeos estáticos');
   {
     const fs = require('fs');
-    const h = fs.readFileSync('/Users/feliruizp/Downloads/Presupuesto_CPV/index.html', 'utf8');
+    const h = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
     const usados = [...new Set([...h.matchAll(/\$\('([A-Za-z0-9_]+)'\)/g)].map(m => m[1]))].filter(x => !x.startsWith('card_') && !x.startsWith('in_') && !x.startsWith('val_') && !x.startsWith('op_') && !x.startsWith('pl_') && !x.startsWith('row_') && !x.startsWith('timer'));
     const defs = new Set([...h.matchAll(/id="([A-Za-z0-9_]+)"/g)].map(m => m[1]));
     const faltan = usados.filter(u => !defs.has(u));
     ok('T5.1 IDs referenciados existen', faltan.length === 0, faltan.join(','));
-    ok('T5.2 sw v3', fs.readFileSync('/Users/feliruizp/Downloads/Presupuesto_CPV/sw.js', 'utf8').includes('cpvpresu-v3'));
+    ok('T5.2 sw v3', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('cpvpresu-v3'));
     ok('T5.3 sin restos piel vieja', !h.includes('Archivo Black') && !h.includes('#F3EEE2') && !h.includes('text-shadow:3px'));
   }
 
