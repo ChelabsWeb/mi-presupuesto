@@ -7,7 +7,7 @@ function ok(nombre, cond, detalle) { R.push([cond ? 'PASS' : 'FAIL', nombre, det
 
 async function tecla(p, ch) { const l = ch === ' ' ? '␣' : ch; await p.locator('#salaTeclas button').filter({ hasText: new RegExp('^' + l + '$') }).first().click(); }
 async function entrar(p, code, nom) {
-  await p.locator('#home button', { hasText: 'Sala' }).click();
+  await p.locator('#home button', { hasText: 'equipos' }).click();
   for (const c of code) await tecla(p, c);
   await tecla(p, 'LISTO'); for (const c of nom) await tecla(p, c); await tecla(p, 'LISTO');
   await p.waitForSelector('#btnArrancar', { state: 'visible', timeout: 15000 });
@@ -58,7 +58,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
   const P = await mk(), A = await mk(), B = await mk();
   {
     await P.goto(U); await A.goto(U); await B.goto(U);
-    await P.locator('#home button', { hasText: 'Sala' }).click();
+    await P.locator('#home button', { hasText: 'equipos' }).click();
     for (const c of 'CIEN') await tecla(P, c);
     await P.getByRole('button', { name: /Proyector/ }).click();
     await entrar(A, 'CIEN', 'LOS CAPOS'); await entrar(B, 'CIEN', 'TIBURONES');
@@ -99,7 +99,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     // proyector tardío entra ahora
     const P2 = await mk();
     await P2.goto(U);
-    await P2.locator('#home button', { hasText: 'Sala' }).click();
+    await P2.locator('#home button', { hasText: 'equipos' }).click();
     for (const c of 'CIEN') await tecla(P2, c);
     await P2.getByRole('button', { name: /Proyector/ }).click();
     await P2.waitForFunction(() => document.getElementById('espEstado').textContent.includes('ASESORANDO'), null, { timeout: 15000 }).catch(() => {});

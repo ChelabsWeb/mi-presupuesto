@@ -102,6 +102,8 @@ button{font-family:inherit;color:var(--ink)}
 .card .tt b{display:block;font-size:clamp(15px,2.2vw,17.5px);line-height:1.2}
 .card .tt span{display:block;font-size:clamp(11.5px,1.7vw,13.5px);font-weight:500;color:var(--ink-2);margin-top:2px}
 .card .val{font-family:var(--font-num);font-weight:700;font-size:clamp(15px,2.4vw,19px);flex-shrink:0}
+.card .addHint{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--surface-violeta);color:var(--violeta);font-weight:900;font-size:20px;line-height:1}
+.card.open .addHint{display:none}
 .card.act{outline:2.5px solid var(--violeta);outline-offset:-1px;background:var(--surface-violeta)}
 .card.act .icb{background:var(--violeta);color:#fff}
 .card.olv{border-style:dashed;border-color:#D9C7F5}
@@ -207,8 +209,12 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 #goOv{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:66}
 #goOv.on{display:flex}
 #goOv .kick{color:var(--amarillo-of);letter-spacing:3px}
-#goN{font-family:var(--font-display);font-weight:900;font-size:clamp(110px,26vw,240px);color:#fff;line-height:1}
+#goN{font-family:var(--font-display);font-weight:900;font-size:clamp(140px,30vw,320px);color:#fff;line-height:1;text-shadow:0 8px 60px rgba(0,0,0,.45)}
 #goN.pop{animation:chipPop .35s var(--pop)}
+.gtimer::before{content:'⏱ '}
+.dato.flashN{animation:bumpD .4s}
+.opCard.sel .icb svg{display:none}
+.opCard.sel .icb::after{content:'✓';font-weight:900;font-size:22px;line-height:1}
 .gtimer{margin-left:auto;border:1.5px solid var(--borde);border-radius:var(--r-pill);background:var(--surface);box-shadow:var(--sombra-1);padding:7px 16px;font-weight:700;font-size:clamp(13px,2vw,17px);font-family:var(--font-num)}
 @keyframes pulso{50%{transform:scale(1.06)}}
 .gtimer.rojo{background:var(--magenta-of);color:#fff;border:none;animation:pulso 1s infinite}
@@ -242,13 +248,15 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 #espectador::before,#espectador::after{content:'';position:fixed;left:0;right:0;height:8px;background:var(--cinta);z-index:5}
 #espectador::before{top:0} #espectador::after{bottom:0}
 #espectador .kick{color:var(--amarillo-of)}
-.eqCol{flex:1;min-width:250px;max-width:350px;background:var(--glass);border:1px solid var(--glass-borde);box-shadow:var(--sombra-3);border-radius:var(--r-lg);padding:20px;text-align:center;position:relative;backdrop-filter:blur(8px)}
+.eqCol{flex:1;min-width:250px;max-width:430px;background:var(--glass);border:1px solid var(--glass-borde);box-shadow:var(--sombra-3);border-radius:var(--r-lg);padding:20px;text-align:center;position:relative;backdrop-filter:blur(8px)}
 @supports not (backdrop-filter:blur(8px)){.eqCol{background:var(--glass-solido)}}
 .eqCol.caida{opacity:.55;filter:grayscale(.6)}
 .eqCol .nom{font-size:clamp(22px,2.8vw,38px);color:#fff}
 .eqCol .sc{font-family:var(--font-num);font-size:clamp(34px,5vw,54px);font-weight:700;margin:6px 0;color:#fff}
 .eqCol .sub{font-weight:600;font-size:clamp(13px,2vw,26px);color:rgba(255,255,255,.78);letter-spacing:1px}
-.eqCol .fila2{display:flex;justify-content:space-between;font-family:var(--font-num);font-weight:500;font-size:clamp(12px,1.5vw,22px);padding:3px 0;color:#fff}
+.eqCol .fila2{display:flex;justify-content:space-between;gap:12px;font-family:var(--font-num);font-weight:500;font-size:clamp(12px,1.5vw,22px);padding:3px 0;color:#fff}
+.eqCol .fila2 span:first-child{text-align:left}
+.eqCol .fila2 span:last-child{white-space:nowrap;flex-shrink:0}
 .eqCol .corona{position:absolute;top:-32px;left:50%;transform:translateX(-50%) rotate(-8deg);width:54px;height:54px;color:var(--amarillo-of);filter:drop-shadow(0 4px 14px rgba(251,197,4,.5))}
 #espMalas{background:var(--glass);border:1px solid var(--glass-borde)}
 #espMalas .mTit{font-family:var(--font-display);font-weight:900;text-transform:uppercase;font-size:clamp(16px,2.3vw,24px);color:var(--amarillo-of);margin-bottom:8px}
@@ -325,7 +333,7 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
     </div>
     <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
       <button class="btn amarillo grande" onclick="irPaso(1)">Armarlo <svg class="ic"><use href="#i-flecha"/></svg></button>
-      <button class="btn grande" onclick="verSala()"><svg class="ic"><use href="#i-wifi"/></svg> Sala · equipos</button>
+      <button class="btn grande" onclick="verSala()"><svg class="ic"><use href="#i-wifi"/></svg> El Trimestre de Juan · jugar en equipos</button>
       <button class="btn" id="btnSeguir" style="display:none" onclick="irPaso(1)"><svg class="ic"><use href="#i-replay"/></svg> Seguir el mío</button>
     </div>
     <div id="ticker"></div>
@@ -364,7 +372,7 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
   </div>
 </section>
 
-<div id="goOv"><div class="kick" id="goCode"></div><div id="goN" class="dsp">3</div><div class="kick">MISMO CASO PARA TODOS · GANA EL MEJOR PLAN</div></div>
+<div id="goOv"><div class="kick" id="goCode"></div><div id="goN" class="dsp">3</div><div class="kick">MISMO CASO PARA TODOS · 2 MESES DE DECISIONES · GANA EL MEJOR PLAN</div></div>
 
 <!-- ================= SALA: fase 1 (expandir) ================= -->
 <section class="screen" id="f1">
@@ -385,7 +393,7 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 <section class="screen" id="f2">
   <div class="wiz" style="padding-bottom:150px">
     <div class="wizHead"><div class="paso dsp" style="background:var(--rosa);color:#fff">FASE 2 · ORDENAR</div><h2 class="dsp">El mes de Juan, etiquetado</h2><div id="timer2" class="gtimer mono">4:00</div></div>
-    <p class="wizSub">Repartan el ingreso del mes. Los mínimos son sagrados (la casa no se negocia)… y las etiquetas del final ya saben quiénes las olvidan.</p>
+    <p class="wizSub">Repartan el ingreso del mes. Los mínimos son sagrados (la casa no se negocia)… y las etiquetas del final, si quedan en $0, restan puntos.</p>
     <div id="gRows"></div>
   </div>
 </section>
@@ -428,6 +436,11 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
   <div class="wiz" style="max-width:1150px;align-items:center;display:flex;flex-direction:column;gap:16px;padding-top:26px">
     <div class="kick">SALA <span id="espCode"></span> · ASESORES DE JUAN IGNACIO</div>
     <h2 class="dsp" id="espEstado" style="font-size:clamp(28px,5vw,50px);text-align:center">Conectando…</h2>
+    <div id="espLobbyCode" style="display:none;text-align:center">
+      <div class="dsp" style="font-size:clamp(80px,18vw,190px);line-height:1;color:#fff;letter-spacing:.12em;text-shadow:0 6px 40px rgba(0,0,0,.35)" id="espCodeBig"></div>
+      <div class="kick" style="margin-top:6px">EN CADA MÁQUINA: <span style="color:#fff">JUGAR EN EQUIPOS</span> → ESCRIBAN ESTE CÓDIGO → NOMBRE DEL EQUIPO</div>
+      <div class="kick" style="margin-top:4px;opacity:.75">OJO: ¡ARRANCAR! ARRANCA EN TODAS LAS MÁQUINAS A LA VEZ</div>
+    </div>
     <div id="espCols" style="display:flex;gap:18px;flex-wrap:wrap;justify-content:center;width:100%"></div>
     <div id="espMalas" class="caja" style="display:none;width:100%;padding:16px 20px"></div>
     <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px">
@@ -603,7 +616,7 @@ function cardHTML(c, tipo){
     <div class="top">
       <div class="icb"><svg class="ic"><use href="#${c.ic}"/></svg></div>
       <div class="tt"><b>${c.n}</b><span>${c.d}</span></div>
-      <div class="val mono" id="val_${c.id}">${val>0?fmt(val):''}</div>
+      <div class="val mono" id="val_${c.id}">${val>0?fmt(val):'<span class="addHint">+</span>'}</div>
     </div>
     <div class="editor" onclick="event.stopPropagation()">
       <div class="montoRow">
@@ -621,7 +634,7 @@ function cardHTML(c, tipo){
   </div>`;
 }
 function invisibleHTML(){
-  return `<div class="invisible"><div class="ej" style="margin:10px 0 2px"><b>LA AYUDA INVISIBLE</b> — marcá lo que tu familia te cubre y sumalo (estimación MENSUAL del taller — los famosos $4.000 a $7.000 por semana):</div>`+
+  return `<div class="invisible"><div class="ej" style="margin:10px 0 2px"><b>LA AYUDA INVISIBLE</b> — marcá lo que tu familia te cubre: se suma a tu mes. Son los famosos $4.000 a $7.000 por semana del taller:</div>`+
     AYUDA_INVISIBLE.map(a=>`<label class="invRow"><input type="checkbox" ${D.inv[a.id]?'checked':''} onchange="togInv('${a.id}',this.checked)"> ${a.n}<span class="m">${fmt(a.m)}</span></label>`).join('')+`</div>`;
 }
 function pintarCards(){
@@ -640,7 +653,7 @@ function tocarCard(ev,id,tipo){
 function setMonto(id,tipo,v){
   v=parseInt((''+v).replace(/\D/g,''),10)||0;
   (tipo==='ing'?D.ing:D.gas)[id]=v;
-  $('val_'+id).textContent=v>0?fmt(v):'';
+  $('val_'+id).innerHTML=v>0?fmt(v):'<span class="addHint">+</span>';
   $('card_'+id).classList.toggle('act', v>0);
   $('card_'+id).classList.add('open');
   barra(); persistir();
@@ -818,10 +831,10 @@ const OPORTUNIDADES=[
 ];
 const JGASTOS=[
  {id:'casa', ic:'i-flia', n:'Aporte en casa', s:'no se negocia', min:3000, ini:3000, fijo:1},
- {id:'trans', ic:'i-bus', n:'Transporte', s:'mínimo para laburar: $2.000', min:2000, ini:2500},
+ {id:'trans', ic:'i-bus', n:'Transporte', s:'para laburar', min:2000, ini:2500},
  {id:'snacks', ic:'i-olla', n:'Meriendas y salidas de comida', s:'recortable', min:0, ini:1500},
  {id:'subs', ic:'i-wifi', n:'Suscripciones', s:'¿las usa todas?', min:0, ini:500},
- {id:'personal', ic:'i-remera', n:'Gastos personales', s:'gustos, salidas, ropa', min:500, ini:3500},
+ {id:'personal', ic:'i-remera', n:'Gastos personales', s:'gustos, salidas, ropa · dejarlo en el piso también cuesta', min:500, ini:3500},
 ];
 const JOLV=[
  {id:'imprev', ic:'i-rayo', n:'Imprevistos', s:'la vida no avisa (~5%)'},
@@ -987,6 +1000,8 @@ const TRAMPAS=[
   caida:'El único que duplica es el que cobra la seña del grupo. Juan puso $800 de prueba y no los vio más. Y ojo: aunque fuera \"legal\", apostar para generar ingreso termina igual — el que necesita recuperar, apuesta de nuevo. Eso ya no es plata: es un problema. −1.500 pts.'},
 ];
 let OPS=[];
+/* mismo ícono que usa cada fuente en el armador: se aprende una vez, se reconoce en todos lados */
+const FIC={'Salario':'i-bille','Cuenta propia':'i-herr','Changas':'i-mano','Reventa':'i-reci','Descuentos':'i-tag','Ayuda familiar':'i-cora','Devolución':'i-devol','Ayuda estatal':'i-estado','Premios':'i-copa','PLATA RÁPIDA':'i-rayo'};
 function mercadoMes1(){
   const l=OPORTUNIDADES.slice();
   l.splice(2,0,TRAMPAS[0]); l.splice(6,0,TRAMPAS[1]); l.splice(10,0,TRAMPAS[2]);
@@ -1052,7 +1067,7 @@ function pintarF1(){
   const p=document.querySelector('#f1 .paso'), h=document.querySelector('#f1 h2'), caso=document.querySelector('#f1 .caja');
   if(G.mes===1){
     p.textContent='MES 1 · EXPANDIR'; h.textContent='La misión: +plata para Juan';
-    caso.innerHTML='<b>Juan Ignacio, 19.</b> Gana $10.000 en el café y aporta $3.000 en casa. Estudia de noche: le quedan <b>12 horas libres por semana</b>. Su sueño: la tableta gráfica ($8.000). Elijan qué recomendarle — sin fundir al pibe. Ojo: no todo lo que brilla es ingreso.';
+    caso.innerHTML='<b>Juan Ignacio, 19.</b> Gana $10.000 en el café y aporta $3.000 en casa. Estudia de noche: le quedan <b>12 horas libres por semana</b>. Su sueño: la tableta gráfica ($8.000). <b>Toquen las tarjetas</b> para elegir qué recomendarle (tocar de nuevo = soltar) — sin fundir al pibe. Ojo: no todo lo que brilla es ingreso.';
   } else {
     p.textContent='MES 2 · RENEGOCIAR'; h.textContent='Nada quedó igual';
     caso.innerHTML='<b>Pasó un mes y el mercado se movió.</b> Sostener también es decidir: hay ofertas que crecieron, otras que se pincharon y puertas que se cerraron. Semana de parciales: <b>'+G.horas+' horas libres</b>.'
@@ -1067,9 +1082,9 @@ function pintarF1(){
     if(G.ops[o.id]) cls.push('sel');
     return `<div class="${cls.join(' ')}" id="op_${o.id}" onclick="togOp('${o.id}')">${badge}
       <div class="top">
-        <div class="icb"><svg class="ic"><use href="#i-bille"/></svg></div>
-        <div class="tt"><b>${o.n}</b><span>${o.d} · <u>${o.f}</u></span><span class="hrs">${o.h===0?'sin horas extra':o.h+' h/semana'}</span></div>
-        <div class="val mono">${o.bloq?'—':'+'+fmt(o.m).slice(1)}</div>
+        <div class="icb"><svg class="ic"><use href="#${FIC[o.f]||'i-bille'}"/></svg></div>
+        <div class="tt"><b>${o.n}</b><span>${o.d} · <u>${o.f}</u></span><span class="hrs">${o.h} h/semana</span></div>
+        <div class="val mono">${o.bloq?'—':'+'+fmt(o.m)+'/mes'}</div>
       </div>
     </div>`;
   }).join('');
@@ -1132,14 +1147,15 @@ function refrescarMeta2(){
 let repT=null,repI=null,repiendo=false;
 function repIni(id,d){ ajustar(id,d); repT=setTimeout(()=>{ repiendo=true; repI=setInterval(()=>ajustar(id,d),110); },420); }
 function repFin(){ clearTimeout(repT); clearInterval(repI); if(repiendo){ repiendo=false; gProg(); } }
+function flashBarra(){ const d=$('gbD2'); d.classList.remove('flashN'); void d.offsetWidth; d.classList.add('flashN'); }
 function ajustar(id,delta){
   if(!G) return;
   if(id==='meta2' && !metaDesbloqueada()){ sfxNo(); return; }
   const c=JGASTOS.find(x=>x.id===id)||JOLV.find(x=>x.id===id)||(id==='fiado'?{min:G.fiado}:{min:0});
   const min=c.min||0;
   let v=(G.plan[id]||0)+delta;
-  if(v<min){ sfxNo(); return; }
-  if(delta>0 && asignado()+delta>disponible()){ sfxNo(); return; }
+  if(v<min){ sfxNo(); flashBarra(); return; }
+  if(delta>0 && asignado()+delta>disponible()){ sfxNo(); flashBarra(); return; }
   G.plan[id]=v; sfxTap();
   const m=$('pl_'+id); m.textContent=fmt(v); m.classList.remove('bump'); void m.offsetWidth; m.classList.add('bump');
   if(G.mes===2) refrescarMeta2();
@@ -1155,11 +1171,11 @@ function gBarra(){
     $('gbSig').innerHTML=(G.mes===1?'A ordenar el mes':'Al plan final')+' <svg class="ic"><use href="#i-flecha"/></svg>';
   } else {
     const resto=disponible()-asignado();
-    $('gbD1').innerHTML='PARA REPARTIR<b class="mono">'+fmt(disponible())+'</b>';
-    $('gbD2').innerHTML=(resto>0?'POR REPARTIR':'SIN NOMBRE')+'<b class="mono">'+fmt(resto)+'</b>';
+    $('gbD1').innerHTML='INGRESO DEL MES<b class="mono">'+fmt(disponible())+'</b>';
+    $('gbD2').innerHTML=(resto<0?'¡PLAN EN ROJO!':resto>0?'FALTA REPARTIR':'TODO REPARTIDO')+'<b class="mono">'+(resto===0?'✓':fmt(resto))+'</b>';
     $('gbD2').classList.toggle('neg',resto<0);
     $('gbD2').classList.toggle('warn',resto>0);
-    $('gbD3').innerHTML='AHORRO CON DESTINO<b class="mono">'+fmt(destino())+'</b>';
+    $('gbD3').innerHTML='AHORRO CON DESTINO · las de amarillo<b class="mono">'+fmt(destino())+'</b>';
     $('gbSig').innerHTML='Confirmar el plan <svg class="ic"><use href="#i-flecha"/></svg>';
   }
 }
@@ -1171,8 +1187,8 @@ function abrirEvento(cfg){
   bar.classList.remove('corre'); void bar.offsetWidth;
   clearInterval(evSegInt); $('evSeg').textContent='';
   if(cfg.seg){ $('evBar').style.display=''; bar.style.animationDuration=cfg.seg+'s'; bar.classList.add('corre');
-    let s=cfg.seg; $('evSeg').textContent=s+'s';
-    evSegInt=setInterval(()=>{ s--; $('evSeg').textContent=Math.max(0,s)+'s'; if(s<=10&&s>0) sfxTick(); if(s<=0) clearInterval(evSegInt); },1000);
+    let s=cfg.seg; $('evSeg').textContent=s+'s · si no eligen, decide Juan';
+    evSegInt=setInterval(()=>{ s--; $('evSeg').textContent=Math.max(0,s)+'s · si no eligen, decide Juan'; if(s<=10&&s>0) sfxTick(); if(s<=0) clearInterval(evSegInt); },1000);
   }
   else $('evBar').style.display='none';
   $('evOps2').innerHTML='';
@@ -1291,7 +1307,7 @@ function shock1(){
   $('shockVer').innerHTML=(G.shock1Ok
     ? 'Su plan tenía <b>'+fmt(cubre)+'</b> entre imprevistos y fondo: <span style="color:var(--verdeTxt)">LO CUBRE SIN DEUDA. +2.000 pts</span>'
     : 'Su plan tenía <b>'+fmt(cubre)+'</b> para imprevistos: <span style="color:var(--rojo)">NO ALCANZA — Juan termina pidiendo fiado. −2.000 pts</span>')
-    +(G.resto1>0?'<br><br><span style="color:var(--rojo)">Quedaron '+fmt(G.resto1)+' sin nombre: se evaporaron (−'+Math.round(G.resto1/2)+' pts)</span>':'')
+    +(G.resto1>0?'<br><br><span style="color:var(--rojo)">Quedaron '+fmt(G.resto1)+' sin nombre: se evaporaron (−'+Math.round(G.resto1/2).toLocaleString('es-UY')+' pts)</span>':'')
     +(vida1<2000?'<br><br><span style="color:var(--rojo)">Juan vivió a agua y laburo: un plan que no se banca también se cae (−1.000 pts)</span>':'');
   $('shockBtn').innerHTML='Seguir al mes 2 <svg class="ic"><use href="#i-flecha"/></svg>';
   $('shockBtn').onclick=mostrarInterludio;
@@ -1306,18 +1322,19 @@ function mostrarInterludio(){
     '<div class="fila3"><span>Ingreso extra del mes</span><span class="mono">'+fmt(G.extra1)+'</span></div>'+
     '<div class="fila3"><span>La bici rota</span><span class="mono" style="color:'+(G.shock1Ok?'var(--lima-txt)':'var(--magenta-txt)')+'">'+(G.shock1Ok?'LA CUBRIERON SIN DEUDA':'LOS FUNDIÓ: fiado en el almacén')+'</span></div>'+
     '<div class="fila3"><span>El cliente urgente</span><span style="text-align:right;max-width:60%">'+ev1txt+'</span></div>'+
-    (G.trampas?'<div class="fila3"><span>Plata rápida</span><span style="color:var(--magenta-txt)">cayeron en '+G.trampas+' (−'+(G.trampas*1500)+' pts)</span></div>':'')+
+    (G.trampas?'<div class="fila3"><span>Plata rápida</span><span style="color:var(--magenta-txt)">cayeron en '+G.trampas+' (−'+(G.trampas*1500).toLocaleString('es-UY')+' pts)</span></div>':'')+
     '<div class="fila3"><span>Etiquetas olvidadas ×'+G.olv1+'</span><span class="mono" style="color:'+(G.olv1?'var(--magenta-txt)':'var(--lima-txt)')+'">'+(G.olv1?'−'+(G.olv1*1500)+' pts · lo que no etiquetás, te etiqueta':'ninguna ✔')+'</span></div>'+
     '<div class="fila3"><span>Fuentes de ingreso usadas</span><span class="mono">'+G.fu1+(G.fu1>=3?' · +1.000 pts':' · sin bonus (3 dan bonus)')+'</span></div>'+
-    (G.resto1>0?'<div class="fila3"><span>Plata sin nombre</span><span class="mono" style="color:var(--magenta-txt)">'+fmt(G.resto1)+' se evaporaron · −'+Math.round(G.resto1/2)+' pts</span></div>':'')+
+    (G.resto1>0?'<div class="fila3"><span>Plata sin nombre</span><span class="mono" style="color:var(--magenta-txt)">'+fmt(G.resto1)+' se evaporaron · −'+Math.round(G.resto1/2).toLocaleString('es-UY')+' pts</span></div>':'')+
     (G.austero?'<div class="fila3"><span>Vida a agua y laburo</span><span style="color:var(--magenta-txt);text-align:right;max-width:60%">un plan que no se banca también se cae · −1.000 pts</span></div>':'')+
     '<div class="fila3"><span>Colchón que pasa al mes 2</span><span class="mono">'+fmt(arr)+'</span></div>'+
     (!G.shock1Ok?'<div class="fila3"><span>Y ojo…</span><span style="color:var(--magenta-txt);text-align:right;max-width:60%">el almacén no se olvida: el fiado se paga el mes que viene</span></div>':'')+
     '<div class="fila3"><span>La tableta ($8.000)</span><span class="mono">'+fmt(G.tabAcum)+' juntados</span></div>'+
-    '<div class="fila3" style="font-weight:800"><span>PUNTOS DEL MES 1</span><span class="mono">'+G.pts.toLocaleString('es-UY')+'</span></div>';
+    '<div class="fila3" style="font-weight:800"><span>PUNTOS DEL MES 1</span><span class="mono">'+G.pts.toLocaleString('es-UY')+' pts</span></div>';
   show('inter'); sfxCoin();
 }
 function irMes2(){
+  document.querySelectorAll('.confeti').forEach(c=>c.remove());
   G.mes=2; G.fase=1; G.horas=11; G.evPlata1=0; G.cerrado=false;
   OPS=mercadoMes2();
   G.ops={};
@@ -1359,8 +1376,9 @@ function shock2(){
     ? 'Su plan tenía <b>'+fmt(cubre)+'</b> de colchón: <span style="color:var(--verdeTxt)">ABSORBE EL RECORTE SIN TOCAR EL RESTO. +1.500 pts</span>'
     : 'Sin colchón, el recorte se comió el aporte en casa: <span style="color:var(--rojo)">Juan quedó debiendo adentro de su propia familia. −1.500 pts</span>')
     +(acero?'<br><br><span style="color:var(--verdeTxt)">COLCHÓN DE ACERO: dos tormentas, cero deudas. +1.000 pts extra</span>':'')
-    +(G.resto2>0?'<br><br><span style="color:var(--rojo)">Quedaron '+fmt(G.resto2)+' sin nombre: se evaporaron (−'+Math.round(G.resto2/2)+' pts)</span>':'')
-    +(G.austero?'<br><br><span style="color:var(--rojo)">Juan vivió a agua y laburo: un plan que no se banca también se cae (−1.000 pts)</span>':'');
+    +(G.resto2>0?'<br><br><span style="color:var(--rojo)">Quedaron '+fmt(G.resto2)+' sin nombre: se evaporaron (−'+Math.round(G.resto2/2).toLocaleString('es-UY')+' pts)</span>':'')
+    +(G.austero?'<br><br><span style="color:var(--rojo)">Juan vivió a agua y laburo: un plan que no se banca también se cae (−1.000 pts)</span>':'')
+    +(G.ev2?'<br><br>La oferta del contado: '+({A:'<span style="color:var(--rojo)">compraron ya — $1.900 menos este mes (−600 pts)</span>',B:'<span style="color:var(--verdeTxt)">la anotaron para comparar el mes que viene (+400 pts)</span>',C:'<span style="color:var(--verdeTxt)">no compraron nada (+300 pts)</span>'}[G.ev2]||''):'');
   $('shockBtn').innerHTML='Cerrar el trimestre <svg class="ic"><use href="#i-flecha"/></svg>';
   $('shockBtn').onclick=finDelEquipo;
   show('shock'); thump();
@@ -1403,16 +1421,20 @@ function pintarEsp(fuerza){
   /* en juego: orden estable alfabético y puntajes ocultos — el final no se quema */
   if(enJuego) rows.sort((a,b)=>a.ini.localeCompare(b.ini));
   else rows.sort((a,b)=>(b.score||0)-(a.score||0));
-  const FASES={1:'BUSCANDO OPORTUNIDADES · MES 1',2:'ORDENANDO EL MES 1',3:'RENEGOCIANDO · MES 2',4:'CERRANDO EL TRIMESTRE'};
+  const FASES={1:'MES 1 · BUSCANDO OPORTUNIDADES',2:'MES 1 · ORDENANDO EL PLAN',3:'MES 2 · RENEGOCIANDO',4:'MES 2 · CERRANDO EL TRIMESTRE'};
   $('espEstado').textContent = rows.length===0?'ESPERANDO EQUIPOS…' : todos?'¡TRIMESTRE CERRADO!' : enJuego?'ASESORANDO EL TRIMESTRE':'EQUIPOS LISTOS';
+  /* en el lobby, lo importante es el código: gigante para copiarlo desde las otras máquinas */
+  const lobby=!enJuego&&!todos;
+  $('espLobbyCode').style.display=lobby?'':'none';
+  if(lobby) $('espCodeBig').textContent=SALA.code;
   $('espCols').innerHTML=rows.map((r,i)=>`
     <div class="eqCol${r.caido?' caida':''}" style="border-top:6px solid ${cols[colorIdx[r.id]%4]}">
       ${todos&&i===0?'<svg class="corona"><use href="#i-corona"/></svg>':''}
       <div class="nom dsp">${r.ini}${r.id===SALA.id&&!SALA.spec?' · VOS':''}</div>
-      <div class="sc"${!enJuego&&(r.score||0)<0?' style="color:var(--rojo)"':''}>${enJuego?'···':(r.score||0).toLocaleString('es-UY')}</div>
-      <div class="sub">${r.caido?'SE DESCONECTÓ':(r.fin?'TRIMESTRE CERRADO':(r.en?(FASES[r.fase]||'ASESORANDO'):'EN LA SALA'))}</div>
+      <div class="sc"${todos&&(r.score||0)<0?' style="color:var(--rojo)"':''}>${todos?(r.score||0).toLocaleString('es-UY')+' pts':(r.en?'···':'✓')}</div>
+      <div class="sub">${r.caido?'SE DESCONECTÓ':(r.fin?'TRIMESTRE CERRADO':(r.en?(FASES[r.fase]||'ASESORANDO'):'EQUIPO LISTO'))}</div>
       ${r.fin?`
-        <div class="fila2"><span>Ingreso extra (2 meses)</span><span>+${(r.extra||0).toLocaleString('es-UY')}</span></div>
+        <div class="fila2"><span>Ingreso extra</span><span>+${(r.extra||0).toLocaleString('es-UY')}</span></div>
         <div class="fila2"><span>Ahorro con destino</span><span>${(r.destino||0).toLocaleString('es-UY')}</span></div>
         <div class="fila2"><span>La bici</span><span style="color:${r.shock1Ok?'var(--verdeTxt)':'var(--rojo)'}">${r.shock1Ok?'CUBIERTA':'LOS FUNDIÓ'}</span></div>
         <div class="fila2"><span>El recorte</span><span style="color:${r.shock2Ok?'var(--verdeTxt)':'var(--rojo)'}">${r.shock2Ok?'ABSORBIDO':'LOS FUNDIÓ'}</span></div>
