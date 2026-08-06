@@ -88,6 +88,9 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await B.waitForSelector('#evOv.on', { timeout: 8000 });
     await B.locator('#evOps2 .op2').nth(2).click(); // ev1 C
     await B.waitForSelector('#f2.on', { timeout: 8000 });
+    // B se queda quieto varios minutos mientras A juega: acá el reloj no debe cerrarle la fase
+    // (el cierre automático por tiempo se prueba aparte, en T6)
+    await B.evaluate(() => gTimer(2, 9999));
     // A ordena m1: destino 11500, resto 0
     await A.evaluate(() => { for (let i = 0; i < 3; i++) ajustar('snacks', -500); ajustar('subs', -500); for (let i = 0; i < 4; i++) ajustar('personal', -500);
       for (let i = 0; i < 4; i++) ajustar('imprev', 500); for (let i = 0; i < 4; i++) ajustar('fondo', 500); for (let i = 0; i < 15; i++) ajustar('objetivo', 500); });
@@ -130,6 +133,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await entrar(B, 'CIEN', 'TIBURONES');
     ok('T2.8 botón Retomar visible', await B.locator('#btnRetomar').isVisible());
     await B.locator('#btnRetomar').click(); await esp(600);
+    await B.evaluate(() => gTimer(2, 9999)); // idem: B sigue esperando a A
     ok('T2.9 retoma en fase 2 con plan intacto', await B.locator('#f2.on').count() === 1 && (await B.locator('#pl_snacks').textContent()) === '$1.000', await B.locator('#pl_snacks').textContent());
     const colsB = await P.evaluate(() => document.querySelectorAll('#espCols .eqCol').length);
     ok('T2.10 sin columna duplicada tras retomar', colsB === 2, '' + colsB);
@@ -207,6 +211,77 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     ok('T4.4 sigue a ordenar', true);
     ok('T4.5 sin errores JS', p._errs.length === 0, p._errs.join(';'));
     await p.context().close();
+  }
+
+  /* ══════════ T6 · RELOJ QUE CIERRA, TECLADO Y BOTÓN "TODO" ══════════ */
+  console.log('\n[T6] Cierre automático, teclado y reparto rápido');
+  {
+    const p = await mk();
+    await p.goto(U);
+    await entrar(p, 'RELO', 'CRONOS');
+    await p.locator('#btnArrancar').click(); await esp(700);
+    await p.locator('#btnArrancar').click();
+    await p.waitForSelector('#f1.on', { timeout: 20000 });
+    // hace falta ingreso extra real: con el plan inicial ($11.000) y solo $10.000 de sueldo, se arranca en rojo
+    for (const id of ['iva', 'beca', 'juegos', 'cari']) { await p.locator('#op_' + id).click(); await esp(80); }
+    // el reloj llega a cero → gracia → la fase se cierra sola (sin tocar Confirmar)
+    await p.evaluate(() => { gT.gracia = true; gT.t = 1; pintarGT(); });
+    await p.waitForSelector('#evOv.on', { timeout: 8000 });
+    ok('T6.1 fase 1 se cierra sola al vencer el reloj', true);
+    await p.locator('#evOps2 .op2').nth(2).click(); // ev1 C
+    await p.waitForSelector('#f2.on', { timeout: 8000 });
+    // el reloj se congela con un modal arriba
+    const congelado = await p.evaluate(async () => { gTimer(2, 100); pausarGT(true); const a = gT.t; await new Promise(r => setTimeout(r, 2200)); return { a, b: gT.t }; });
+    ok('T6.2 el reloj se congela con modal arriba', congelado.a === congelado.b, JSON.stringify(congelado));
+    await p.evaluate(() => { pausarGT(false); gTimer(2, 9999); });
+    // steppers con teclado (hoy solo respondían a pointer)
+    const antes = await p.locator('#pl_snacks').textContent();
+    await p.locator('#row_snacks .ctrl button').nth(1).press('Enter'); await esp(200);
+    const despues = await p.locator('#pl_snacks').textContent();
+    ok('T6.3 stepper responde a teclado', antes === '$1.500' && despues === '$2.000', antes + ' → ' + despues);
+    // botón TODO: manda el sobrante entero a una etiqueta
+    await p.locator('#row_objetivo .ctrl button.todo').click(); await esp(250);
+    const barra = await p.locator('#gbD2').textContent();
+    ok('T6.4 TODO deja el reparto en cero', barra.includes('TODO REPARTIDO'), barra);
+    const resto = await p.evaluate(() => disponible() - asignado());
+    ok('T6.5 resto exacto = 0', resto === 0, '' + resto);
+    await confirmar(p);
+    await p.waitForSelector('#shock.on', { timeout: 8000 });
+    ok('T6.6 confirma sin modal de plata sin nombre', true);
+    ok('T6.7 sin errores JS', p._errs.length === 0, p._errs.join(';'));
+    await p.context().close();
+  }
+
+  /* ══════════ T7 · CONTROL DEL FACILITADOR + GUARD DE REINICIO ══════════ */
+  console.log('\n[T7] Facilitador y guard de reinicio');
+  {
+    const PF = await mk(), EF = await mk();
+    await PF.goto(U); await EF.goto(U);
+    await PF.locator('#home button', { hasText: 'equipos' }).click();
+    for (const c of 'FACI') await tecla(PF, c);
+    await PF.getByRole('button', { name: /Proyector/ }).click();
+    await entrar(EF, 'FACI', 'MESA UNO');
+    await PF.waitForFunction(() => document.querySelectorAll('#espCols .eqCol').length === 1, null, { timeout: 15000 });
+    await PF.locator('#espArrancar').click();
+    await EF.waitForSelector('#f1.on', { timeout: 20000 });
+    await PF.waitForSelector('#espForzar', { state: 'visible', timeout: 10000 });
+    ok('T7.1 botón del facilitador visible con la ronda en juego', true);
+    await PF.locator('#espForzar').click(); await esp(400); // primer toque = arma
+    ok('T7.2 forzar pide confirmación', (await PF.locator('#espForzar').textContent()).includes('Tocá de nuevo'), await PF.locator('#espForzar').textContent());
+    await PF.locator('#espForzar').click();
+    await EF.waitForSelector('#evOv.on', { timeout: 10000 });
+    ok('T7.3 el proyector cierra la fase de los equipos', true);
+    // una máquina que entra tarde no debe poder reiniciarle la ronda a todos de un toque
+    const XF = await mk(); await XF.goto(U);
+    await entrar(XF, 'FACI', 'TARDE');
+    await XF.waitForFunction(() => Object.keys(SALA.prog || {}).length > 0, null, { timeout: 15000 });
+    await XF.locator('#btnArrancar').click(); await esp(700);
+    ok('T7.4 avisa antes de reiniciar una ronda en curso', (await XF.locator('#lobbyEstado').textContent()).includes('EN CURSO'), await XF.locator('#lobbyEstado').textContent());
+    // aunque el aviso se ignore, el equipo que está jugando no se reinicia
+    await XF.locator('#btnArrancar').click(); await esp(1500);
+    ok('T7.5 el equipo en juego ignora el start ajeno', await EF.locator('#goOv.on').count() === 0 && await EF.locator('#evOv.on').count() === 1);
+    ok('T7.6 sin errores JS', PF._errs.length + EF._errs.length + XF._errs.length === 0, [...PF._errs, ...EF._errs, ...XF._errs].join(';'));
+    await PF.context().close(); await EF.context().close(); await XF.context().close();
   }
 
   /* ══════════ T5 · ESTÁTICOS ══════════ */

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -255,6 +255,8 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 .gRow .ctrl button:active{transform:scale(.92)}
 .gRow .ctrl button.min{opacity:.35}
 .gRow .ctrl .m{font-family:var(--font-num);font-weight:700;font-size:clamp(15px,2.5vw,20px);min-width:86px;text-align:center}
+.gRow .ctrl button.todo{width:auto;min-width:60px;padding:0 12px;font-size:12px;letter-spacing:.5px;border-radius:var(--r-pill);background:var(--amarillo-of);color:var(--ink)}
+.gRow .ctrl button.todo:hover{background:var(--amarillo-of);color:var(--ink);filter:brightness(1.06)}
 /* proyector noche */
 #espectador::before,#espectador::after{content:'';position:fixed;left:0;right:0;height:8px;background:var(--cinta);z-index:5}
 #espectador::before{top:0} #espectador::after{bottom:0}
@@ -470,6 +472,7 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
     <div id="espMalas" class="caja" style="display:none;width:100%;padding:16px 20px"></div>
     <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px">
       <button class="btn amarillo grande dsp" id="espArrancar" style="display:none" onclick="arrancar()">¡Arrancar! <svg class="ic"><use href="#i-flecha"/></svg></button>
+      <button class="btn" id="espForzar" style="display:none" onclick="forzarTodas(this)">Cerrar la fase en todas</button>
       <button class="btn amarillo" id="btnRetryE" style="display:none" onclick="reintentar()">Reintentar</button>
       <button class="btn" onclick="salirSala(this)">Salir</button>
     </div>
@@ -937,6 +940,8 @@ function entrarSala(spec){
       pintarLobby(); pintarEsp(); });
     ch.on('broadcast',{event:'start'},({payload})=>{ if(!SALA||SALA.ch!==ch) return;
       if(payload.ronda<=SALA.ronda) return;
+      /* un equipo con el trimestre a medias no se reinicia porque otra máquina tocó Arrancar */
+      if(!SALA.spec&&SALA.playing&&G) return;
       SALA.ronda=payload.ronda; SALA.festejado=false; SALA.prog={}; SALA.guardado=null;
       $('btnRetomar').style.display='none';
       Object.values(SALA.timeouts).forEach(clearTimeout); SALA.timeouts={};
@@ -944,6 +949,8 @@ function entrarSala(spec){
     ch.on('broadcast',{event:'prog'},({payload})=>{ if(!SALA||SALA.ch!==ch) return;
       if(payload.ronda>SALA.ronda) SALA.ronda=payload.ronda;
       if(!(SALA.prog[payload.id]&&SALA.prog[payload.id].fin)) SALA.prog[payload.id]=payload; pintarEsp(); });
+    /* el facilitador destraba la sala desde el proyector sin ir máquina por máquina */
+    ch.on('broadcast',{event:'forzar'},()=>{ if(!SALA||SALA.ch!==ch||SALA.spec) return; forzarCierreLocal(); });
     ch.on('broadcast',{event:'fin'},({payload})=>{ if(!SALA||SALA.ch!==ch) return;
       if(payload.ronda>SALA.ronda) SALA.ronda=payload.ronda;
       SALA.prog[payload.id]=payload; pintarEsp(); });
@@ -968,7 +975,7 @@ function salirSala(b){
     try{ localStorage.removeItem('cpv_sala_'+SALA.code); }catch(e){} }
   SALA=null; G=null; OPS=[]; lobbyPrev=0;
   clearInterval(gTimerInt); clearTimeout(evTimer); evAl=null;
-  $('evOv').classList.remove('on'); confirmarFase._avisado=false;
+  $('evOv').classList.remove('on');
   $('gBarra').classList.remove('on'); show('home'); attract();
 }
 let lobbyPrev=0;
@@ -978,7 +985,7 @@ function pintarLobby(){
   $('lobbyList').innerHTML=ks.map(k=>`<div class="lobJ dsp${k===SALA.id?' yo':''}">${SALA.players[k].ini}${k===SALA.id?' · VOS':''}</div>`).join('');
   if(ks.length>lobbyPrev&&lobbyPrev>0) sfxCoin();
   lobbyPrev=ks.length;
-  if(ks.length>1) $('lobbyEstado').textContent=ks.length+' MÁQUINAS CONECTADAS · CUANDO ESTÉN TODAS, ¡ARRANQUEN!';
+  if(ks.length>1&&Date.now()>=avisoHasta) $('lobbyEstado').textContent=ks.length+' MÁQUINAS CONECTADAS · CUANDO ESTÉN TODAS, ¡ARRANQUEN!';
 }
 function retomarTrimestre(){
   const g=SALA&&SALA.guardado; if(!g||!g.G) return;
@@ -988,15 +995,42 @@ function retomarTrimestre(){
   if(G.fase===1){ pintarF1(); show('f1'); } else { pintarF2(); show('f2'); }
   $('gBarra').classList.add('on'); gBarra(); gTimer(G.fase,90); gProg(); sfxCoin();
 }
+/* los avisos del lobby duraban lo que tardaba el próximo presence sync en pisarlos */
+let avisoHasta=0;
+function avisoSala(txt,despues){
+  avisoHasta=Date.now()+4000;
+  ($('espectador').classList.contains('on')?$('espEstado'):$('lobbyEstado')).textContent=txt;
+  sfxNo();
+  setTimeout(()=>{ avisoHasta=0; if(despues) despues(); if(SALA){ pintarLobby(); pintarEsp(); } },4000);
+}
 const arrancar=conLock(function(){
   if(!SALA||!SALA.ch) return;
   if(!SALA.spec && Object.keys(SALA.players).length<2 && !arrancar._solo){
     arrancar._solo=true;
-    const est=$('espectador').classList.contains('on')?$('espEstado'):$('lobbyEstado');
-    est.textContent='SOS LA ÚNICA MÁQUINA · TOCÁ DE NUEVO PARA JUGAR IGUAL';
-    setTimeout(()=>{ arrancar._solo=false; if(SALA){ pintarLobby(); pintarEsp(); } },4000); sfxNo(); return; }
+    avisoSala('SOS LA ÚNICA MÁQUINA · TOCÁ DE NUEVO PARA JUGAR IGUAL',()=>arrancar._solo=false); return; }
+  /* volver al lobby con la ronda andando y tocar Arrancar le tiraba el trimestre abajo a todos */
+  if(Object.values(SALA.prog||{}).some(p=>!p.fin) && !arrancar._reinicio){
+    arrancar._reinicio=true;
+    avisoSala('HAY UNA RONDA EN CURSO · TOCÁ DE NUEVO PARA REINICIARLA EN TODAS',()=>arrancar._reinicio=false); return; }
+  arrancar._reinicio=false;
   SALA.ch.send({type:'broadcast',event:'start',payload:{ronda:SALA.ronda+1}});
 });
+/* ---- control del facilitador: cerrar la fase en todas las máquinas desde el proyector ---- */
+function forzarTodas(b){
+  if(!SALA||!SALA.ch) return;
+  if(b&&!b.dataset.arm){ b.dataset.arm='1'; b.textContent='¿Cerrar en todas? Tocá de nuevo';
+    setTimeout(()=>{ if(b.dataset.arm){ delete b.dataset.arm; b.textContent='Cerrar la fase en todas'; } },2500); sfxTap(); return; }
+  if(b){ delete b.dataset.arm; b.textContent='Cerrar la fase en todas'; }
+  SALA.ch.send({type:'broadcast',event:'forzar',payload:{ronda:SALA.ronda}});
+}
+function forzarCierreLocal(){
+  if(!G||!SALA||!SALA.playing) return;
+  if($('evOv').classList.contains('on')){ resolverEv(evAuto,true); return; }
+  if($('coachOv').classList.contains('on')) cerrarCoach();
+  if($('f1').classList.contains('on')||$('f2').classList.contains('on')){
+    clearInterval(gTimerInt); gT.el=null; autoCerrarFase();
+  }
+}
 function cuentaRegresiva(){
   const ov=$('goOv'); if(ov.classList.contains('on')) return;
   $('goCode').textContent='SALA '+SALA.code+(SALA.ronda>1?' · RONDA '+SALA.ronda:'');
@@ -1065,10 +1099,10 @@ function mostrarCoach(n){
   $('coachTit').textContent=c.t;
   $('coachRows').innerHTML=c.r.map(x=>'<div class="coachRow"><div class="icb"><svg class="ic"><use href="#'+x[0]+'"/></svg></div><span>'+x[1]+'</span></div>').join('');
   $('coachBtn').innerHTML=c.b+' <svg class="ic"><use href="#i-flecha"/></svg>';
-  $('coachOv').classList.add('on');
+  $('coachOv').classList.add('on'); pausarGT(true);
 }
 function cerrarCoach(){
-  $('coachOv').classList.remove('on');
+  $('coachOv').classList.remove('on'); pausarGT(false);
   try{ sessionStorage.setItem('cpvCoach'+(COACH.abierto||1),'1'); }catch(e){}
   sfxTap();
 }
@@ -1097,17 +1131,54 @@ function scoreAhora(){
   if(fuentesTot()>=3) p+=G.mes===1?1000:800;
   return G.pts+p;
 }
+/* el reloj cierra de verdad: al llegar a cero hay GRACIA segundos y después la fase se cierra sola.
+   Sin esto, un equipo lento congela al taller entero: el podio espera a que TODOS terminen. */
+const GRACIA=20;
+let gT={t:0, el:null, gracia:false, pausado:false};
 function gTimer(fase,seg){
   clearInterval(gTimerInt);
   const el=$('timer'+fase); if(!el) return;
-  let t=seg;
-  const pinta=()=>{ el.textContent=Math.floor(t/60)+':'+String(t%60).padStart(2,'0'); };
-  pinta(); el.classList.remove('rojo');
-  gTimerInt=setInterval(()=>{ t--;
-    if(t<0){ el.textContent='¡CIERREN!'; el.classList.add('rojo'); return; }
-    pinta();
-    if(t<=30){ el.classList.add('rojo'); if(t<=10) sfxTick(); }
-  },1000);
+  gT={t:seg, el, gracia:false, pausado:false};
+  el.classList.remove('rojo'); pintarGT();
+  gTimerInt=setInterval(tickGT,1000);
+}
+function pintarGT(){
+  if(!gT.el) return;
+  gT.el.textContent = gT.gracia ? 'CIERRA EN '+gT.t+'s' : Math.floor(gT.t/60)+':'+String(gT.t%60).padStart(2,'0');
+}
+function tickGT(){
+  if(gT.pausado||!gT.el) return;
+  gT.t--;
+  if(!gT.gracia){
+    if(gT.t<=0){ gT.gracia=true; gT.t=GRACIA; gT.el.classList.add('rojo'); sfxNo(); }
+    else if(gT.t<=30){ gT.el.classList.add('rojo'); if(gT.t<=10) sfxTick(); }
+    pintarGT(); return;
+  }
+  if(gT.t<=0){ clearInterval(gTimerInt); gT.el=null; autoCerrarFase(); return; }
+  pintarGT(); sfxTick();
+}
+/* el reloj se congela mientras hay un modal arriba: el evento ya trae su propio timer */
+function pausarGT(p){ gT.pausado=!!p; }
+/* cierre automático: acomoda lo mínimo para que el plan sea válido y confirma sin preguntar */
+function autoCerrarFase(){
+  if(!G||!SALA||!SALA.playing) return;
+  if(G.fase===1){
+    let g=0;
+    while(horasTot()>G.horas && g++<40){
+      const peor=OPS.filter(o=>G.ops[o.id]&&!o.fija&&o.h>0).sort((a,b)=>(a.m/a.h)-(b.m/b.h))[0];
+      if(!peor) break;
+      delete G.ops[peor.id];
+    }
+    pintarF1(); gBarra(); gProg(); ejecutarFase1();
+  } else {
+    let g=0;
+    while(asignado()>disponible() && g++<400){
+      const fila=Object.keys(G.plan).filter(id=>(G.plan[id]||0)-500>=minDe(id)).sort((a,b)=>G.plan[b]-G.plan[a])[0];
+      if(!fila) break;
+      G.plan[fila]-=500;
+    }
+    pintarF2(); gBarra(); gProg(); cerrarFase();
+  }
 }
 /* ----- fase EXPANDIR (mes 1 y mes 2) ----- */
 function pintarF1(){
@@ -1175,9 +1246,10 @@ function gRowHTML(c,olv){
     <div class="icb"><svg class="ic"><use href="#${c.ic}"/></svg></div>
     <div class="tt"><b>${c.n}</b><span>${c.s}${c.min?` · mínimo ${fmt(c.min)}`:''}</span></div>
     <div class="ctrl">
-      <button class="menos" onpointerdown="repIni('${c.id}',-500)" onpointerup="repFin()" onpointerleave="repFin()" oncontextmenu="return false">−</button>
+      <button class="menos" aria-label="restar 500 a ${c.n}" onpointerdown="repIni('${c.id}',-500)" onpointerup="repFin()" onpointerleave="repFin()" onclick="if(!event.detail)ajustar('${c.id}',-500)" oncontextmenu="return false">−</button>
       <div class="m mono" id="pl_${c.id}">${fmt(G.plan[c.id]||0)}</div>
-      <button onpointerdown="repIni('${c.id}',500)" onpointerup="repFin()" onpointerleave="repFin()" oncontextmenu="return false">+</button>
+      <button aria-label="sumar 500 a ${c.n}" onpointerdown="repIni('${c.id}',500)" onpointerup="repFin()" onpointerleave="repFin()" onclick="if(!event.detail)ajustar('${c.id}',500)" oncontextmenu="return false">+</button>
+      <button class="todo dsp" title="poner acá todo lo que falta repartir" onclick="ponerResto('${c.id}')">TODO</button>
     </div>
   </div>`;
 }
@@ -1194,12 +1266,23 @@ function refrescarMeta2(){
 let repT=null,repI=null,repiendo=false;
 function repIni(id,d){ ajustar(id,d); repT=setTimeout(()=>{ repiendo=true; repI=setInterval(()=>ajustar(id,d),110); },420); }
 function repFin(){ clearTimeout(repT); clearInterval(repI); if(repiendo){ repiendo=false; gProg(); } }
+/* repartir $10.000 de a $500 con el reloj corriendo es un suplicio: un toque manda todo el sobrante acá */
+function ponerResto(id){
+  if(!G) return;
+  if(id==='meta2' && !metaDesbloqueada()){ sfxNo(); return; }
+  const resto=disponible()-asignado();
+  if(resto<=0){ sfxNo(); flashBarra(); return; }
+  G.plan[id]=(G.plan[id]||0)+resto; sfxCoin();
+  const m=$('pl_'+id); m.textContent=fmt(G.plan[id]); m.classList.remove('bump'); void m.offsetWidth; m.classList.add('bump');
+  if(G.mes===2) refrescarMeta2();
+  gBarra(); gProg();
+}
 function flashBarra(){ const d=$('gbD2'); d.classList.remove('flashN'); void d.offsetWidth; d.classList.add('flashN'); }
+const minDe=id=>{ if(id==='fiado') return G.fiado||0; const c=JGASTOS.find(x=>x.id===id)||JOLV.find(x=>x.id===id); return (c&&c.min)||0; };
 function ajustar(id,delta){
   if(!G) return;
   if(id==='meta2' && !metaDesbloqueada()){ sfxNo(); return; }
-  const c=JGASTOS.find(x=>x.id===id)||JOLV.find(x=>x.id===id)||(id==='fiado'?{min:G.fiado}:{min:0});
-  const min=c.min||0;
+  const min=minDe(id);
   let v=(G.plan[id]||0)+delta;
   if(v<min){ sfxNo(); flashBarra(); return; }
   if(delta>0 && asignado()+delta>disponible()){ sfxNo(); flashBarra(); return; }
@@ -1227,7 +1310,7 @@ function gBarra(){
   }
 }
 /* ----- eventos (modal con timer) ----- */
-let evTimer=null, evAl=null, evSegInt=null;
+let evTimer=null, evAl=null, evSegInt=null, evAuto=0;
 function abrirEvento(cfg){
   $('evKick').textContent=cfg.kick; $('evTit').textContent=cfg.tit; $('evTxt').innerHTML=cfg.txt;
   const bar=$('evBar').firstElementChild;
@@ -1240,12 +1323,12 @@ function abrirEvento(cfg){
   else $('evBar').style.display='none';
   $('evOps2').innerHTML='';
   cfg.ops.forEach((o,i)=>{ const b=document.createElement('button'); b.className='op2'; b.innerHTML=o; b.onclick=()=>resolverEv(i); $('evOps2').appendChild(b); });
-  evAl=cfg.al;
+  evAl=cfg.al; evAuto=cfg.auto||0;
   clearTimeout(evTimer);
   if(cfg.seg) evTimer=setTimeout(()=>resolverEv(cfg.auto,true),cfg.seg*1000);
-  $('evOv').classList.add('on'); thump();
+  $('evOv').classList.add('on'); pausarGT(true); thump();
 }
-function resolverEv(i,porTiempo){ clearTimeout(evTimer); clearInterval(evSegInt); $('evOv').classList.remove('on'); const f=evAl; evAl=null; sfxTap(); if(!G) return; if(f) f(i,porTiempo); }
+function resolverEv(i,porTiempo){ clearTimeout(evTimer); clearInterval(evSegInt); $('evOv').classList.remove('on'); pausarGT(false); const f=evAl; evAl=null; sfxTap(); if(!G) return; if(f) f(i,porTiempo); }
 function evento1(){
   abrirEvento({kick:'EVENTO · SUENA EL TELÉFONO', tit:'El cliente urgente',
     txt:'El dueño de una cervecería de Agraciada quiere una caricatura del staff <b>para mañana</b>. Paga $1.500. El tema: mañana Juan tiene el parcial de matemática del liceo.',
@@ -1281,6 +1364,24 @@ function pasarAOrdenar(){
   G.fase=2; pintarF2(); show('f2'); $('gBarra').classList.add('on'); gTimer(2, G.mes===1?195:240); gBarra(); gProg(); if(G.mes===1) mostrarCoach(2);
 }
 /* ----- confirmar / shocks / interludio ----- */
+/* el "qué pasa al cerrar la fase 1", separado de sus guards: lo usan el botón y el cierre automático */
+function ejecutarFase1(){
+  if(G.mes===1){
+    const caidas=TRAMPAS.filter(t=>G.ops[t.id]);
+    if(caidas.length){
+      G.trampas=caidas.length; G.pts-=caidas.length*1500;
+      caidas.forEach(t=>delete G.ops[t.id]);
+      pintarF1(); gBarra();
+      abrirEvento({kick:'JUAN DUDA… Y HACE BIEN', tit:'La plata rápida siempre la paga alguien',
+        txt:caidas.map(t=>'<b>'+t.n+':</b> '+t.caida).join('<br><br>')+'<br><br><b>Esta vez, casi la paga Juan.</b>',
+        seg:0, auto:0, ops:['Entendido: esas "oportunidades" afuera del plan'],
+        al:()=>evento1()});
+    } else evento1();
+  } else {
+    G.soltoPerrosOK=!!(G.opsM1&&G.opsM1.perros&&!G.ops.perros2);
+    evento2();
+  }
+}
 const confirmarFase=conLock(function(){
   if(!G) return;
   if(G.fase===1){
@@ -1292,21 +1393,7 @@ const confirmarFase=conLock(function(){
       setTimeout(()=>{ pintarHoras(); gBarra(); },2200);
       return;
     }
-    if(G.mes===1){
-      const caidas=TRAMPAS.filter(t=>G.ops[t.id]);
-      if(caidas.length){
-        G.trampas=caidas.length; G.pts-=caidas.length*1500;
-        caidas.forEach(t=>delete G.ops[t.id]);
-        pintarF1(); gBarra();
-        abrirEvento({kick:'JUAN DUDA… Y HACE BIEN', tit:'La plata rápida siempre la paga alguien',
-          txt:caidas.map(t=>'<b>'+t.n+':</b> '+t.caida).join('<br><br>')+'<br><br><b>Esta vez, casi la paga Juan.</b>',
-          seg:0, auto:0, ops:['Entendido: esas "oportunidades" afuera del plan'],
-          al:()=>evento1()});
-      } else evento1();
-    } else {
-      G.soltoPerrosOK=!!(G.opsM1&&G.opsM1.perros&&!G.ops.perros2);
-      evento2();
-    }
+    ejecutarFase1();
     return;
   }
   const resto=disponible()-asignado();
@@ -1326,8 +1413,7 @@ const confirmarFase=conLock(function(){
   cerrarFase();
 });
 function cerrarFase(){
-  confirmarFase._avisado=false;
-  clearInterval(gTimerInt); $('gBarra').classList.remove('on');
+  clearInterval(gTimerInt); gT.el=null; $('gBarra').classList.remove('on');
   if(G.mes===1) shock1(); else shock2();
 }
 function shock1(){
@@ -1469,7 +1555,7 @@ function pintarEsp(fuerza){
   if(enJuego) rows.sort((a,b)=>a.ini.localeCompare(b.ini));
   else rows.sort((a,b)=>(b.score||0)-(a.score||0));
   const FASES={1:'MES 1 · CONSIGUIENDO PLATA',2:'MES 1 · REPARTIENDO EL MES',3:'MES 2 · RENEGOCIANDO',4:'MES 2 · CERRANDO EL PLAN'};
-  $('espEstado').textContent = rows.length===0?'ESPERANDO EQUIPOS…' : todos?'¡TRIMESTRE CERRADO!' : enJuego?'ASESORANDO EL TRIMESTRE':'EQUIPOS LISTOS';
+  if(Date.now()>=avisoHasta) $('espEstado').textContent = rows.length===0?'ESPERANDO EQUIPOS…' : todos?'¡TRIMESTRE CERRADO!' : enJuego?'ASESORANDO EL TRIMESTRE':'EQUIPOS LISTOS';
   /* en el lobby, lo importante es el código: gigante para copiarlo desde las otras máquinas */
   const lobby=!enJuego&&!todos;
   $('espLobbyCode').style.display=lobby?'':'none';
@@ -1511,6 +1597,7 @@ function pintarEsp(fuerza){
     ml.innerHTML='<div class="mTit">El análisis del trimestre</div>'+li.map(x=>`<div class="mRow">${x}</div>`).join('')+
       '<div class="mRow"><b>Para la ronda:</b> ¿qué golpe fue peor: la bici rota o las horas recortadas? ¿Por qué el mismo colchón sirve para los dos?</div>';
   } else ml.style.display='none';
+  $('espForzar').style.display=(SALA.spec&&enJuego)?'':'none';
   $('espArrancar').style.display=(SALA.spec&&rows.length>0&&!enJuego)||(todos&&!SALA.spec)?'':'none';
   $('espArrancar').innerHTML=(todos?'Revancha ':'¡Arrancar! ')+'<svg class="ic"><use href="#i-flecha"/></svg>';
   if(todos&&!SALA.festejado){ SALA.festejado=true; revelarTrimestre(); }
