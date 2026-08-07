@@ -257,6 +257,26 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await p.locator('#row_snacks').press('Enter'); await esp(200);
     const despues = await p.locator('#pl_snacks').textContent();
     ok('T6.3 la tarjeta responde a teclado', antes === '$1.500' && despues === '$2.000', antes + ' → ' + despues);
+    // arrastrar un billete: pointer events, tiene que andar igual con mouse y con dedo
+    const bb = await p.locator('.bill.b1000').boundingBox();
+    const dd = await p.locator('#row_fondo').boundingBox();
+    const f0 = await p.evaluate(() => G.plan.fondo || 0);
+    await p.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2);
+    await p.mouse.down();
+    await p.mouse.move(dd.x + dd.width / 2, dd.y + dd.height / 2, { steps: 10 });
+    await esp(120);
+    const resalta = await p.locator('#row_fondo.dropOk').count() === 1;
+    await p.mouse.up(); await esp(300);
+    const f1 = await p.evaluate(() => G.plan.fondo || 0);
+    ok('T6.8 arrastrar un billete asigna su monto', f1 - f0 === 1000, f0 + ' → ' + f1);
+    ok('T6.9 el destino se resalta al pasar por encima', resalta);
+    ok('T6.10 no queda el clon volando', await p.locator('#billVuela').count() === 0);
+    // soltar fuera de una tarjeta no debe asignar nada
+    const a0 = await p.evaluate(() => asignado());
+    const bb2 = await p.locator('.bill.b500').boundingBox();
+    await p.mouse.move(bb2.x + bb2.width / 2, bb2.y + bb2.height / 2);
+    await p.mouse.down(); await p.mouse.move(12, 12, { steps: 6 }); await p.mouse.up(); await esp(250);
+    ok('T6.11 soltar afuera no asigna', await p.evaluate(() => asignado()) === a0);
     // botón TODO: manda el sobrante entero a una etiqueta
     await p.locator('#row_objetivo .td').click(); await esp(250);
     const barra = await p.locator('#gbD2').textContent();

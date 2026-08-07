@@ -39,7 +39,7 @@
 | **Mes 1 · Conseguir plata** | 4:00 | Eligen changas y ventas. Tienen 12 h/semana. Hay 3 tarjetas **PLATA RÁPIDA** sorteadas entre 5. | *"No todo lo que paga es ingreso. Miren de dónde sale la plata."* No les digas cuáles son trampa. |
 | **Se revela la trampa** | — | Si cayeron, el juego explica cada una y les resta **−1.500 pts** c/u. | Acá parás 30 seg. **Es el momento pedagógico más fuerte del juego.** |
 | **Evento: el cliente urgente** | 1:00 | Cobrar $1.500 y faltar al parcial / negociar el plazo / rechazar. | *"¿Hay una tercera opción?"* (sí: negociar) |
-| **Mes 1 · Repartir la plata** | 3:15 | Tocan las tarjetas para mandar plata. Las **amarillas** dan puntos; en $0 restan **−1.500** c/u. | *"Cada peso con nombre. La plata sin nombre se gasta sola."* |
+| **Mes 1 · Repartir la plata** | 3:15 | **Arrastran billetes** ($500/$1.000/$5.000) a donde va la plata — o tocan la tarjeta para sumar de a $500. Las **amarillas** dan puntos; en $0 restan **−1.500** c/u. | *"Cada peso con nombre. La plata sin nombre se gasta sola."* |
 | **El mes, día por día** | ~7s | Pasan los 30 días. Caen **dos imprevistos ($2.000 en total)** y el colchón los absorbe… o no. | Callate y dejá que lo miren. Se explica solo. |
 | **Veredicto del mes 1** | — | Zafan si tenían **$2.000** entre imprevistos + fondo. | *"¿Quién tenía colchón?"* |
 | **Interludio** | — | Desglose del mes 1 con los puntos a la vista. | Dejalos leer. Acá entienden el puntaje. |

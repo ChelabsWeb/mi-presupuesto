@@ -130,6 +130,12 @@ Era una planilla: párrafo de instrucciones de 3 líneas + 10 filas iguales con 
   el proyector sigue con `···` y el podio no se quema.
 - **`+N` flotante** al asignar a una etiqueta que da puntos (`flotarPts`, acumula para que el hold no
   escupa uno cada 110 ms).
+- **Billetes que se arrastran** ($500 / $1.000 / $5.000, colores de la paleta oficial). Va con
+  **pointer events, no con drag&drop de HTML5**: el de HTML5 no existe en touch y esto corre en
+  notebooks y celulares. El clon que viaja es `#billVuela` con `pointer-events:none` para que
+  `elementFromPoint` vea la tarjeta de abajo. El billete que ya no entra en lo que queda se apaga solo.
+- **El tap en la tarjeta sigue sumando $500** y el teclado sigue andando: arrastrar es una forma más
+  de repartir, no la única. Si se rompe el drag, el juego sigue jugable.
 - La barra de abajo oculta `gbD1`/`gbD3` en la fase 2 para no repetir lo que ya está arriba.
   **`gbD2` se mantiene**: la suite depende de sus textos.
 - **La economía no se tocó.** Si `T2.16`/`T2.17` dejan de dar `31.275` / `−12.950`, algo se rompió.

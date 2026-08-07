@@ -282,6 +282,31 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 #platonPts{text-align:right;flex-shrink:0}
 #platonPtsN{display:block;font-family:var(--font-num);font-weight:700;font-size:clamp(22px,3.6vw,36px);color:var(--violeta)}
 
+/* ====== LOS BILLETES: repartir plata tiene que parecerse a repartir plata ====== */
+#fajo{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:9px 4px 0}
+.bill{position:relative;width:clamp(74px,10vw,104px);aspect-ratio:2.05/1;border-radius:7px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;
+  border:1.5px solid rgba(0,0,0,.16);color:#231045;
+  /* la pila: tres sombras desfasadas = se ve que hay más abajo */
+  box-shadow:2px 2px 0 rgba(0,0,0,.10), 4px 4px 0 rgba(0,0,0,.07), 0 6px 16px rgba(35,16,74,.18);
+  transition:transform var(--dur) var(--pop),box-shadow var(--dur),opacity var(--dur)}
+.bill::before{content:'$';position:absolute;left:6px;top:4px;font-weight:900;font-size:11px;opacity:.5}
+.bill::after{content:'';position:absolute;inset:4px;border:1px solid rgba(0,0,0,.16);border-radius:4px;pointer-events:none}
+.bill b{font-family:var(--font-num);font-weight:700;font-size:clamp(15px,2.2vw,20px);letter-spacing:-.02em}
+.bill:hover{transform:translateY(-3px) rotate(-1.5deg)}
+.bill:active{cursor:grabbing}
+.b500{background:#A8E86A} .b1000{background:#FBC504} .b5000{background:#F9A03F}
+.bill.off{opacity:.28;cursor:not-allowed;box-shadow:none}
+.bill.off:hover{transform:none}
+#fajoHint{font-weight:700;font-size:clamp(11px,1.5vw,13px);color:var(--ink-2);letter-spacing:.5px}
+/* el billete que viaja con el dedo */
+#billVuela{position:fixed;z-index:90;pointer-events:none;margin:0;transform:rotate(-6deg) scale(1.06);
+  box-shadow:0 14px 30px rgba(35,16,74,.35)}
+/* el destino que va a recibir la plata */
+.gCard.dropOk{border-color:var(--lima-of)!important;background:#EDFBDF;transform:translateY(-4px) scale(1.03);box-shadow:var(--sombra-2)}
+.gCard.dropNo{border-color:var(--magenta-of)!important;background:#FDECF1}
+body.arrastrando{cursor:grabbing}
+body.arrastrando .gCard{cursor:copy}
 .gGrupo{margin:14px 0 8px;display:flex;align-items:center;gap:10px}
 .gGrupo .t{font-family:var(--font-display);font-weight:900;text-transform:uppercase;font-size:clamp(13px,2vw,17px)}
 .gGrupo .linea{flex:1;height:3px;background:var(--borde);border-radius:2px}
@@ -539,6 +564,12 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
         <div id="platonBar"><i style="width:100%"></i></div>
       </div>
       <div id="platonPts"><div class="l">PUNTOS</div><b class="mono" id="platonPtsN">0</b></div>
+    </div>
+    <div id="fajo">
+      <div class="bill b500" data-m="500" onpointerdown="billIni(event,500)"><b>500</b></div>
+      <div class="bill b1000" data-m="1000" onpointerdown="billIni(event,1000)"><b>1.000</b></div>
+      <div class="bill b5000" data-m="5000" onpointerdown="billIni(event,5000)"><b>5.000</b></div>
+      <div id="fajoHint">Arrastrá la plata a donde va</div>
     </div></div>
     <div id="gRows"></div>
   </div>
@@ -1459,6 +1490,56 @@ function refrescarPie(id){
   const p=r.querySelector('.pie'); if(p) p.innerHTML=piePara(id, minDe(id));
 }
 /* la recompensa: los puntos saltan de la tarjeta. Se acumulan para que el hold no escupa 9 por segundo */
+/* ---- arrastrar billetes ----
+   Pointer events y no drag&drop de HTML5: el de HTML5 no existe en touch, y esto va a correr
+   en las notebooks del taller igual que en un celular. El tap en la tarjeta sigue sumando $500,
+   así que el que no quiere arrastrar (o usa teclado) puede jugar igual. */
+let arr=null;
+function billIni(e,m){
+  if(!G||G.fase!==2) return;
+  if(disponible()-asignado()<m){ sfxNo(); flashBarra(); return; }
+  e.preventDefault();
+  const src=e.currentTarget, r=src.getBoundingClientRect();
+  const g=src.cloneNode(true);
+  g.id='billVuela'; g.style.width=r.width+'px'; g.style.height=r.height+'px';
+  document.body.appendChild(g);
+  arr={m, g, dx:e.clientX-r.left, dy:e.clientY-r.top, sobre:null};
+  document.body.classList.add('arrastrando');
+  billMueve(e);
+  window.addEventListener('pointermove',billMueve);
+  window.addEventListener('pointerup',billSuelta);
+  window.addEventListener('pointercancel',billSuelta);
+}
+function billMueve(e){
+  if(!arr) return;
+  arr.g.style.left=(e.clientX-arr.dx)+'px';
+  arr.g.style.top=(e.clientY-arr.dy)+'px';
+  const bajo=document.elementFromPoint(e.clientX,e.clientY);
+  const card=bajo&&bajo.closest?bajo.closest('.gCard'):null;
+  if(card===arr.sobre) return;
+  if(arr.sobre) arr.sobre.classList.remove('dropOk','dropNo');
+  arr.sobre=card;
+  if(card){
+    const id=card.id.replace('row_','');
+    card.classList.add(puedeRecibir(id,arr.m)?'dropOk':'dropNo');
+  }
+}
+const puedeRecibir=(id,m)=> !(id==='meta2'&&!metaDesbloqueada()) && asignado()+m<=disponible();
+function billSuelta(){
+  if(!arr) return;
+  window.removeEventListener('pointermove',billMueve);
+  window.removeEventListener('pointerup',billSuelta);
+  window.removeEventListener('pointercancel',billSuelta);
+  document.body.classList.remove('arrastrando');
+  const card=arr.sobre, m=arr.m;
+  if(card) card.classList.remove('dropOk','dropNo');
+  arr.g.remove(); arr=null;
+  if(!card){ sfxTap(); return; }
+  const antes=asignado();
+  ajustar(card.id.replace('row_',''), m);
+  /* que el destino "trague" el billete: sin esto, soltar no devuelve nada */
+  if(asignado()!==antes){ card.classList.remove('bump'); void card.offsetWidth; card.classList.add('bump'); }
+}
 /* el número salta solo cuando cambió de verdad: si salta siempre, deja de querer decir algo */
 function bumpSi(el,txt){
   if(!el||el.textContent===txt) return;
@@ -1489,6 +1570,9 @@ function pintarPlaton(){
   /* la barra se LLENA con lo que ya tiene nombre: terminar es verla completa, no verla vacía */
   $('platonBar').firstElementChild.style.width=Math.max(0,Math.min(100, disp>0?asignado()*100/disp:0))+'%';
   bumpSi($('platonPtsN'), scoreAhora().toLocaleString('es-UY'));
+  /* el billete que ya no entra se apaga: igual que las changas sin horas, se ve antes de tocar */
+  document.querySelectorAll('#fajo .bill').forEach(b=>b.classList.toggle('off', +b.dataset.m>resto));
+  $('fajoHint').textContent = resto<=0 ? '' : 'Arrastrá la plata a donde va';
 }
 function metaDesbloqueada(){ return G.mes===2 && (G.tabAcum+(G.plan.objetivo||0))>=JUAN.tableta; }
 function refrescarMeta2(){
