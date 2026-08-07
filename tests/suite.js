@@ -158,7 +158,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await B.waitForSelector('#inter.on', { timeout: 8000 });
     await B.getByRole('button', { name: /Vamos al mes 2/ }).click();
     await B.waitForSelector('#f1.on', { timeout: 8000 });
-    ok('T2.11 fiado en caso mes 2', (await B.locator('#f1 .caja').first().textContent()).includes('fiado'));
+    ok('T2.11 fiado en caso mes 2', (await B.locator('#f1Caso').textContent()).includes('fiado'));
     await confirmar(B);
     await B.waitForSelector('#evOv.on', { timeout: 8000 });
     await B.locator('#evOps2 .op2').first().click(); // ev2 A: compra
@@ -195,7 +195,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await A.waitForSelector('#f1.on', { timeout: 20000 });
     await B.waitForSelector('#f1.on', { timeout: 20000 });
     const chipR = await A.locator('#f1 .paso').textContent();
-    const extraR = await A.locator('#gbD1').textContent();
+    const extraR = await A.locator('#horasExtra').textContent(); // el extra vive en el cabezal de la fase 1
     ok('T3.1 revancha reinicia mes 1', chipR.includes('MES 1'), chipR);
     ok('T3.2 extra en cero', extraR.includes('$0'), extraR);
     ok('T3.3 proyector resetea', !(await P.locator('#espMalas').isVisible()));

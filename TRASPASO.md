@@ -81,6 +81,17 @@ node suite.js                # corre la suite
   en `fondo` y le regalaba el shock 2 al que ya iba ganando; ahora hay que volver a repartirlo.
 - Detalle completo en el código, funciones `scoreAhora`, `cerrarFase`, `shock1`/`shock2`, `mostrarInterludio`, `finDelEquipo`.
 
+## La pantalla de conseguir plata (agosto 2026)
+
+- **Cabezal `#horason`** (mismo CSS que `#platon`): horas libres que le quedan en grande + barra +
+  **extra conseguido** y **puntaje vivo**, los dos con `bumpSi()` cuando cambian.
+- **Lo que ya no entra en las horas que quedan se apaga solo** (`.opCard.nohay`, recalculado en
+  `pintarHoras`): antes tocabas y te rebotaba, ahora lo ves antes de tocar.
+- El caso de Juan pasó de 4 líneas a 1. La tarjeta muestra **monto grande + chip de horas** (que es lo
+  que se compara al decidir) y la descripción recortada a 2 líneas con `-webkit-line-clamp`.
+- El caso tiene id propio (`#f1Caso`): antes se buscaba con `#f1 .caja`, que ahora agarraría el cabezal.
+- La barra de abajo dejó de repetir el extra; muestra fuentes distintas e ingreso del mes.
+
 ## La pantalla de repartir (agosto 2026)
 
 Era una planilla: párrafo de instrucciones de 3 líneas + 10 filas iguales con `−`/`+`. Ahora:

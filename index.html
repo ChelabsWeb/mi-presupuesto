@@ -229,10 +229,22 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 .gtimer{margin-left:auto;border:1.5px solid var(--borde);border-radius:var(--r-pill);background:var(--surface);box-shadow:var(--sombra-1);padding:7px 16px;font-weight:700;font-size:clamp(13px,2vw,17px);font-family:var(--font-num)}
 @keyframes pulso{50%{transform:scale(1.06)}}
 .gtimer.rojo{background:var(--magenta-of);color:#fff;border:none;animation:pulso 1s infinite}
-.opCard{overflow:hidden}
+.opCard{overflow:hidden;padding:12px 14px}
 .opCard::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:var(--violeta)}
-.opCard .val{color:var(--lima-txt)}
-.opCard .hrs{font-family:var(--font-num);font-weight:600;font-size:12px;color:var(--ink-2)}
+.opCard .val{color:var(--lima-txt);font-size:clamp(17px,2.6vw,21px)}
+/* la grilla se aprieta: 12-15 tarjetas tienen que entrar sin scrollear con el reloj corriendo */
+/* 326px = 3 columnas cómodas: más angosto los títulos se parten en 4 líneas y se lee peor */
+#cardsOp{grid-template-columns:repeat(auto-fill,minmax(min(100%,326px),1fr));gap:11px}
+.opCard .tt span.d{font-size:11.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.opCard .plata{flex-shrink:0;text-align:right}
+.hrsChip{display:inline-block;margin-top:3px;padding:2px 9px;border-radius:var(--r-pill);background:var(--surface-2);
+  color:var(--ink-2);font-weight:700;font-size:11.5px}
+/* lo que ya no entra en las horas que quedan se apaga: se ve antes de tocar, no después del rebote */
+.opCard.nohay{opacity:.4}
+.opCard.nohay .hrsChip{background:var(--magenta-of);color:#fff}
+.opCard.nohay:hover{transform:none;box-shadow:var(--sombra-1)}
+/* a la izquierda: a la derecha se encimaba con el monto de la tarjeta */
+.opCard .flota{top:auto;bottom:6px;left:14px;right:auto;color:var(--lima-txt)}
 .opCard.sel{outline:2.5px solid var(--violeta);outline-offset:-1px;background:var(--surface-violeta)}
 .opCard.sel .icb{background:var(--violeta);color:#fff}
 .opCard.denied{animation:bumpD .4s}
@@ -245,14 +257,18 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 .opCard .badgeF{position:absolute;top:9px;right:10px;background:var(--surface-violeta);color:var(--violeta);border-radius:var(--r-pill);padding:2px 10px;font-weight:700;font-size:9.5px;letter-spacing:.5px}
 /* ====== FASE 2 · REPARTIR: tarjetas que se tocan, no una planilla ====== */
 /* la plata que queda, arriba y grande: se tiene que VER vaciarse */
-#platon{position:sticky;top:0;z-index:20;background:var(--bg);padding:8px 0 10px}
-#platonCaja{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--borde);border-radius:var(--r-lg);box-shadow:var(--sombra-2);padding:12px 20px}
-#platonL{flex:1;min-width:200px}
-#platon .l{font-weight:700;letter-spacing:1.5px;font-size:clamp(10px,1.5vw,12.5px);color:var(--ink-2)}
-#platonN{font-family:var(--font-num);font-weight:700;font-size:clamp(28px,5vw,44px);line-height:1.05}
-#platonBar{height:14px;border-radius:var(--r-pill);background:#E9E1F8;overflow:hidden;margin-top:5px}
+#platon,#horason{position:sticky;top:0;z-index:20;background:var(--bg);padding:8px 0 10px}
+#platonCaja,#horasonCaja{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--borde);border-radius:var(--r-lg);box-shadow:var(--sombra-2);padding:12px 20px}
+#platonL,#horasonL{flex:1;min-width:200px}
+#platon .l,#horason .l{font-weight:700;letter-spacing:1.5px;font-size:clamp(10px,1.5vw,12.5px);color:var(--ink-2)}
+#platonN,#horasTxt{font-family:var(--font-num);font-weight:700;font-size:clamp(28px,5vw,44px);line-height:1.05;display:block}
+#platonBar,#horasonBar{height:14px;border-radius:var(--r-pill);background:#E9E1F8;overflow:hidden;margin-top:5px}
 /* sólido, no la cinta: comprimida al 10% la cinta de 5 colores es un manchón */
-#platonBar i{display:block;height:100%;background:var(--violeta);border-radius:var(--r-pill);transition:width .25s var(--pop)}
+#platonBar i,#horasonBar i{display:block;height:100%;background:var(--violeta);border-radius:var(--r-pill);transition:width .25s var(--pop)}
+#horason .lado{text-align:right;flex-shrink:0}
+#horason .lado b{display:block;font-family:var(--font-num);font-weight:700;font-size:clamp(20px,3.2vw,32px)}
+#horason .lado.pts b{color:var(--violeta)}
+#horason.lleno #horasTxt{color:var(--magenta-txt)}
 #platon.listo #platonN{color:var(--lima-txt)} #platon.listo #platonBar i{background:var(--lima-of)}
 #platon.listo #platonLbl{color:var(--lima-txt)}
 #platon.rojo #platonN{color:var(--magenta-txt)} #platon.rojo #platonBar i{background:var(--magenta-of)}
@@ -452,15 +468,18 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 
 <!-- ================= SALA: fase 1 (expandir) ================= -->
 <section class="screen" id="f1">
-  <div class="wiz" style="padding-bottom:150px">
+  <div class="wiz" style="padding-bottom:150px;max-width:1100px">
     <div class="wizHead"><div class="paso dsp" style="background:var(--azul);color:#fff">PASO 1 · CONSEGUIR PLATA</div><h2 class="dsp">La misión: +plata para Juan</h2><div id="timer1" class="gtimer mono">4:00</div></div>
-    <div class="caja" style="padding:12px 16px;margin-bottom:14px;font-weight:700;font-size:clamp(13px,1.9vw,15.5px)">
-      <b>Juan Ignacio, 19.</b> Gana $10.000 en el café y aporta $3.000 en casa. Estudia de noche: le quedan <b>12 horas libres por semana</b>. Su sueño: la tableta gráfica ($8.000). Elijan qué oportunidades recomendarle — sin fundir al pibe.
-    </div>
-    <div id="horasBar" class="caja" style="padding:10px 16px;margin-bottom:14px">
-      <div style="display:flex;justify-content:space-between;font-weight:800;font-size:14px"><span>HORAS SEMANALES USADAS</span><span class="mono" id="horasTxt">0 / 12 h</span></div>
-      <div class="track" style="margin-top:6px"><i id="horasFill" style="width:0%"></i></div>
-    </div>
+    <div id="horason"><div id="horasonCaja">
+      <div id="horasonL">
+        <div class="l" id="horasLbl">HORAS LIBRES QUE LE QUEDAN</div>
+        <div id="horasTxt" class="mono">12</div>
+        <div id="horasonBar"><i id="horasFill" style="width:0%"></i></div>
+      </div>
+      <div class="lado"><div class="l">EXTRA</div><b class="mono" id="horasExtra">$0</b></div>
+      <div class="lado pts"><div class="l">PUNTOS</div><b class="mono" id="horasPts">0</b></div>
+    </div></div>
+    <div class="caja" id="f1Caso" style="padding:11px 16px;margin-bottom:12px;font-weight:600;font-size:clamp(12.5px,1.8vw,15px)"></div>
     <div class="cards" id="cardsOp"></div>
   </div>
 </section>
@@ -1250,15 +1269,15 @@ function autoCerrarFase(){
 }
 /* ----- fase EXPANDIR (mes 1 y mes 2) ----- */
 function pintarF1(){
-  const p=document.querySelector('#f1 .paso'), h=document.querySelector('#f1 h2'), caso=document.querySelector('#f1 .caja');
+  const p=document.querySelector('#f1 .paso'), h=document.querySelector('#f1 h2'), caso=$('f1Caso');
   if(G.mes===1){
     p.textContent='MES 1 · PASO 1 · CONSEGUIR PLATA'; h.textContent='La misión: +plata para Juan';
-    caso.innerHTML='<b>Juan Ignacio, 19.</b> Gana $10.000 en el café y aporta $3.000 en casa. Estudia de noche: le quedan <b>12 horas libres por semana</b>. Su sueño: la tableta gráfica ($8.000). <b>Toquen las tarjetas</b> para elegir qué recomendarle (tocar de nuevo = soltar) — sin fundir al pibe. Ojo: no todo lo que brilla es ingreso.';
+    caso.innerHTML='<b>Juan Ignacio, 19, La Teja.</b> Gana $10.000 en un café y quiere una tableta de $8.000. Toquen las tarjetas para conseguirle laburo — cada una le come horas.';
   } else {
     p.textContent='MES 2 · PASO 1 · RENEGOCIAR'; h.textContent='Nada quedó igual';
-    caso.innerHTML='<b>Pasó un mes y el mercado se movió.</b> Sostener también es decidir: hay ofertas que crecieron, otras que se pincharon y puertas que se cerraron. Semana de parciales: <b>'+G.horas+' horas libres</b>.'
+    caso.innerHTML='<b>Pasó un mes y el mercado se movió.</b> Hay ofertas que crecieron, otras que se pincharon y puertas que se cerraron. Semana de parciales: tiene menos horas.'
       +(G.fiado?' <b style="color:var(--rojo)">Y el almacén no se olvidó del fiado.</b>':'')
-      +(horasTot()>G.horas?' <b style="color:var(--rojo)">Arrancan pasados: '+horasTot()+' de '+G.horas+' h — algo hay que soltar.</b>':'');
+      +(horasTot()>G.horas?' <b style="color:var(--rojo)">Arrancan pasados: algo hay que soltar.</b>':'');
   }
   $('cardsOp').innerHTML=OPS.map(o=>{
     const cls=['card','opCard']; let badge='';
@@ -1269,8 +1288,11 @@ function pintarF1(){
     return `<div class="${cls.join(' ')}" id="op_${o.id}" onclick="togOp('${o.id}')">${badge}
       <div class="top">
         <div class="icb"><svg class="ic"><use href="#${FIC[o.f]||'i-bille'}"/></svg></div>
-        <div class="tt"><b>${o.n}</b><span>${o.d} · <u>${o.f}</u></span><span class="hrs">${o.h} h/semana</span></div>
-        <div class="val mono">${o.bloq?'—':'+'+fmt(o.m)+'/mes'}</div>
+        <div class="tt"><b>${o.n}</b><span class="d">${o.d}</span></div>
+        <div class="plata">
+          <div class="val mono">${o.bloq?'—':'+'+fmt(o.m)}</div>
+          <div class="hrsChip mono">${o.h?o.h+' h':'0 h'}</div>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1281,17 +1303,31 @@ function togOp(id){
   if(o.bloq||o.fija){ sfxNo(); return; }
   if(!G.ops[id] && horasTot()+o.h>G.horas){
     const c=$('op_'+id); c.classList.remove('denied'); void c.offsetWidth; c.classList.add('denied'); sfxNo();
-    $('horasTxt').textContent='¡SIN HORAS! LARGÁ ALGO O DEJÁ QUE JUAN DUERMA';
+    $('horasTxt').textContent='¡SIN HORAS!';
+    $('horasLbl').textContent='LARGUEN ALGO O DEJEN QUE JUAN DUERMA';
     setTimeout(pintarHoras,1600);
     return;
   }
+  const antes=scoreAhora();
   G.ops[id]=!G.ops[id]; if(!G.ops[id]) delete G.ops[id];
-  sfxTap();
-  $('op_'+id).classList.toggle('sel',!!G.ops[id]);
+  const puesto=!!G.ops[id];
+  $('op_'+id).classList.toggle('sel',puesto);
+  if(puesto){ sfxCoin(); flotarPts('op_'+id, 0, '+'+fmt(o.m)); }
+  else sfxTap();
   pintarHoras(); gBarra(); gProg();
 }
 function pintarHoras(){
-  $('horasTxt').textContent=horasTot()+' / '+G.horas+' h';
+  const libres=G.horas-horasTot();
+  $('horasLbl').textContent = libres<0?'¡JUAN NO LLEGA! SOLTÁ ALGO':'HORAS LIBRES QUE LE QUEDAN';
+  $('horasTxt').textContent = libres+' de '+G.horas;
+  $('horason').classList.toggle('lleno',libres<=0);
+  bumpSi($('horasExtra'), fmt(extraTot()));
+  bumpSi($('horasPts'), scoreAhora().toLocaleString('es-UY'));
+  /* las que ya no entran en las horas que quedan se apagan solas: antes tocabas y te rebotaba */
+  OPS.forEach(o=>{
+    const el=$('op_'+o.id); if(!el) return;
+    el.classList.toggle('nohay', !G.ops[o.id] && !o.bloq && !o.fija && o.h>libres);
+  });
   $('horasFill').style.width=Math.min(100,horasTot()*100/G.horas)+'%';
   $('horasFill').style.visibility=horasTot()>0?'':'hidden';
   $('horasFill').style.background=horasTot()>=G.horas?'var(--rojo)':'var(--azul)';
@@ -1347,9 +1383,19 @@ function refrescarPie(id){
   const p=r.querySelector('.pie'); if(p) p.innerHTML=piePara(id, minDe(id));
 }
 /* la recompensa: los puntos saltan de la tarjeta. Se acumulan para que el hold no escupa 9 por segundo */
-function flotarPts(id,n){
-  const card=$('row_'+id); if(!card) return;
+/* el número salta solo cuando cambió de verdad: si salta siempre, deja de querer decir algo */
+function bumpSi(el,txt){
+  if(!el||el.textContent===txt) return;
+  el.textContent=txt; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+}
+function flotarPts(elId,n,txt){
+  const card=$(elId); if(!card) return;
   let s=card.querySelector('.flota');
+  if(txt){ /* texto fijo (fase 1): un toque, un flotante */
+    if(s) s.remove();
+    s=document.createElement('span'); s.className='flota'; s.textContent=txt;
+    card.appendChild(s); setTimeout(()=>s.remove(),800); return;
+  }
   if(s){ clearTimeout(+s.dataset.t); s.dataset.n=(+s.dataset.n||0)+n; }
   else { s=document.createElement('span'); s.className='flota'; s.dataset.n=n; card.appendChild(s); }
   s.textContent='+'+(+s.dataset.n).toLocaleString('es-UY');
@@ -1366,8 +1412,7 @@ function pintarPlaton(){
   $('platonN').textContent = resto===0?'✓':fmt(resto);
   /* la barra se LLENA con lo que ya tiene nombre: terminar es verla completa, no verla vacía */
   $('platonBar').firstElementChild.style.width=Math.max(0,Math.min(100, disp>0?asignado()*100/disp:0))+'%';
-  const pts=scoreAhora().toLocaleString('es-UY'), b=$('platonPtsN');
-  if(b.textContent!==pts){ b.textContent=pts; b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
+  bumpSi($('platonPtsN'), scoreAhora().toLocaleString('es-UY'));
 }
 function metaDesbloqueada(){ return G.mes===2 && (G.tabAcum+(G.plan.objetivo||0))>=JUAN.tableta; }
 function refrescarMeta2(){
@@ -1393,7 +1438,7 @@ function ponerResto(id){
   const m=$('pl_'+id); m.textContent=fmt(G.plan[id]); m.classList.remove('bump'); void m.offsetWidth; m.classList.add('bump');
   refrescarPie(id);
   const dif=scoreAhora()-antes;
-  if(dif>0) flotarPts(id,dif);
+  if(dif>0) flotarPts('row_'+id,dif);
   if(G.mes===2) refrescarMeta2();
   gBarra(); gProg();
 }
@@ -1411,18 +1456,18 @@ function ajustar(id,delta){
   const m=$('pl_'+id); m.textContent=fmt(v); m.classList.remove('bump'); void m.offsetWidth; m.classList.add('bump');
   refrescarPie(id);
   const dif=scoreAhora()-antes;
-  if(dif>0) flotarPts(id,dif);
+  if(dif>0) flotarPts('row_'+id,dif);
   if(G.mes===2) refrescarMeta2();
   gBarra(); if(!repiendo) gProg();
 }
 function gBarra(){
   if(!G) return;
   if(G.fase===1){
-    $('gbD1').style.display=''; $('gbD3').style.display='';
-    $('gbD1').innerHTML='EXTRA CONSEGUIDO<b class="mono">'+fmt(extraTot())+'</b>';
-    $('gbD2').innerHTML='FUENTES NUEVAS<b class="mono">'+fuentesTot()+'</b>';
-    $('gbD2').classList.remove('neg');
-    $('gbD3').innerHTML='INGRESO DEL MES<b class="mono">'+fmt(disponible())+'</b>';
+    /* el extra ya está arriba en el cabezal: acá van los dos datos que no están */
+    $('gbD1').style.display=''; $('gbD3').style.display='none';
+    $('gbD1').innerHTML='FUENTES DISTINTAS<b class="mono">'+fuentesTot()+(fuentesTot()>=3?' ✓':' de 3')+'</b>';
+    $('gbD2').innerHTML='INGRESO DEL MES<b class="mono">'+fmt(disponible())+'</b>';
+    $('gbD2').classList.remove('neg','warn');
     $('gbSig').innerHTML=(G.mes===1?'A ordenar el mes':'Al plan final')+' <svg class="ic"><use href="#i-flecha"/></svg>';
   } else {
     const resto=disponible()-asignado();
@@ -1512,9 +1557,10 @@ const confirmarFase=conLock(function(){
   if(!G) return;
   if(G.fase===1){
     if(horasTot()>G.horas){
-      $('horasTxt').textContent='¡JUAN NO LLEGA! SOLTÁ ALGO: '+horasTot()+' / '+G.horas+' h';
+      $('horasTxt').textContent=(G.horas-horasTot())+' de '+G.horas;
+      $('horasLbl').textContent='¡JUAN NO LLEGA! SUELTEN ALGO';
       $('horasFill').style.background='var(--rojo)'; sfxNo();
-      $('horasBar').scrollIntoView({behavior:'smooth',block:'center'});
+      $('horason').scrollIntoView({behavior:'smooth',block:'center'});
       $('gbD2').innerHTML='¡SIN HORAS!<b class="mono">'+horasTot()+' / '+G.horas+' h — suelten algo</b>';
       setTimeout(()=>{ pintarHoras(); gBarra(); },2200);
       return;
