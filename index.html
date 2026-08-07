@@ -229,10 +229,28 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 .gtimer{margin-left:auto;border:1.5px solid var(--borde);border-radius:var(--r-pill);background:var(--surface);box-shadow:var(--sombra-1);padding:7px 16px;font-weight:700;font-size:clamp(13px,2vw,17px);font-family:var(--font-num)}
 @keyframes pulso{50%{transform:scale(1.06)}}
 .gtimer.rojo{background:var(--magenta-of);color:#fff;border:none;animation:pulso 1s infinite}
-.opCard{overflow:hidden}
+.opCard{overflow:hidden;padding:12px 14px}
 .opCard::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:var(--violeta)}
-.opCard .val{color:var(--lima-txt)}
-.opCard .hrs{font-family:var(--font-num);font-weight:600;font-size:12px;color:var(--ink-2)}
+.opCard .val{color:var(--lima-txt);font-size:clamp(17px,2.6vw,21px)}
+/* la grilla se aprieta: 12-15 tarjetas tienen que entrar sin scrollear con el reloj corriendo */
+/* 326px = 3 columnas cómodas: más angosto los títulos se parten en 4 líneas y se lee peor */
+#cardsOp{grid-template-columns:repeat(auto-fill,minmax(min(100%,326px),1fr));gap:11px}
+/* todas exactamente iguales: alto fijo + título y bajada recortados a 2 líneas.
+   (grid-auto-rows:1fr no alcanza: sin altura en el contenedor, el fr colapsa a auto) */
+.opCard{display:flex;height:118px}
+.opCard .top{flex:1;min-width:0}
+.opCard .tt{overflow:hidden}
+.opCard .tt b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.opCard .tt span.d{font-size:11.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.opCard .plata{flex-shrink:0;text-align:right}
+.hrsChip{display:inline-block;margin-top:3px;padding:2px 9px;border-radius:var(--r-pill);background:var(--surface-2);
+  color:var(--ink-2);font-weight:700;font-size:11.5px}
+/* lo que ya no entra en las horas que quedan se apaga: se ve antes de tocar, no después del rebote */
+.opCard.nohay{opacity:.4}
+.opCard.nohay .hrsChip{background:var(--magenta-of);color:#fff}
+.opCard.nohay:hover{transform:none;box-shadow:var(--sombra-1)}
+/* a la izquierda: a la derecha se encimaba con el monto de la tarjeta */
+.opCard .flota{top:auto;bottom:6px;left:14px;right:auto;color:var(--lima-txt)}
 .opCard.sel{outline:2.5px solid var(--violeta);outline-offset:-1px;background:var(--surface-violeta)}
 .opCard.sel .icb{background:var(--violeta);color:#fff}
 .opCard.denied{animation:bumpD .4s}
@@ -243,22 +261,165 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 .opCard.bloq::before{background:var(--borde)}
 .opCard.fija{outline:2.5px dashed var(--violeta);outline-offset:-1px}
 .opCard .badgeF{position:absolute;top:9px;right:10px;background:var(--surface-violeta);color:var(--violeta);border-radius:var(--r-pill);padding:2px 10px;font-weight:700;font-size:9.5px;letter-spacing:.5px}
-.gRow{background:var(--surface);border:1px solid var(--borde);border-radius:var(--r-md);box-shadow:var(--sombra-1);padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.gRow.olv2{border-style:dashed;border-color:#D9C7F5;position:relative}
-.gRow.olv2::before{content:'LA QUE TODOS OLVIDAN';position:absolute;top:-10px;right:10px;background:var(--amarillo-of);color:var(--ink);border-radius:var(--r-pill);padding:2px 9px;font-family:var(--font-display);font-weight:900;font-size:9px;box-shadow:var(--sombra-1)}
-.gRow .tt{flex:1;min-width:140px}
-.gRow .tt b{display:block;font-size:clamp(13.5px,2vw,16px);line-height:1.15}
-.gRow .tt span{font-size:11.5px;font-weight:500;color:var(--ink-2)}
-.gRow .ctrl{display:flex;align-items:center;gap:8px}
-.gRow .ctrl button{width:46px;height:46px;border:none;border-radius:50%;background:var(--surface-violeta);color:var(--violeta);font-size:22px;font-weight:900;cursor:pointer;transition:transform var(--dur);touch-action:manipulation;user-select:none;-webkit-user-select:none}
-.gRow .ctrl button:hover{background:var(--violeta);color:#fff}
-.gRow .ctrl button:active{transform:scale(.92)}
-.gRow .ctrl button.min{opacity:.35}
-.gRow .ctrl .m{font-family:var(--font-num);font-weight:700;font-size:clamp(15px,2.5vw,20px);min-width:86px;text-align:center}
+/* ====== FASE 2 · REPARTIR: tarjetas que se tocan, no una planilla ====== */
+/* la plata que queda, arriba y grande: se tiene que VER vaciarse */
+#platon,#horason{position:sticky;top:0;z-index:20;background:var(--bg);padding:8px 0 10px}
+#platonCaja,#horasonCaja{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--borde);border-radius:var(--r-lg);box-shadow:var(--sombra-2);padding:12px 20px}
+#platonL,#horasonL{flex:1;min-width:200px}
+#platon .l,#horason .l{font-weight:700;letter-spacing:1.5px;font-size:clamp(10px,1.5vw,12.5px);color:var(--ink-2)}
+#platonN,#horasTxt{font-family:var(--font-num);font-weight:700;font-size:clamp(28px,5vw,44px);line-height:1.05;display:block}
+#platonBar,#horasonBar{height:14px;border-radius:var(--r-pill);background:#E9E1F8;overflow:hidden;margin-top:5px}
+/* sólido, no la cinta: comprimida al 10% la cinta de 5 colores es un manchón */
+#platonBar i,#horasonBar i{display:block;height:100%;background:var(--violeta);border-radius:var(--r-pill);transition:width .25s var(--pop)}
+#horason .lado{text-align:right;flex-shrink:0}
+#horason .lado b{display:block;font-family:var(--font-num);font-weight:700;font-size:clamp(20px,3.2vw,32px)}
+#horason .lado.pts b{color:var(--violeta)}
+#horason.lleno #horasTxt{color:var(--magenta-txt)}
+#platon.listo #platonN{color:var(--lima-txt)} #platon.listo #platonBar i{background:var(--lima-of)}
+#platon.listo #platonLbl{color:var(--lima-txt)}
+#platon.rojo #platonN{color:var(--magenta-txt)} #platon.rojo #platonBar i{background:var(--magenta-of)}
+#platon.rojo #platonLbl{color:var(--magenta-txt)}
+#platonPts{text-align:right;flex-shrink:0}
+#platonPtsN{display:block;font-family:var(--font-num);font-weight:700;font-size:clamp(22px,3.6vw,36px);color:var(--violeta)}
+
+/* ====== EL MERCADO DE A UNA (mes 1): decidir por instinto, con el reloj corriendo ====== */
+#swBarra{display:flex;gap:10px;width:100%;justify-content:space-between}
+#swBarra>div{flex:1;background:var(--surface);border:1px solid var(--borde);border-radius:var(--r-md);box-shadow:var(--sombra-1);padding:8px 12px;text-align:center}
+#swBarra .l{display:block;font-weight:700;letter-spacing:1px;font-size:10px;color:var(--ink-2)}
+#swBarra b{font-family:var(--font-num);font-weight:700;font-size:clamp(17px,2.8vw,23px)}
+#swBarra .sinh b{color:var(--magenta-txt)}
+#swPila{position:relative;width:100%;height:clamp(290px,44vh,380px)}
+.swCard{position:absolute;inset:0;background:var(--surface);border:1.5px solid var(--borde);border-radius:var(--r-lg);
+  box-shadow:var(--sombra-3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+  padding:26px 24px;text-align:center;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;overflow:hidden}
+.swCard::before{content:'';position:absolute;top:0;left:0;right:0;height:7px;background:var(--violeta)}
+.swCard.trampa::before{background:var(--naranja-of)}
+/* gris y sin contenido: al correr la de adelante tiene que leerse "hay más", no un hueco blanco */
+.swCard.detras{transform:scale(.95) translateY(13px);background:var(--surface-2);box-shadow:var(--sombra-1);z-index:0}
+.swCard.detras .ci{opacity:.3}
+#swPila .swCard:not(.detras){z-index:1}
+.swCard.va{transition:transform .32s ease-out,opacity .32s}
+.swCard .ci{width:64px;height:64px;display:flex;align-items:center;justify-content:center;border-radius:16px;background:var(--surface-violeta);color:var(--violeta)}
+.swCard .ci .ic{width:36px;height:36px}
+.swCard.trampa .ci{background:#FFE6D6;color:var(--naranja-txt)}
+.swCard .nm{font-family:var(--font-display);font-weight:900;text-transform:uppercase;font-size:clamp(18px,3.4vw,26px);line-height:1.1}
+.swCard .mt{font-family:var(--font-num);font-weight:700;font-size:clamp(30px,6vw,46px);color:var(--lima-txt);line-height:1}
+.swCard .hr{font-weight:700;font-size:clamp(12px,1.8vw,15px);color:var(--ink-2);background:var(--surface-2);border-radius:var(--r-pill);padding:4px 14px}
+.swCard .d{font-weight:500;font-size:clamp(12.5px,1.9vw,15px);color:var(--ink-2);line-height:1.35;max-width:88%}
+.swCard .fte{font-weight:700;letter-spacing:1.5px;font-size:11px;color:var(--violeta)}
+.swCard.trampa .fte{color:var(--naranja-txt)}
+.swCard .nohrs{font-weight:800;font-size:12.5px;color:var(--magenta-txt)}
+/* el sello que aparece al arrastrar */
+.swCard .sello{position:absolute;top:20px;font-family:var(--font-display);font-weight:900;font-size:clamp(24px,5vw,38px);
+  border:5px solid;border-radius:12px;padding:2px 14px;opacity:0;transition:opacity .12s;pointer-events:none}
+.swCard .sello.si{right:18px;transform:rotate(13deg);color:var(--lima-txt);border-color:var(--lima-txt)}
+.swCard .sello.no{left:18px;transform:rotate(-13deg);color:var(--magenta-txt);border-color:var(--magenta-txt)}
+#swBtns{display:flex;gap:16px;justify-content:center}
+.swB{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:clamp(112px,26vw,146px);
+  min-height:60px;border:none;border-radius:var(--r-pill);cursor:pointer;font-family:var(--font-display);font-weight:900;
+  font-size:22px;box-shadow:var(--sombra-2);transition:transform var(--dur) var(--pop)}
+.swB span{font-family:var(--font-ui);font-weight:700;font-size:12px;letter-spacing:.5px}
+.swB.no{background:var(--surface);color:var(--magenta-txt);border:2px solid var(--borde)}
+.swB.si{background:var(--lima-of);color:#173D00}
+.swB:hover{transform:translateY(-3px)}
+.swB:active{transform:scale(.95)}
+.swB:disabled{opacity:.35;cursor:not-allowed;transform:none}
+/* ====== LOS BILLETES: repartir plata tiene que parecerse a repartir plata ====== */
+#fajo{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:9px 4px 0}
+.bill{position:relative;width:clamp(74px,10vw,104px);aspect-ratio:2.05/1;border-radius:7px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;
+  border:1.5px solid rgba(0,0,0,.16);color:#231045;
+  /* la pila: tres sombras desfasadas = se ve que hay más abajo */
+  box-shadow:2px 2px 0 rgba(0,0,0,.10), 4px 4px 0 rgba(0,0,0,.07), 0 6px 16px rgba(35,16,74,.18);
+  transition:transform var(--dur) var(--pop),box-shadow var(--dur),opacity var(--dur)}
+.bill::before{content:'$';position:absolute;left:6px;top:4px;font-weight:900;font-size:11px;opacity:.5}
+.bill::after{content:'';position:absolute;inset:4px;border:1px solid rgba(0,0,0,.16);border-radius:4px;pointer-events:none}
+.bill b{font-family:var(--font-num);font-weight:700;font-size:clamp(15px,2.2vw,20px);letter-spacing:-.02em}
+.bill:hover{transform:translateY(-3px) rotate(-1.5deg)}
+.bill:active{cursor:grabbing}
+.b500{background:#A8E86A} .b1000{background:#FBC504} .b5000{background:#F9A03F}
+.bill.off{opacity:.28;cursor:not-allowed;box-shadow:none}
+.bill.off:hover{transform:none}
+#fajoHint{font-weight:700;font-size:clamp(11px,1.5vw,13px);color:var(--ink-2);letter-spacing:.5px}
+/* el billete que viaja con el dedo */
+#billVuela{position:fixed;z-index:90;pointer-events:none;margin:0;transform:rotate(-6deg) scale(1.06);
+  box-shadow:0 14px 30px rgba(35,16,74,.35)}
+/* el destino que va a recibir la plata */
+.gCard.dropOk{border-color:var(--lima-of)!important;background:#EDFBDF;transform:translateY(-4px) scale(1.03);box-shadow:var(--sombra-2)}
+.gCard.dropNo{border-color:var(--magenta-of)!important;background:#FDECF1}
+body.arrastrando{cursor:grabbing}
+body.arrastrando .gCard{cursor:copy}
+.gGrupo{margin:14px 0 8px;display:flex;align-items:center;gap:10px}
+.gGrupo .t{font-family:var(--font-display);font-weight:900;text-transform:uppercase;font-size:clamp(13px,2vw,17px)}
+.gGrupo .linea{flex:1;height:3px;background:var(--borde);border-radius:2px}
+.gGrupo.puntos .t{color:var(--naranja-txt)}
+.gGrupo.puntos .linea{background:var(--cinta);opacity:.65}
+
+.gCards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,196px),1fr));gap:12px;grid-auto-rows:1fr}
+.gCard{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;overflow:hidden;
+  background:var(--surface);border:1.5px solid var(--borde);border-radius:var(--r-md);box-shadow:var(--sombra-1);
+  padding:30px 12px 12px;height:186px;cursor:pointer;text-align:center;color:var(--ink);
+  touch-action:manipulation;user-select:none;-webkit-user-select:none;
+  transition:transform var(--dur),box-shadow var(--dur),border-color var(--dur)}
+.gCard:hover{transform:translateY(-3px);box-shadow:var(--sombra-2);border-color:var(--violeta)}
+.gCard:active{transform:scale(.97)}
+.gCard:focus-visible{outline:none;box-shadow:var(--focus)}
+.gCard .ci{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:var(--surface-violeta);color:var(--violeta)}
+.gCard .ci .ic{width:23px;height:23px}
+/* dos líneas fijas: si no, un nombre largo desalinea el monto de toda la fila */
+.gCard .nm{font-weight:700;font-size:clamp(12px,1.7vw,14px);line-height:1.2;min-height:2.4em;display:flex;align-items:center}
+.gCard .mt{font-family:var(--font-num);font-weight:700;font-size:clamp(18px,3vw,25px)}
+/* pie siempre pegado abajo: si no, la barra de progreso de la tableta hace esa tarjeta más alta */
+.gCard .pie{font-size:11px;font-weight:600;color:var(--ink-2);min-height:15px;width:100%;margin-top:auto;padding-top:4px}
+.gCard .pie .ok2{color:var(--lima-txt)}
+/* las que dan puntos: se distinguen sin leer nada */
+.gCard.da{border-color:var(--amarillo-of);background:linear-gradient(180deg,#FFFBEC,var(--surface) 60%)}
+.gCard.da::before{content:'DA PUNTOS';position:absolute;top:0;left:0;right:0;background:var(--amarillo-of);color:var(--ink);
+  font-family:var(--font-display);font-weight:900;font-size:9.5px;letter-spacing:.6px;padding:4px 0}
+.gCard.da .ci{background:#FDF0C4;color:var(--naranja-txt)}
+.gCard.da:hover{border-color:var(--naranja-of)}
+.gCard.fijo{background:var(--surface-2)}
+.gCard.fijo .ci{background:var(--borde);color:var(--ink-2)}
+.gCard.bloq{opacity:.5;cursor:not-allowed}
+/* botones chicos: el resto de la tarjeta es "sumar" */
+.gCard .mn,.gCard .td{position:absolute;top:6px;border:none;cursor:pointer;font-family:var(--font-ui);z-index:2}
+.gCard.da .mn,.gCard.da .td{top:26px}
+.gCard .mn{left:8px;width:30px;height:30px;border-radius:50%;background:var(--surface-2);color:var(--ink-2);font-size:19px;font-weight:900;line-height:1}
+.gCard .mn:hover{background:var(--magenta-of);color:#fff}
+.gCard .td{right:8px;height:30px;padding:0 10px;border-radius:var(--r-pill);background:transparent;border:1.5px solid var(--borde);color:var(--ink-2);font-size:10.5px;font-weight:900;letter-spacing:.5px}
+.gCard .td:hover{background:var(--violeta);border-color:var(--violeta);color:#fff}
+/* progreso de la tableta: la única meta con número, ahora se ve */
+.gCard .prog{display:block;height:7px;border-radius:var(--r-pill);background:#E9E1F8;overflow:hidden;margin:3px 0 2px}
+.gCard .prog i{display:block;height:100%;background:var(--naranja-of);transition:width .25s var(--pop)}
+/* la recompensa: los puntos saltan de la tarjeta */
+@keyframes flota{0%{opacity:0;transform:translateY(6px) scale(.8)}25%{opacity:1;transform:translateY(-6px) scale(1.05)}100%{opacity:0;transform:translateY(-34px) scale(1)}}
+.flota{position:absolute;right:9px;top:58%;pointer-events:none;z-index:3;
+  font-family:var(--font-display);font-weight:900;font-size:clamp(15px,2vw,19px);color:var(--lima-txt);
+  text-shadow:0 2px 10px rgba(255,255,255,.95);animation:flota .8s ease-out forwards}
 /* proyector noche */
 #espectador::before,#espectador::after{content:'';position:fixed;left:0;right:0;height:8px;background:var(--cinta);z-index:5}
 #espectador::before{top:0} #espectador::after{bottom:0}
 #espectador .kick{color:var(--amarillo-of)}
+/* ====== HOST: el código no se esconde nunca y el reloj se ve desde el fondo del salón ====== */
+#espTop{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 34px 0;width:100%}
+#espTop .lz{min-width:0}
+#espTop .der{text-align:right}
+#espCodeTop{font-size:clamp(34px,6vw,68px);line-height:1;color:#fff;letter-spacing:.16em}
+#espReloj{font-size:clamp(34px,6vw,68px);line-height:1;color:#fff;font-variant-numeric:tabular-nums}
+#espReloj.rojo{color:var(--rosa-noche)}
+/* leaderboard en filas mientras se juega; el podio en columnas queda para el final */
+#espCols.tabla{flex-direction:column;gap:9px;width:100%;max-width:960px}
+#espCols.tabla .eqCol{display:flex;align-items:center;gap:16px;width:100%;max-width:none;min-width:0;
+  padding:11px 18px;text-align:left;border-top-width:1px!important}
+#espCols.tabla .pos{font-family:var(--font-display);font-weight:900;font-size:clamp(20px,2.6vw,34px);color:var(--amarillo-of);width:1.4em;flex-shrink:0}
+#espCols.tabla .nom{font-size:clamp(17px,2.2vw,27px);flex:0 0 auto;width:clamp(140px,22vw,260px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#espCols.tabla .pista{flex:1;height:20px;border-radius:var(--r-pill);background:rgba(255,255,255,.12);overflow:hidden;min-width:60px}
+#espCols.tabla .pista i{display:block;height:100%;border-radius:var(--r-pill);transition:width .5s var(--pop)}
+#espCols.tabla .mmm{font-family:var(--font-num);font-weight:700;font-size:clamp(14px,1.7vw,22px);color:#fff;flex-shrink:0;min-width:5.5em;text-align:right}
+#espCols.tabla .est{font-weight:700;font-size:clamp(11px,1.4vw,16px);color:rgba(255,255,255,.8);flex-shrink:0;width:clamp(96px,13vw,168px);text-align:right;letter-spacing:.5px}
+#espCols.tabla .est.ok{color:var(--lima-of)}
+#espCols.tabla .sc{display:none}
+#espPie{font-weight:700;letter-spacing:1.5px;font-size:clamp(13px,1.8vw,20px);color:rgba(255,255,255,.85)}
 .eqCol{flex:1;min-width:250px;max-width:430px;background:var(--glass);border:1px solid var(--glass-borde);box-shadow:var(--sombra-3);border-radius:var(--r-lg);padding:20px;text-align:center;position:relative;backdrop-filter:blur(8px)}
 @supports not (backdrop-filter:blur(8px)){.eqCol{background:var(--glass-solido)}}
 .eqCol.caida{opacity:.55;filter:grayscale(.6)}
@@ -289,6 +450,23 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 #evBar i{display:block;height:100%;background:var(--cinta);width:100%}
 @keyframes evVacia{from{width:100%}to{width:0}}
 #evBar i.corre{animation:evVacia 45s linear forwards}
+/* ====== EL MES, DÍA POR DÍA ====== */
+#m30Colchon{padding:12px 22px;min-width:min(100%,320px)}
+#m30Colchon .l{font-weight:700;letter-spacing:1.5px;font-size:12px;color:var(--ink-2)}
+#m30Plata{font-size:clamp(30px,6vw,50px);line-height:1.05;color:var(--lima-txt)}
+#m30Plata.vacio{color:var(--magenta-txt)}
+#m30Bar{height:12px;border-radius:var(--r-pill);background:#E9E1F8;overflow:hidden;margin-top:6px}
+#m30Bar i{display:block;height:100%;width:100%;background:var(--lima-of);border-radius:var(--r-pill);transition:width .5s var(--pop)}
+#m30Bar i.vacio{background:var(--magenta-of)}
+#m30Grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;width:100%;max-width:460px}
+.m30d{aspect-ratio:1;border-radius:8px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-num);font-weight:700;font-size:clamp(10px,1.6vw,13px);color:#C9BEE4;
+  transition:transform .25s var(--pop),background .25s,color .25s}
+.m30d.ok{background:#D9F0C0;color:var(--lima-txt)}
+.m30d.mal{background:var(--magenta-of);color:#fff;transform:scale(1.18)}
+#m30Msg{min-height:3.2em;font-weight:700;font-size:clamp(14px,2.2vw,19px);line-height:1.35;max-width:520px}
+#m30Msg .cual{font-family:var(--font-display);font-weight:900;text-transform:uppercase;color:var(--magenta-txt);display:block;font-size:clamp(16px,2.6vw,23px)}
+#m30Msg .como{color:var(--ink-2);font-weight:600;font-size:.86em}
 /* interludio */
 #inter .wiz{align-items:center;display:flex;flex-direction:column;justify-content:center;text-align:center;gap:14px;min-height:100vh}
 #interCard{max-width:640px;width:100%;padding:22px;text-align:left}
@@ -344,7 +522,8 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
     </div>
     <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
       <button class="btn amarillo grande" onclick="irPaso(1)">Armarlo <svg class="ic"><use href="#i-flecha"/></svg></button>
-      <button class="btn grande" onclick="verSala()"><svg class="ic"><use href="#i-wifi"/></svg> El Trimestre de Juan · jugar en equipos</button>
+      <button class="btn grande" onclick="verSala('host')"><svg class="ic"><use href="#i-wifi"/></svg> Crear sala · soy el proyector</button>
+      <button class="btn grande" onclick="verSala()">Entrar a una sala</button>
       <button class="btn" id="btnSeguir" style="display:none" onclick="irPaso(1)"><svg class="ic"><use href="#i-replay"/></svg> Seguir el mío</button>
     </div>
     <div id="ticker"></div>
@@ -361,7 +540,6 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
     <div class="salaSlots" id="slotsIni" style="display:none"></div>
     <div id="salaTeclas"></div>
     <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px">
-      <button class="btn" id="btnProyector" onclick="entrarProyector()"><svg class="ic"><use href="#i-wifi"/></svg> Proyector: solo mirar</button>
       <button class="btn" id="btnSalaVolver">Volver</button>
     </div>
   </div>
@@ -401,24 +579,61 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 
 <!-- ================= SALA: fase 1 (expandir) ================= -->
 <section class="screen" id="f1">
-  <div class="wiz" style="padding-bottom:150px">
+  <div class="wiz" style="padding-bottom:150px;max-width:1100px">
     <div class="wizHead"><div class="paso dsp" style="background:var(--azul);color:#fff">PASO 1 · CONSEGUIR PLATA</div><h2 class="dsp">La misión: +plata para Juan</h2><div id="timer1" class="gtimer mono">4:00</div></div>
-    <div class="caja" style="padding:12px 16px;margin-bottom:14px;font-weight:700;font-size:clamp(13px,1.9vw,15.5px)">
-      <b>Juan Ignacio, 19.</b> Gana $10.000 en el café y aporta $3.000 en casa. Estudia de noche: le quedan <b>12 horas libres por semana</b>. Su sueño: la tableta gráfica ($8.000). Elijan qué oportunidades recomendarle — sin fundir al pibe.
-    </div>
-    <div id="horasBar" class="caja" style="padding:10px 16px;margin-bottom:14px">
-      <div style="display:flex;justify-content:space-between;font-weight:800;font-size:14px"><span>HORAS SEMANALES USADAS</span><span class="mono" id="horasTxt">0 / 12 h</span></div>
-      <div class="track" style="margin-top:6px"><i id="horasFill" style="width:0%"></i></div>
-    </div>
+    <div id="horason"><div id="horasonCaja">
+      <div id="horasonL">
+        <div class="l" id="horasLbl">HORAS LIBRES QUE LE QUEDAN</div>
+        <div id="horasTxt" class="mono">12</div>
+        <div id="horasonBar"><i id="horasFill" style="width:0%"></i></div>
+      </div>
+      <div class="lado"><div class="l">EXTRA</div><b class="mono" id="horasExtra">$0</b></div>
+      <div class="lado pts"><div class="l">PUNTOS</div><b class="mono" id="horasPts">0</b></div>
+    </div></div>
+    <div class="caja" id="f1Caso" style="padding:11px 16px;margin-bottom:12px;font-weight:600;font-size:clamp(12.5px,1.8vw,15px)"></div>
     <div class="cards" id="cardsOp"></div>
+  </div>
+</section>
+
+<!-- ========= SALA: el mercado, de a una (mes 1) ========= -->
+<section class="screen" id="swipe">
+  <div class="wiz" style="align-items:center;display:flex;flex-direction:column;justify-content:center;gap:12px;max-width:560px;min-height:100vh;padding-bottom:20px">
+    <div class="wizHead" style="width:100%;justify-content:space-between">
+      <div class="paso dsp" style="background:var(--azul);color:#fff">MES 1 · CONSEGUIR PLATA</div>
+      <div class="gtimer mono" id="timerSw">4:00</div>
+    </div>
+    <div id="swBarra">
+      <div><span class="l">HORAS LIBRES</span><b class="mono" id="swHoras">12</b></div>
+      <div><span class="l">CONSEGUIDO</span><b class="mono" id="swExtra">$0</b></div>
+      <div><span class="l">OFERTA</span><b class="mono" id="swCount">1/15</b></div>
+    </div>
+    <div id="swPila"></div>
+    <div id="swBtns">
+      <button class="swB no" id="swNo" onclick="swDecide(0)">✕<span>Paso</span></button>
+      <button class="swB si" id="swSi" onclick="swDecide(1)">✓<span>La agarro</span></button>
+    </div>
+    <button class="btn" id="swVerTodas" onclick="swSalir()" style="padding:9px 18px;font-size:14px">Ver todas juntas</button>
   </div>
 </section>
 
 <!-- ================= SALA: fase 2 (ordenar) ================= -->
 <section class="screen" id="f2">
-  <div class="wiz" style="padding-bottom:150px">
+  <div class="wiz" style="padding-bottom:150px;max-width:1100px">
     <div class="wizHead"><div class="paso dsp" style="background:var(--rosa);color:#fff">PASO 2 · REPARTIR LA PLATA</div><h2 class="dsp">El mes de Juan, etiquetado</h2><div id="timer2" class="gtimer mono">4:00</div></div>
-    <p class="wizSub">Repartan el ingreso del mes. Los mínimos son sagrados (la casa no se negocia)… y las etiquetas del final, si quedan en $0, restan puntos. Los <b>− y +</b> van de a $500: mantené apretado y corre solo.</p>
+    <div id="platon"><div id="platonCaja">
+      <div id="platonL">
+        <div class="l" id="platonLbl">TE QUEDA POR REPARTIR</div>
+        <div id="platonN" class="mono">$0</div>
+        <div id="platonBar"><i style="width:100%"></i></div>
+      </div>
+      <div id="platonPts"><div class="l">PUNTOS</div><b class="mono" id="platonPtsN">0</b></div>
+    </div>
+    <div id="fajo">
+      <div class="bill b500" data-m="500" onpointerdown="billIni(event,500)"><b>500</b></div>
+      <div class="bill b1000" data-m="1000" onpointerdown="billIni(event,1000)"><b>1.000</b></div>
+      <div class="bill b5000" data-m="5000" onpointerdown="billIni(event,5000)"><b>5.000</b></div>
+      <div id="fajoHint">Arrastrá la plata a donde va</div>
+    </div></div>
     <div id="gRows"></div>
   </div>
 </section>
@@ -444,6 +659,21 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
   </div>
 </section>
 
+<!-- ========= SALA: el mes, día por día (reemplaza la pantalla estática del shock) ========= -->
+<section class="screen" id="mes30">
+  <div class="wiz" style="align-items:center;display:flex;flex-direction:column;justify-content:center;text-align:center;gap:12px;min-height:100vh;max-width:640px">
+    <div class="kick" id="m30Kick">EL MES DE JUAN, DÍA POR DÍA</div>
+    <h2 class="dsp" id="m30Tit" style="font-size:clamp(24px,4.6vw,40px)">La vida no avisa</h2>
+    <div id="m30Colchon" class="caja">
+      <div class="l" id="m30Lbl">SU COLCHÓN</div>
+      <div class="mono dsp" id="m30Plata">$0</div>
+      <div id="m30Bar"><i></i></div>
+    </div>
+    <div id="m30Grid"></div>
+    <div id="m30Msg"></div>
+  </div>
+</section>
+
 <!-- ================= SALA: shock ================= -->
 <section class="screen" id="shock">
   <div class="wiz" style="align-items:center;display:flex;flex-direction:column;justify-content:center;text-align:center;gap:14px;min-height:100vh">
@@ -458,18 +688,25 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 
 <!-- ================= SALA: espectador (proyector) ================= -->
 <section class="screen" id="espectador">
-  <div class="wiz" style="max-width:1150px;align-items:center;display:flex;flex-direction:column;gap:16px;padding-top:26px">
-    <div class="kick">SALA <span id="espCode"></span> · ASESORES DE JUAN IGNACIO</div>
-    <h2 class="dsp" id="espEstado" style="font-size:clamp(28px,5vw,50px);text-align:center">Conectando…</h2>
+  <div id="espTop">
+    <div class="lz"><div class="kick">SALA · <span id="espCode"></span></div><div class="dsp" id="espCodeTop"></div></div>
+    <div class="lz der" id="espRelojBox" style="display:none">
+      <div class="kick">TIEMPO</div><div class="dsp mono" id="espReloj">0:00</div>
+    </div>
+  </div>
+  <div class="wiz" style="max-width:1250px;align-items:center;display:flex;flex-direction:column;justify-content:center;gap:14px;padding-top:14px">
+    <h2 class="dsp" id="espEstado" style="font-size:clamp(24px,4vw,42px);text-align:center">Conectando…</h2>
     <div id="espLobbyCode" style="display:none;text-align:center">
-      <div class="dsp" style="font-size:clamp(80px,18vw,190px);line-height:1;color:#fff;letter-spacing:.12em;text-shadow:0 6px 40px rgba(0,0,0,.35)" id="espCodeBig"></div>
+      <div class="dsp" style="font-size:clamp(90px,20vw,230px);line-height:1;color:#fff;letter-spacing:.14em;text-shadow:0 6px 40px rgba(0,0,0,.35)" id="espCodeBig"></div>
       <div class="kick" style="margin-top:6px">EN CADA MÁQUINA: <span style="color:#fff">JUGAR EN EQUIPOS</span> → ESCRIBAN ESTE CÓDIGO → NOMBRE DEL EQUIPO</div>
       <div class="kick" style="margin-top:4px;opacity:.75">OJO: ¡ARRANCAR! ARRANCA EN TODAS LAS MÁQUINAS A LA VEZ</div>
     </div>
     <div id="espCols" style="display:flex;gap:18px;flex-wrap:wrap;justify-content:center;width:100%"></div>
+    <div id="espPie" style="display:none"></div>
     <div id="espMalas" class="caja" style="display:none;width:100%;padding:16px 20px"></div>
     <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px">
       <button class="btn amarillo grande dsp" id="espArrancar" style="display:none" onclick="arrancar()">¡Arrancar! <svg class="ic"><use href="#i-flecha"/></svg></button>
+      <button class="btn" id="espForzar" style="display:none" onclick="forzarTodas(this)">Cerrar la fase en todas</button>
       <button class="btn amarillo" id="btnRetryE" style="display:none" onclick="reintentar()">Reintentar</button>
       <button class="btn" onclick="salirSala(this)">Salir</button>
     </div>
@@ -857,24 +1094,41 @@ const OPORTUNIDADES=[
 const JGASTOS=[
  {id:'casa', ic:'i-flia', n:'Aporte en casa', s:'no se negocia', min:3000, ini:3000, fijo:1},
  {id:'trans', ic:'i-bus', n:'Transporte', s:'para laburar', min:2000, ini:2500},
- {id:'snacks', ic:'i-olla', n:'Meriendas y salidas de comida', s:'recortable', min:0, ini:1500},
+ {id:'snacks', ic:'i-olla', n:'Comida y salidas', s:'recortable', min:0, ini:1500},
  {id:'subs', ic:'i-wifi', n:'Suscripciones', s:'¿las usa todas?', min:0, ini:500},
  {id:'personal', ic:'i-remera', n:'Gastos personales', s:'gustos, salidas, ropa · dejarlo en el piso también cuesta', min:500, ini:3500},
 ];
 const JOLV=[
  {id:'imprev', ic:'i-rayo', n:'Imprevistos', s:'la vida no avisa (~5%)'},
  {id:'fondo', ic:'i-chancho', n:'Fondo de emergencia', s:'el colchón que no tiene'},
- {id:'objetivo', ic:'i-estrella', n:'La tableta ($8.000)', s:'su gran objetivo, en cuotas propias'},
+ {id:'objetivo', ic:'i-estrella', n:'La tableta', s:'su gran objetivo, en cuotas propias'},
 ];
 
-let SALA=null, sbClient=null, sCode=[], sIni=[], sPaso=0, G=null, gTimerInt=null;
-function verSala(){ sCode=[]; sIni=[]; sPaso=0; armarTeclasSala(); pintarSala(); show('sala'); $('barra').classList.remove('on'); $('gBarra').classList.remove('on'); }
+let SALA=null, sbClient=null, sCode=[], sIni=[], sPaso=0, sModo='equipo', G=null, gTimerInt=null;
+/* el que crea la sala es el proyector y no configura nada: le viene un código sorteado y toca LISTO */
+const CODIGOS=['TEJA','PINO','SOLE','RUTA','MATE','CERR','BOTA','LOMA','NIDO','CANO','FARO','TUNA'];
+function verSala(modo){
+  sModo=modo==='host'?'host':'equipo';
+  sCode=sModo==='host'?CODIGOS[Math.floor(Math.random()*CODIGOS.length)].split(''):[];
+  sIni=[]; sPaso=0; armarTeclasSala(); pintarSala(); show('sala');
+  $('barra').classList.remove('on'); $('gBarra').classList.remove('on');
+}
 function armarTeclasSala(){
   const tec=$('salaTeclas'); if(tec.childElementCount) return;
   'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ '.split('').forEach(l=>{ const b=document.createElement('button'); b.textContent=l===' '?'␣':l; b.onclick=()=>salaKey(l); tec.appendChild(b); });
   const del=document.createElement('button'); del.textContent='⌫'; del.onclick=()=>salaKey(null); tec.appendChild(del);
   const ok=document.createElement('button'); ok.textContent='LISTO'; ok.className='listo dsp'; ok.onclick=salaListo; tec.appendChild(ok);
 }
+/* el teclado en pantalla es para el touch; en una laptop se escribe con el teclado de verdad */
+document.addEventListener('keydown',e=>{
+  if(!$('sala').classList.contains('on')) return;
+  if(e.ctrlKey||e.altKey||e.metaKey) return;
+  audioInit();
+  if(e.key==='Backspace'){ e.preventDefault(); salaKey(null); return; }
+  if(e.key==='Enter'){ e.preventDefault(); salaListo(); return; }
+  if(e.key===' '){ e.preventDefault(); salaKey(' '); return; }
+  if(e.key.length===1 && /[a-záéíóúüñ]/i.test(e.key)){ e.preventDefault(); salaKey(e.key.toUpperCase()); }
+});
 function salaKey(l){ sfxTap(); const buf=sPaso===0?sCode:sIni, max=sPaso===0?4:12;
   if(l===null) buf.pop();
   else if(l===' '&&(sPaso===0||!buf.length)) return;
@@ -888,22 +1142,29 @@ function salaInvalido(p){
   setTimeout(()=>{ h.style.color=''; if($('sala').classList.contains('on')) pintarSala(); },2000);
 }
 function salaListo(){
-  if(sPaso===0){ if(sCode.length!==4){ salaInvalido(0); return; } sPaso=1; sfxCoin(); pintarSala(); }
+  if(sPaso===0){
+    if(sCode.length!==4){ salaInvalido(0); return; }
+    if(sModo==='host'){ sfxCoin(); entrarSala(true); return; }  /* el host no elige nada más */
+    sPaso=1; sfxCoin(); pintarSala();
+  }
   else { if(sIni.join('').trim().length<2){ salaInvalido(1); return; } entrarSala(); }
 }
 function pintarSala(){
-  $('btnProyector').style.display=sPaso===0?'':'none';
   const bv=$('btnSalaVolver');
   bv.textContent=sPaso===1?'← Cambiar código':'Volver';
   bv.onclick=sPaso===1?()=>{ sPaso=0; sfxTap(); pintarSala(); }:()=>{ show('home'); attract(); };
-  $('salaTit').textContent=sPaso===0?'Código de sala':'Nombre del equipo';
-  $('salaHint').textContent=sPaso===0?'Elijan un código de 4 letras y pónganlo igual en todas las máquinas.':'Así los ve el resto en el tablero (hasta 12 letras).';
+  $('salaTit').textContent=sPaso===0?(sModo==='host'?'El código de tu sala':'Código de sala'):'Nombre del equipo';
+  $('salaHint').innerHTML=(sPaso===0
+      ?(sModo==='host'
+        ?'Este es el código que van a escribir los equipos. Cambialo si querés, o dale <b>Enter</b> y listo.'
+        :'Escribí el código que muestra el proyector.')
+      :'Así los ve el resto en el tablero (hasta 12 letras).')
+    +'<br><span style="font-weight:600;color:var(--ink-2);font-size:.85em">Escribí con el teclado · Enter para seguir</span>';
   const rC=$('slotsCode'); rC.innerHTML='';
   for(let i=0;i<4;i++){ const d=document.createElement('div'); d.className='slot'+(sPaso===0&&i===Math.min(sCode.length,3)?' act':''); d.textContent=sCode[i]||''; rC.appendChild(d); }
   $('slotsIni').style.display=sPaso===1?'flex':'none';
   $('slotsIni').innerHTML='<div class="nameBox dsp">'+(sIni.join('').replace(/ /g,'&nbsp;'))+'<span class="caret"></span></div>';
 }
-function entrarProyector(){ if(sCode.length!==4){ salaInvalido(0); return; } entrarSala(true); }
 function loadSB(){ return window.supabase?Promise.resolve():new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
 function reintentar(){
   $('btnRetryL').style.display='none'; $('btnRetryE').style.display='none';
@@ -937,13 +1198,17 @@ function entrarSala(spec){
       pintarLobby(); pintarEsp(); });
     ch.on('broadcast',{event:'start'},({payload})=>{ if(!SALA||SALA.ch!==ch) return;
       if(payload.ronda<=SALA.ronda) return;
-      SALA.ronda=payload.ronda; SALA.festejado=false; SALA.prog={}; SALA.guardado=null;
+      /* un equipo con el trimestre a medias no se reinicia porque otra máquina tocó Arrancar */
+      if(!SALA.spec&&SALA.playing&&G) return;
+      SALA.ronda=payload.ronda; SALA.seed=payload.seed||1; SALA.festejado=false; SALA.prog={}; SALA.guardado=null;
       $('btnRetomar').style.display='none';
       Object.values(SALA.timeouts).forEach(clearTimeout); SALA.timeouts={};
       cuentaRegresiva(); });
     ch.on('broadcast',{event:'prog'},({payload})=>{ if(!SALA||SALA.ch!==ch) return;
       if(payload.ronda>SALA.ronda) SALA.ronda=payload.ronda;
       if(!(SALA.prog[payload.id]&&SALA.prog[payload.id].fin)) SALA.prog[payload.id]=payload; pintarEsp(); });
+    /* el facilitador destraba la sala desde el proyector sin ir máquina por máquina */
+    ch.on('broadcast',{event:'forzar'},()=>{ if(!SALA||SALA.ch!==ch||SALA.spec) return; forzarCierreLocal(); });
     ch.on('broadcast',{event:'fin'},({payload})=>{ if(!SALA||SALA.ch!==ch) return;
       if(payload.ronda>SALA.ronda) SALA.ronda=payload.ronda;
       SALA.prog[payload.id]=payload; pintarEsp(); });
@@ -966,9 +1231,9 @@ function salirSala(b){
   if(b){ delete b.dataset.arm; b.style.background=''; b.style.color=''; }
   if(SALA){ Object.values(SALA.timeouts||{}).forEach(clearTimeout); if(SALA.ch&&sbClient) sbClient.removeChannel(SALA.ch);
     try{ localStorage.removeItem('cpv_sala_'+SALA.code); }catch(e){} }
-  SALA=null; G=null; OPS=[]; lobbyPrev=0;
-  clearInterval(gTimerInt); clearTimeout(evTimer); evAl=null;
-  $('evOv').classList.remove('on'); confirmarFase._avisado=false;
+  SALA=null; G=null; OPS=[]; lobbyPrev=0; latir(false);
+  clearInterval(gTimerInt); clearTimeout(evTimer); evAl=null; m30T.forEach(clearTimeout); m30T=[];
+  $('evOv').classList.remove('on');
   $('gBarra').classList.remove('on'); show('home'); attract();
 }
 let lobbyPrev=0;
@@ -978,25 +1243,53 @@ function pintarLobby(){
   $('lobbyList').innerHTML=ks.map(k=>`<div class="lobJ dsp${k===SALA.id?' yo':''}">${SALA.players[k].ini}${k===SALA.id?' · VOS':''}</div>`).join('');
   if(ks.length>lobbyPrev&&lobbyPrev>0) sfxCoin();
   lobbyPrev=ks.length;
-  if(ks.length>1) $('lobbyEstado').textContent=ks.length+' MÁQUINAS CONECTADAS · CUANDO ESTÉN TODAS, ¡ARRANQUEN!';
+  if(ks.length>1&&Date.now()>=avisoHasta) $('lobbyEstado').textContent=ks.length+' MÁQUINAS CONECTADAS · CUANDO ESTÉN TODAS, ¡ARRANQUEN!';
 }
 function retomarTrimestre(){
   const g=SALA&&SALA.guardado; if(!g||!g.G) return;
-  G=g.G; SALA.ronda=Math.max(SALA.ronda,g.ronda||0); SALA.playing=true; SALA.guardado=null;
-  OPS=G.mes===1?mercadoMes1():mercadoMes2();
+  G=g.G; SALA.ronda=Math.max(SALA.ronda,g.ronda||0); SALA.playing=true; SALA.guardado=null; latir(true);
+  OPS=G.mes===1?mercadoMes1(G.seed):mercadoMes2();
   $('btnRetomar').style.display='none';
   if(G.fase===1){ pintarF1(); show('f1'); } else { pintarF2(); show('f2'); }
   $('gBarra').classList.add('on'); gBarra(); gTimer(G.fase,90); gProg(); sfxCoin();
+}
+/* los avisos del lobby duraban lo que tardaba el próximo presence sync en pisarlos */
+let avisoHasta=0;
+function avisoSala(txt,despues){
+  avisoHasta=Date.now()+4000;
+  ($('espectador').classList.contains('on')?$('espEstado'):$('lobbyEstado')).textContent=txt;
+  sfxNo();
+  setTimeout(()=>{ avisoHasta=0; if(despues) despues(); if(SALA){ pintarLobby(); pintarEsp(); } },4000);
 }
 const arrancar=conLock(function(){
   if(!SALA||!SALA.ch) return;
   if(!SALA.spec && Object.keys(SALA.players).length<2 && !arrancar._solo){
     arrancar._solo=true;
-    const est=$('espectador').classList.contains('on')?$('espEstado'):$('lobbyEstado');
-    est.textContent='SOS LA ÚNICA MÁQUINA · TOCÁ DE NUEVO PARA JUGAR IGUAL';
-    setTimeout(()=>{ arrancar._solo=false; if(SALA){ pintarLobby(); pintarEsp(); } },4000); sfxNo(); return; }
-  SALA.ch.send({type:'broadcast',event:'start',payload:{ronda:SALA.ronda+1}});
+    avisoSala('SOS LA ÚNICA MÁQUINA · TOCÁ DE NUEVO PARA JUGAR IGUAL',()=>arrancar._solo=false); return; }
+  /* volver al lobby con la ronda andando y tocar Arrancar le tiraba el trimestre abajo a todos */
+  if(Object.values(SALA.prog||{}).some(p=>!p.fin) && !arrancar._reinicio){
+    arrancar._reinicio=true;
+    avisoSala('HAY UNA RONDA EN CURSO · TOCÁ DE NUEVO PARA REINICIARLA EN TODAS',()=>arrancar._reinicio=false); return; }
+  arrancar._reinicio=false;
+  SALA.ch.send({type:'broadcast',event:'start',payload:{ronda:SALA.ronda+1, seed:Math.floor(Math.random()*1e9)+1}});
 });
+/* ---- control del facilitador: cerrar la fase en todas las máquinas desde el proyector ---- */
+function forzarTodas(b){
+  if(!SALA||!SALA.ch) return;
+  if(b&&!b.dataset.arm){ b.dataset.arm='1'; b.textContent='¿Cerrar en todas? Tocá de nuevo';
+    setTimeout(()=>{ if(b.dataset.arm){ delete b.dataset.arm; b.textContent='Cerrar la fase en todas'; } },2500); sfxTap(); return; }
+  if(b){ delete b.dataset.arm; b.textContent='Cerrar la fase en todas'; }
+  SALA.ch.send({type:'broadcast',event:'forzar',payload:{ronda:SALA.ronda}});
+}
+function forzarCierreLocal(){
+  if(!G||!SALA||!SALA.playing) return;
+  if($('evOv').classList.contains('on')){ resolverEv(evAuto,true); return; }
+  if($('coachOv').classList.contains('on')) cerrarCoach();
+  if($('swipe').classList.contains('on')){ swSalir(); }
+  if($('f1').classList.contains('on')||$('f2').classList.contains('on')){
+    clearInterval(gTimerInt); gT.act=false; autoCerrarFase();
+  }
+}
 function cuentaRegresiva(){
   const ov=$('goOv'); if(ov.classList.contains('on')) return;
   $('goCode').textContent='SALA '+SALA.code+(SALA.ronda>1?' · RONDA '+SALA.ronda:'');
@@ -1023,13 +1316,24 @@ const TRAMPAS=[
   caida:'Eso tiene nombre: mula financiera. La plata era de estafas y la cuenta queda marcada — Juan pudo terminar denunciado por lavado. Cero pesos. −1.500 pts.'},
  {id:'apuestas', trampa:1, f:'PLATA RÁPIDA', n:'El "sistema infalible" de apuestas', d:'"Duplicás en una semana, te paso el grupo de Telegram"', m:4000, h:1,
   caida:'El único que duplica es el que cobra la seña del grupo. Juan puso $800 de prueba y no los vio más. Y ojo: aunque fuera \"legal\", apostar para generar ingreso termina igual — el que necesita recuperar, apuesta de nuevo. Eso ya no es plata: es un problema. −1.500 pts.'},
+ {id:'kit', trampa:1, f:'PLATA RÁPIDA', n:'Armar cajas en casa, pago semanal', d:'Aviso en Instagram: trabajo desde casa, solo hay que comprar el kit inicial', m:2200, h:1,
+  caida:'Si para empezar a cobrar tenés que pagar vos, no es un trabajo: es la estafa del anticipo. Juan puso $900 por el kit que nunca llegó, y la cuenta que le vendía desapareció. −1.500 pts.'},
+ {id:'sobrepago', trampa:1, f:'PLATA RÁPIDA', n:'La encuesta que paga de más', d:'Le depositan $5.000 "por error" y le piden que devuelva $3.000', m:2000, h:0,
+  caida:'El depósito original era falso y se cayó a los tres días; los $3.000 que devolvió eran de Juan. Regla simple: nadie te deposita de más por error. −1.500 pts.'},
 ];
+/* PRNG determinístico: todas las máquinas de la sala arman la misma grilla a partir del mismo seed */
+function rng(seed){ let a=(seed>>>0)||1; return ()=>{ a=(a+0x6D2B79F5)>>>0; let t=Math.imul(a^a>>>15,1|a); t=(t+Math.imul(t^t>>>7,61|t))^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function baraja(arr,r){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 let OPS=[];
 /* mismo ícono que usa cada fuente en el armador: se aprende una vez, se reconoce en todos lados */
 const FIC={'Salario':'i-bille','Cuenta propia':'i-herr','Changas':'i-mano','Reventa':'i-reci','Descuentos':'i-tag','Ayuda familiar':'i-cora','Devolución':'i-devol','Ayuda estatal':'i-estado','Premios':'i-copa','PLATA RÁPIDA':'i-rayo'};
-function mercadoMes1(){
-  const l=OPORTUNIDADES.slice();
-  l.splice(2,0,TRAMPAS[0]); l.splice(6,0,TRAMPAS[1]); l.splice(10,0,TRAMPAS[2]);
+/* la revancha era idéntica: mismas 3 trampas, siempre en el mismo lugar. Ahora salen 3 de 5,
+   en posiciones distintas, iguales para toda la sala (seed compartido en el arranque). */
+function mercadoMes1(seed){
+  const r=rng(seed), l=OPORTUNIDADES.slice();
+  const elegidas=baraja(TRAMPAS,r).slice(0,3);
+  const pos=baraja([1,2,3,4,5,6,7,8,9,10,11],r).slice(0,3).sort((a,b)=>a-b);
+  elegidas.forEach((t,i)=>l.splice(pos[i]+i,0,t));
   return l;
 }
 function mercadoMes2(){
@@ -1053,7 +1357,7 @@ function mercadoMes2(){
 const COACH={
  1:{t:'Son los asesores de Juan', b:'¡Jugamos!', r:[
    ['i-mano','<b>Toquen las tarjetas</b> para conseguirle plata extra a Juan. Cada trabajo gasta horas: tiene 12 por semana (arriba se cuentan).'],
-   ['i-rayo','Ojo con la <b>PLATA RÁPIDA</b>: parece el mejor negocio de la grilla… y siempre tiene trampa.'],
+   ['i-rayo','Antes de aceptar, miren <b>de dónde sale la plata</b>. Si paga mucho por casi nada de laburo, la pregunta es quién la está poniendo.'],
    ['i-flecha','Cuando estén listos, toquen <b>A ORDENAR EL MES</b>. Atentos: la vida pega golpes sorpresa — el que guarda, aguanta.']]},
  2:{t:'Ahora repartan la plata', b:'¡A repartir!', r:[
    ['i-bille','Con <b>− y +</b> le ponen nombre a cada peso del mes. Van de a $500: mantengan apretado y corre solo.'],
@@ -1065,22 +1369,22 @@ function mostrarCoach(n){
   $('coachTit').textContent=c.t;
   $('coachRows').innerHTML=c.r.map(x=>'<div class="coachRow"><div class="icb"><svg class="ic"><use href="#'+x[0]+'"/></svg></div><span>'+x[1]+'</span></div>').join('');
   $('coachBtn').innerHTML=c.b+' <svg class="ic"><use href="#i-flecha"/></svg>';
-  $('coachOv').classList.add('on');
+  $('coachOv').classList.add('on'); pausarGT(true);
 }
 function cerrarCoach(){
-  $('coachOv').classList.remove('on');
+  $('coachOv').classList.remove('on'); pausarGT(false);
   try{ sessionStorage.setItem('cpvCoach'+(COACH.abierto||1),'1'); }catch(e){}
   sfxTap();
 }
 function empezarJuego(){
   G={mes:1, fase:1, ops:{}, plan:{}, pts:0, evPlata1:0, trampas:0, ev1:null, ev2:null,
      shock1Ok:null, shock2Ok:null, horas:12, opsM1:null, plan1:null, extra1:0, tabAcum:0, soltoPerrosOK:false,
-     cerrado:false, arr:0, fiado:0, resto1:0, resto2:0, austero:false};
-  OPS=mercadoMes1();
+     cerrado:false, arr:0, fiado:0, resto1:0, resto2:0, austero:false, seed:SALA.seed||1};
+  OPS=mercadoMes1(G.seed);
   JGASTOS.forEach(c=>G.plan[c.id]=c.ini);
   JOLV.forEach(c=>G.plan[c.id]=0);
-  SALA.playing=true;
-  pintarF1(); show('f1'); $('gBarra').classList.add('on'); gBarra(); gTimer(1,240); mostrarCoach(1);
+  SALA.playing=true; latir(true);
+  iniSwipe(); $('gBarra').classList.add('on'); gBarra(); gTimer(1,240); mostrarCoach(1);
   gProg();
 }
 const extraTot=()=>OPS.reduce((a,o)=>a+(G.ops[o.id]?o.m:0),0);
@@ -1097,29 +1401,137 @@ function scoreAhora(){
   if(fuentesTot()>=3) p+=G.mes===1?1000:800;
   return G.pts+p;
 }
+/* el reloj cierra de verdad: al llegar a cero hay GRACIA segundos y después la fase se cierra sola.
+   Sin esto, un equipo lento congela al taller entero: el podio espera a que TODOS terminen. */
+const GRACIA=20;
+/* el reloj se pinta en la pantalla que esté activa, no en un id fijo: la fase 1 pasa por
+   dos pantallas (el swipe y la grilla) y el reloj es el mismo */
+let gT={t:0, act:false, gracia:false, pausado:false};
 function gTimer(fase,seg){
   clearInterval(gTimerInt);
-  const el=$('timer'+fase); if(!el) return;
-  let t=seg;
-  const pinta=()=>{ el.textContent=Math.floor(t/60)+':'+String(t%60).padStart(2,'0'); };
-  pinta(); el.classList.remove('rojo');
-  gTimerInt=setInterval(()=>{ t--;
-    if(t<0){ el.textContent='¡CIERREN!'; el.classList.add('rojo'); return; }
-    pinta();
-    if(t<=30){ el.classList.add('rojo'); if(t<=10) sfxTick(); }
-  },1000);
+  gT={t:seg, act:true, gracia:false, pausado:false};
+  document.querySelectorAll('.gtimer').forEach(e=>e.classList.remove('rojo'));
+  pintarGT();
+  gTimerInt=setInterval(tickGT,1000);
+}
+function pintarGT(){
+  if(!gT.act) return;
+  const el=document.querySelector('.screen.on .gtimer'); if(!el) return;
+  el.textContent = gT.gracia ? 'CIERRA EN '+gT.t+'s' : Math.floor(gT.t/60)+':'+String(gT.t%60).padStart(2,'0');
+  if(gT.gracia||gT.t<=30) el.classList.add('rojo');
+}
+function tickGT(){
+  if(gT.pausado||!gT.act) return;
+  gT.t--;
+  if(!gT.gracia){
+    if(gT.t<=0){ gT.gracia=true; gT.t=GRACIA; sfxNo(); }
+    else if(gT.t<=10) sfxTick();
+    pintarGT(); return;
+  }
+  if(gT.t<=0){ clearInterval(gTimerInt); gT.act=false; autoCerrarFase(); return; }
+  pintarGT(); sfxTick();
+}
+/* el reloj se congela mientras hay un modal arriba: el evento ya trae su propio timer */
+function pausarGT(p){ gT.pausado=!!p; }
+/* cierre automático: acomoda lo mínimo para que el plan sea válido y confirma sin preguntar */
+function autoCerrarFase(){
+  if(!G||!SALA||!SALA.playing) return;
+  if(G.fase===1){
+    let g=0;
+    while(horasTot()>G.horas && g++<40){
+      const peor=OPS.filter(o=>G.ops[o.id]&&!o.fija&&o.h>0).sort((a,b)=>(a.m/a.h)-(b.m/b.h))[0];
+      if(!peor) break;
+      delete G.ops[peor.id];
+    }
+    pintarF1(); show('f1'); gBarra(); gProg(); ejecutarFase1();
+  } else {
+    let g=0;
+    while(asignado()>disponible() && g++<400){
+      const fila=Object.keys(G.plan).filter(id=>(G.plan[id]||0)-500>=minDe(id)).sort((a,b)=>G.plan[b]-G.plan[a])[0];
+      if(!fila) break;
+      G.plan[fila]-=500;
+    }
+    pintarF2(); gBarra(); gProg(); cerrarFase();
+  }
+}
+/* ---- el mercado de a una, solo en el mes 1 ----
+   En el mes 2 va la grilla directo: ahí hay que COMPARAR lo que tenías con lo que quedó
+   (ofertas que crecieron, que se pincharon, puertas cerradas) y de a una no se puede.
+   Al terminar la pila se cae en la grilla igual, para repasar antes de confirmar. */
+let swIdx=0, swDrag=null;
+function iniSwipe(){ swIdx=0; pintarSwipe(); show('swipe'); }
+function swSalir(){ swDrag=null; pintarF1(); show('f1'); gBarra(); gProg(); }
+function pintarSwipe(){
+  if(swIdx>=OPS.length){ swSalir(); return; }
+  const o=OPS[swIdx], sig=OPS[swIdx+1];
+  const libres=G.horas-horasTot();
+  const noEntra=!o.bloq&&!o.fija&&o.h>libres;
+  $('swHoras').textContent=libres+' de '+G.horas;
+  $('swHoras').parentElement.classList.toggle('sinh',libres<=0);
+  $('swExtra').textContent=fmt(extraTot());
+  $('swCount').textContent=(swIdx+1)+'/'+OPS.length;
+  $('swSi').disabled=!!(o.bloq||o.fija||noEntra);
+  $('swPila').innerHTML=
+    (sig?'<div class="swCard detras'+(sig.trampa?' trampa':'')+'"><div class="ci"><svg class="ic"><use href="#'+(FIC[sig.f]||'i-bille')+'"/></svg></div></div>':'')+
+    '<div class="swCard'+(o.trampa?' trampa':'')+'" id="swCard" onpointerdown="swIni(event)">'+
+      '<div class="sello si">LA AGARRO</div><div class="sello no">PASO</div>'+
+      '<div class="fte">'+o.f+'</div>'+
+      '<div class="ci"><svg class="ic"><use href="#'+(FIC[o.f]||'i-bille')+'"/></svg></div>'+
+      '<div class="nm">'+o.n+'</div>'+
+      '<div class="mt">'+(o.bloq?'—':'+'+fmt(o.m))+'</div>'+
+      '<div class="hr">'+o.h+' h por semana</div>'+
+      '<div class="d">'+o.d+'</div>'+
+      (o.bloq?'<div class="nohrs">Esta puerta ya se cerró</div>':o.fija?'<div class="nohrs">Ya la tiene fija</div>':
+       noEntra?'<div class="nohrs">No le quedan horas para esto</div>':'')+
+    '</div>';
+}
+function swIni(e){
+  const c=$('swCard'); if(!c) return;
+  e.preventDefault(); c.setPointerCapture(e.pointerId);
+  swDrag={x0:e.clientX, c};
+  c.onpointermove=swMueve; c.onpointerup=swSuelta; c.onpointercancel=swSuelta;
+}
+function swMueve(e){
+  if(!swDrag) return;
+  const dx=e.clientX-swDrag.x0, c=swDrag.c;
+  c.style.transform='translateX('+dx+'px) rotate('+(dx/22)+'deg)';
+  const si=c.querySelector('.sello.si'), no=c.querySelector('.sello.no');
+  si.style.opacity=dx>40?Math.min(1,(dx-40)/60):0;
+  no.style.opacity=dx<-40?Math.min(1,(-dx-40)/60):0;
+}
+function swSuelta(e){
+  if(!swDrag) return;
+  const dx=e.clientX-swDrag.x0, c=swDrag.c;
+  swDrag=null; c.onpointermove=c.onpointerup=c.onpointercancel=null;
+  if(Math.abs(dx)<95){ c.style.transform=''; c.querySelectorAll('.sello').forEach(s=>s.style.opacity=0); return; }
+  if(dx>0 && $('swSi').disabled){ c.style.transform=''; c.querySelectorAll('.sello').forEach(s=>s.style.opacity=0); sfxNo(); return; }
+  c.classList.add('va');
+  c.style.transform='translateX('+(dx>0?900:-900)+'px) rotate('+(dx>0?32:-32)+'deg)';
+  c.style.opacity='0';
+  swDecide(dx>0?1:0, true);
+}
+function swDecide(si, yaAnimado){
+  if(!G||swIdx>=OPS.length) return;
+  const o=OPS[swIdx];
+  if(si){
+    if($('swSi').disabled){ sfxNo(); return; }
+    G.ops[o.id]=true; sfxCoin();
+  } else sfxTap();
+  swIdx++;
+  gBarra(); gProg();
+  setTimeout(pintarSwipe, yaAnimado?300:0);
 }
 /* ----- fase EXPANDIR (mes 1 y mes 2) ----- */
 function pintarF1(){
-  const p=document.querySelector('#f1 .paso'), h=document.querySelector('#f1 h2'), caso=document.querySelector('#f1 .caja');
+  const p=document.querySelector('#f1 .paso'), h=document.querySelector('#f1 h2'), caso=$('f1Caso');
   if(G.mes===1){
     p.textContent='MES 1 · PASO 1 · CONSEGUIR PLATA'; h.textContent='La misión: +plata para Juan';
-    caso.innerHTML='<b>Juan Ignacio, 19.</b> Gana $10.000 en el café y aporta $3.000 en casa. Estudia de noche: le quedan <b>12 horas libres por semana</b>. Su sueño: la tableta gráfica ($8.000). <b>Toquen las tarjetas</b> para elegir qué recomendarle (tocar de nuevo = soltar) — sin fundir al pibe. Ojo: no todo lo que brilla es ingreso.';
+    caso.innerHTML='<b>Juan Ignacio, 19, La Teja.</b> Gana $10.000 en un café y quiere una tableta de $8.000. Toquen las tarjetas para conseguirle laburo — cada una le come horas.';
   } else {
     p.textContent='MES 2 · PASO 1 · RENEGOCIAR'; h.textContent='Nada quedó igual';
-    caso.innerHTML='<b>Pasó un mes y el mercado se movió.</b> Sostener también es decidir: hay ofertas que crecieron, otras que se pincharon y puertas que se cerraron. Semana de parciales: <b>'+G.horas+' horas libres</b>.'
+    caso.innerHTML='<b>Pasó un mes y el mercado se movió.</b> Hay ofertas que crecieron, otras que se pincharon y puertas que se cerraron. Semana de parciales: tiene menos horas.'
       +(G.fiado?' <b style="color:var(--rojo)">Y el almacén no se olvidó del fiado.</b>':'')
-      +(horasTot()>G.horas?' <b style="color:var(--rojo)">Arrancan pasados: '+horasTot()+' de '+G.horas+' h — algo hay que soltar.</b>':'');
+      +(horasTot()>G.horas?' <b style="color:var(--rojo)">Arrancan pasados: algo hay que soltar.</b>':'');
   }
   $('cardsOp').innerHTML=OPS.map(o=>{
     const cls=['card','opCard']; let badge='';
@@ -1130,8 +1542,11 @@ function pintarF1(){
     return `<div class="${cls.join(' ')}" id="op_${o.id}" onclick="togOp('${o.id}')">${badge}
       <div class="top">
         <div class="icb"><svg class="ic"><use href="#${FIC[o.f]||'i-bille'}"/></svg></div>
-        <div class="tt"><b>${o.n}</b><span>${o.d} · <u>${o.f}</u></span><span class="hrs">${o.h} h/semana</span></div>
-        <div class="val mono">${o.bloq?'—':'+'+fmt(o.m)+'/mes'}</div>
+        <div class="tt"><b>${o.n}</b><span class="d">${o.d}</span></div>
+        <div class="plata">
+          <div class="val mono">${o.bloq?'—':'+'+fmt(o.m)}</div>
+          <div class="hrsChip mono">${o.h?o.h+' h':'0 h'}</div>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1142,17 +1557,31 @@ function togOp(id){
   if(o.bloq||o.fija){ sfxNo(); return; }
   if(!G.ops[id] && horasTot()+o.h>G.horas){
     const c=$('op_'+id); c.classList.remove('denied'); void c.offsetWidth; c.classList.add('denied'); sfxNo();
-    $('horasTxt').textContent='¡SIN HORAS! LARGÁ ALGO O DEJÁ QUE JUAN DUERMA';
+    $('horasTxt').textContent='¡SIN HORAS!';
+    $('horasLbl').textContent='LARGUEN ALGO O DEJEN QUE JUAN DUERMA';
     setTimeout(pintarHoras,1600);
     return;
   }
+  const antes=scoreAhora();
   G.ops[id]=!G.ops[id]; if(!G.ops[id]) delete G.ops[id];
-  sfxTap();
-  $('op_'+id).classList.toggle('sel',!!G.ops[id]);
+  const puesto=!!G.ops[id];
+  $('op_'+id).classList.toggle('sel',puesto);
+  if(puesto){ sfxCoin(); flotarPts('op_'+id, 0, '+'+fmt(o.m)); }
+  else sfxTap();
   pintarHoras(); gBarra(); gProg();
 }
 function pintarHoras(){
-  $('horasTxt').textContent=horasTot()+' / '+G.horas+' h';
+  const libres=G.horas-horasTot();
+  $('horasLbl').textContent = libres<0?'¡JUAN NO LLEGA! SOLTÁ ALGO':'HORAS LIBRES QUE LE QUEDAN';
+  $('horasTxt').textContent = libres+' de '+G.horas;
+  $('horason').classList.toggle('lleno',libres<=0);
+  bumpSi($('horasExtra'), fmt(extraTot()));
+  bumpSi($('horasPts'), scoreAhora().toLocaleString('es-UY'));
+  /* las que ya no entran en las horas que quedan se apagan solas: antes tocabas y te rebotaba */
+  OPS.forEach(o=>{
+    const el=$('op_'+o.id); if(!el) return;
+    el.classList.toggle('nohay', !G.ops[o.id] && !o.bloq && !o.fija && o.h>libres);
+  });
   $('horasFill').style.width=Math.min(100,horasTot()*100/G.horas)+'%';
   $('horasFill').style.visibility=horasTot()>0?'':'hidden';
   $('horasFill').style.background=horasTot()>=G.horas?'var(--rojo)':'var(--azul)';
@@ -1162,72 +1591,204 @@ function pintarF2(){
   const p=document.querySelector('#f2 .paso'), h=document.querySelector('#f2 h2');
   p.textContent=G.mes===1?'MES 1 · PASO 2 · REPARTIR LA PLATA':'MES 2 · PASO 2 · EL PLAN FINAL';
   h.textContent=G.mes===1?'El mes de Juan, etiquetado':'El plan final, con lo aprendido';
-  const olvs=JOLV.slice();
-  const rows=JGASTOS.map(c=>gRowHTML(c,false)).concat(olvs.map(c=>gRowHTML(c,true)));
-  if(G.mes===2&&G.fiado) rows.unshift(gRowHTML({id:'fiado', ic:'i-cadena', n:'Fiado del almacén (la bici)', s:'la deuda cobra primero — no se negocia', min:G.fiado},false));
-  if(G.mes===2) rows.push(gRowHTML({id:'meta2', ic:'i-estrella', n:'Meta 2: curso de ilustración ($4.500)', s:'se desbloquea si la tableta queda asegurada'},true));
-  $('gRows').innerHTML=rows.join('');
+  /* las que dan puntos van primero: ahí está la decisión, y así no hay que scrollear para encontrarlas */
+  const dan=JOLV.map(c=>({...c, da:1}));
+  if(G.mes===2) dan.push({id:'meta2', ic:'i-estrella', n:'Meta 2: el curso', da:1});
+  const fijos=[];
+  if(G.mes===2&&G.fiado) fijos.push({id:'fiado', ic:'i-cadena', n:'Fiado del almacén', min:G.fiado, fijo:1});
+  JGASTOS.forEach(c=>fijos.push(c));
+  $('gRows').innerHTML=
+    '<div class="gGrupo puntos"><span class="t">Estas dan puntos</span><span class="linea"></span></div>'+
+    '<div class="gCards">'+dan.map(gCardHTML).join('')+'</div>'+
+    '<div class="gGrupo"><span class="t">Lo de todos los meses</span><span class="linea"></span></div>'+
+    '<div class="gCards">'+fijos.map(gCardHTML).join('')+'</div>';
   refrescarMeta2();
   gBarra();
 }
-function gRowHTML(c,olv){
-  return `<div class="gRow${olv?' olv2':''}" id="row_${c.id}">
-    <div class="icb"><svg class="ic"><use href="#${c.ic}"/></svg></div>
-    <div class="tt"><b>${c.n}</b><span>${c.s}${c.min?` · mínimo ${fmt(c.min)}`:''}</span></div>
-    <div class="ctrl">
-      <button class="menos" onpointerdown="repIni('${c.id}',-500)" onpointerup="repFin()" onpointerleave="repFin()" oncontextmenu="return false">−</button>
-      <div class="m mono" id="pl_${c.id}">${fmt(G.plan[c.id]||0)}</div>
-      <button onpointerdown="repIni('${c.id}',500)" onpointerup="repFin()" onpointerleave="repFin()" oncontextmenu="return false">+</button>
-    </div>
+/* toda la tarjeta es "sumar $500": no hay que apuntarle a un botón chico */
+function gCardHTML(c){
+  const v=G.plan[c.id]||0;
+  return `<div class="gCard${c.da?' da':''}${c.fijo?' fijo':''}" id="row_${c.id}" role="button" tabindex="0"
+    aria-label="${c.n}: ${fmt(v)}. Sumar 500"
+    onpointerdown="repIni('${c.id}',500)" onpointerup="repFin()" onpointerleave="repFin()" oncontextmenu="return false"
+    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ajustar('${c.id}',500)}">
+    <button class="mn" tabindex="-1" aria-label="restar 500 a ${c.n}"
+      onpointerdown="event.stopPropagation();repIni('${c.id}',-500)" onpointerup="event.stopPropagation();repFin()" onpointerleave="repFin()"
+      onclick="event.stopPropagation();if(!event.detail)ajustar('${c.id}',-500)" oncontextmenu="return false">−</button>
+    <button class="td" tabindex="-1" title="poner acá todo lo que falta repartir"
+      onpointerdown="event.stopPropagation()" onclick="event.stopPropagation();ponerResto('${c.id}')">TODO</button>
+    <div class="ci"><svg class="ic"><use href="#${c.ic}"/></svg></div>
+    <div class="nm">${c.n}</div>
+    <div class="mt mono" id="pl_${c.id}">${fmt(v)}</div>
+    <div class="pie">${piePara(c.id, c.min||0)}</div>
   </div>`;
+}
+function piePara(id,min){
+  const v=G.plan[id]||0;
+  if(id==='objetivo'){
+    const t=G.tabAcum+v, pc=Math.min(100,Math.round(t*100/JUAN.tableta));
+    return '<span class="prog"><i style="width:'+pc+'%"></i></span>'+(t>=JUAN.tableta?'<span class="ok2">¡la tableta es suya!</span>':fmt(t)+' de '+fmt(JUAN.tableta));
+  }
+  if(min) return v>=min?'<span class="ok2">✓ mínimo cubierto</span>':'mín. '+fmt(min);
+  return '';
+}
+function refrescarPie(id){
+  const r=$('row_'+id); if(!r) return;
+  const p=r.querySelector('.pie'); if(p) p.innerHTML=piePara(id, minDe(id));
+}
+/* la recompensa: los puntos saltan de la tarjeta. Se acumulan para que el hold no escupa 9 por segundo */
+/* ---- arrastrar billetes ----
+   Pointer events y no drag&drop de HTML5: el de HTML5 no existe en touch, y esto va a correr
+   en las notebooks del taller igual que en un celular. El tap en la tarjeta sigue sumando $500,
+   así que el que no quiere arrastrar (o usa teclado) puede jugar igual. */
+let arr=null;
+function billIni(e,m){
+  if(!G||G.fase!==2) return;
+  if(disponible()-asignado()<m){ sfxNo(); flashBarra(); return; }
+  e.preventDefault();
+  const src=e.currentTarget, r=src.getBoundingClientRect();
+  const g=src.cloneNode(true);
+  g.id='billVuela'; g.style.width=r.width+'px'; g.style.height=r.height+'px';
+  document.body.appendChild(g);
+  arr={m, g, dx:e.clientX-r.left, dy:e.clientY-r.top, sobre:null};
+  document.body.classList.add('arrastrando');
+  billMueve(e);
+  window.addEventListener('pointermove',billMueve);
+  window.addEventListener('pointerup',billSuelta);
+  window.addEventListener('pointercancel',billSuelta);
+}
+function billMueve(e){
+  if(!arr) return;
+  arr.g.style.left=(e.clientX-arr.dx)+'px';
+  arr.g.style.top=(e.clientY-arr.dy)+'px';
+  const bajo=document.elementFromPoint(e.clientX,e.clientY);
+  const card=bajo&&bajo.closest?bajo.closest('.gCard'):null;
+  if(card===arr.sobre) return;
+  if(arr.sobre) arr.sobre.classList.remove('dropOk','dropNo');
+  arr.sobre=card;
+  if(card){
+    const id=card.id.replace('row_','');
+    card.classList.add(puedeRecibir(id,arr.m)?'dropOk':'dropNo');
+  }
+}
+const puedeRecibir=(id,m)=> !(id==='meta2'&&!metaDesbloqueada()) && asignado()+m<=disponible();
+function billSuelta(){
+  if(!arr) return;
+  window.removeEventListener('pointermove',billMueve);
+  window.removeEventListener('pointerup',billSuelta);
+  window.removeEventListener('pointercancel',billSuelta);
+  document.body.classList.remove('arrastrando');
+  const card=arr.sobre, m=arr.m;
+  if(card) card.classList.remove('dropOk','dropNo');
+  arr.g.remove(); arr=null;
+  if(!card){ sfxTap(); return; }
+  const antes=asignado();
+  ajustar(card.id.replace('row_',''), m);
+  /* que el destino "trague" el billete: sin esto, soltar no devuelve nada */
+  if(asignado()!==antes){ card.classList.remove('bump'); void card.offsetWidth; card.classList.add('bump'); }
+}
+/* el número salta solo cuando cambió de verdad: si salta siempre, deja de querer decir algo */
+function bumpSi(el,txt){
+  if(!el||el.textContent===txt) return;
+  el.textContent=txt; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+}
+function flotarPts(elId,n,txt){
+  const card=$(elId); if(!card) return;
+  let s=card.querySelector('.flota');
+  if(txt){ /* texto fijo (fase 1): un toque, un flotante */
+    if(s) s.remove();
+    s=document.createElement('span'); s.className='flota'; s.textContent=txt;
+    card.appendChild(s); setTimeout(()=>s.remove(),800); return;
+  }
+  if(s){ clearTimeout(+s.dataset.t); s.dataset.n=(+s.dataset.n||0)+n; }
+  else { s=document.createElement('span'); s.className='flota'; s.dataset.n=n; card.appendChild(s); }
+  s.textContent='+'+(+s.dataset.n).toLocaleString('es-UY');
+  s.dataset.t=setTimeout(()=>s.remove(),800);
+}
+/* el equipo dejaba de ver su puntaje hasta el interludio: acá lo ve moverse con cada toque
+   (el proyector sigue mostrando ··· , así el podio no se quema) */
+function pintarPlaton(){
+  if(!G||G.fase!==2) return;
+  const disp=disponible(), resto=disp-asignado(), el=$('platon');
+  el.classList.toggle('listo',resto===0);
+  el.classList.toggle('rojo',resto<0);
+  $('platonLbl').textContent = resto>0?'TE QUEDA POR REPARTIR':resto===0?'¡TODO REPARTIDO!':'¡SE PASARON!';
+  $('platonN').textContent = resto===0?'✓':fmt(resto);
+  /* la barra se LLENA con lo que ya tiene nombre: terminar es verla completa, no verla vacía */
+  $('platonBar').firstElementChild.style.width=Math.max(0,Math.min(100, disp>0?asignado()*100/disp:0))+'%';
+  bumpSi($('platonPtsN'), scoreAhora().toLocaleString('es-UY'));
+  /* el billete que ya no entra se apaga: igual que las changas sin horas, se ve antes de tocar */
+  document.querySelectorAll('#fajo .bill').forEach(b=>b.classList.toggle('off', +b.dataset.m>resto));
+  $('fajoHint').textContent = resto<=0 ? '' : 'Arrastrá la plata a donde va';
 }
 function metaDesbloqueada(){ return G.mes===2 && (G.tabAcum+(G.plan.objetivo||0))>=JUAN.tableta; }
 function refrescarMeta2(){
   const r=$('row_meta2'); if(!r) return;
   const ok=metaDesbloqueada();
-  r.style.opacity=ok?'':'0.5';
-  r.querySelector('.tt span').textContent = ok
-    ? '¡la tableta está asegurada! el que llega a una meta ya mira la siguiente'
-    : 'se desbloquea si la tableta ('+fmt(JUAN.tableta)+') queda asegurada — llevan '+fmt(G.tabAcum+(G.plan.objetivo||0));
+  r.classList.toggle('bloq',!ok);
+  r.querySelector('.pie').innerHTML = ok
+    ? '<span class="ok2">✓ desbloqueada</span>'
+    : 'primero asegurá la tableta';
 }
 /* mantener presionado repite: asignar $6.000 deja de ser 12 toques */
 let repT=null,repI=null,repiendo=false;
 function repIni(id,d){ ajustar(id,d); repT=setTimeout(()=>{ repiendo=true; repI=setInterval(()=>ajustar(id,d),110); },420); }
 function repFin(){ clearTimeout(repT); clearInterval(repI); if(repiendo){ repiendo=false; gProg(); } }
+/* repartir $10.000 de a $500 con el reloj corriendo es un suplicio: un toque manda todo el sobrante acá */
+function ponerResto(id){
+  if(!G) return;
+  if(id==='meta2' && !metaDesbloqueada()){ sfxNo(); return; }
+  const resto=disponible()-asignado();
+  if(resto<=0){ sfxNo(); flashBarra(); return; }
+  const antes=scoreAhora();
+  G.plan[id]=(G.plan[id]||0)+resto; sfxCoin();
+  const m=$('pl_'+id); m.textContent=fmt(G.plan[id]); m.classList.remove('bump'); void m.offsetWidth; m.classList.add('bump');
+  refrescarPie(id);
+  const dif=scoreAhora()-antes;
+  if(dif>0) flotarPts('row_'+id,dif);
+  if(G.mes===2) refrescarMeta2();
+  gBarra(); gProg();
+}
 function flashBarra(){ const d=$('gbD2'); d.classList.remove('flashN'); void d.offsetWidth; d.classList.add('flashN'); }
+const minDe=id=>{ if(id==='fiado') return G.fiado||0; const c=JGASTOS.find(x=>x.id===id)||JOLV.find(x=>x.id===id); return (c&&c.min)||0; };
 function ajustar(id,delta){
   if(!G) return;
   if(id==='meta2' && !metaDesbloqueada()){ sfxNo(); return; }
-  const c=JGASTOS.find(x=>x.id===id)||JOLV.find(x=>x.id===id)||(id==='fiado'?{min:G.fiado}:{min:0});
-  const min=c.min||0;
+  const min=minDe(id);
   let v=(G.plan[id]||0)+delta;
   if(v<min){ sfxNo(); flashBarra(); return; }
   if(delta>0 && asignado()+delta>disponible()){ sfxNo(); flashBarra(); return; }
+  const antes=scoreAhora();
   G.plan[id]=v; sfxTap();
   const m=$('pl_'+id); m.textContent=fmt(v); m.classList.remove('bump'); void m.offsetWidth; m.classList.add('bump');
+  refrescarPie(id);
+  const dif=scoreAhora()-antes;
+  if(dif>0) flotarPts('row_'+id,dif);
   if(G.mes===2) refrescarMeta2();
   gBarra(); if(!repiendo) gProg();
 }
 function gBarra(){
   if(!G) return;
   if(G.fase===1){
-    $('gbD1').innerHTML='EXTRA CONSEGUIDO<b class="mono">'+fmt(extraTot())+'</b>';
-    $('gbD2').innerHTML='FUENTES NUEVAS<b class="mono">'+fuentesTot()+'</b>';
-    $('gbD2').classList.remove('neg');
-    $('gbD3').innerHTML='INGRESO DEL MES<b class="mono">'+fmt(disponible())+'</b>';
+    /* el extra ya está arriba en el cabezal: acá van los dos datos que no están */
+    $('gbD1').style.display=''; $('gbD3').style.display='none';
+    $('gbD1').innerHTML='FUENTES DISTINTAS<b class="mono">'+fuentesTot()+(fuentesTot()>=3?' ✓':' de 3')+'</b>';
+    $('gbD2').innerHTML='INGRESO DEL MES<b class="mono">'+fmt(disponible())+'</b>';
+    $('gbD2').classList.remove('neg','warn');
     $('gbSig').innerHTML=(G.mes===1?'A ordenar el mes':'Al plan final')+' <svg class="ic"><use href="#i-flecha"/></svg>';
   } else {
     const resto=disponible()-asignado();
-    $('gbD1').innerHTML='INGRESO DEL MES<b class="mono">'+fmt(disponible())+'</b>';
+    /* lo que falta repartir ya está arriba y gigante: acá abajo alcanza con el estado */
+    $('gbD1').style.display='none'; $('gbD3').style.display='none';
     $('gbD2').innerHTML=(resto<0?'¡PLAN EN ROJO!':resto>0?'FALTA REPARTIR':'TODO REPARTIDO')+'<b class="mono">'+(resto===0?'✓':fmt(resto))+'</b>';
     $('gbD2').classList.toggle('neg',resto<0);
     $('gbD2').classList.toggle('warn',resto>0);
-    $('gbD3').innerHTML='AHORRO CON DESTINO · las de amarillo<b class="mono">'+fmt(destino())+'</b>';
     $('gbSig').innerHTML='Confirmar el plan <svg class="ic"><use href="#i-flecha"/></svg>';
+    pintarPlaton();
   }
 }
 /* ----- eventos (modal con timer) ----- */
-let evTimer=null, evAl=null, evSegInt=null;
+let evTimer=null, evAl=null, evSegInt=null, evAuto=0;
 function abrirEvento(cfg){
   $('evKick').textContent=cfg.kick; $('evTit').textContent=cfg.tit; $('evTxt').innerHTML=cfg.txt;
   const bar=$('evBar').firstElementChild;
@@ -1240,12 +1801,12 @@ function abrirEvento(cfg){
   else $('evBar').style.display='none';
   $('evOps2').innerHTML='';
   cfg.ops.forEach((o,i)=>{ const b=document.createElement('button'); b.className='op2'; b.innerHTML=o; b.onclick=()=>resolverEv(i); $('evOps2').appendChild(b); });
-  evAl=cfg.al;
+  evAl=cfg.al; evAuto=cfg.auto||0;
   clearTimeout(evTimer);
   if(cfg.seg) evTimer=setTimeout(()=>resolverEv(cfg.auto,true),cfg.seg*1000);
-  $('evOv').classList.add('on'); thump();
+  $('evOv').classList.add('on'); pausarGT(true); thump();
 }
-function resolverEv(i,porTiempo){ clearTimeout(evTimer); clearInterval(evSegInt); $('evOv').classList.remove('on'); const f=evAl; evAl=null; sfxTap(); if(!G) return; if(f) f(i,porTiempo); }
+function resolverEv(i,porTiempo){ clearTimeout(evTimer); clearInterval(evSegInt); $('evOv').classList.remove('on'); pausarGT(false); const f=evAl; evAl=null; sfxTap(); if(!G) return; if(f) f(i,porTiempo); }
 function evento1(){
   abrirEvento({kick:'EVENTO · SUENA EL TELÉFONO', tit:'El cliente urgente',
     txt:'El dueño de una cervecería de Agraciada quiere una caricatura del staff <b>para mañana</b>. Paga $1.500. El tema: mañana Juan tiene el parcial de matemática del liceo.',
@@ -1281,32 +1842,37 @@ function pasarAOrdenar(){
   G.fase=2; pintarF2(); show('f2'); $('gBarra').classList.add('on'); gTimer(2, G.mes===1?195:240); gBarra(); gProg(); if(G.mes===1) mostrarCoach(2);
 }
 /* ----- confirmar / shocks / interludio ----- */
+/* el "qué pasa al cerrar la fase 1", separado de sus guards: lo usan el botón y el cierre automático */
+function ejecutarFase1(){
+  if(G.mes===1){
+    const caidas=TRAMPAS.filter(t=>G.ops[t.id]);
+    if(caidas.length){
+      G.trampas=caidas.length; G.pts-=caidas.length*1500;
+      caidas.forEach(t=>delete G.ops[t.id]);
+      pintarF1(); gBarra();
+      abrirEvento({kick:'JUAN DUDA… Y HACE BIEN', tit:'La plata rápida siempre la paga alguien',
+        txt:caidas.map(t=>'<b>'+t.n+':</b> '+t.caida).join('<br><br>')+'<br><br><b>Esta vez, casi la paga Juan.</b>',
+        seg:0, auto:0, ops:['Entendido: esas "oportunidades" afuera del plan'],
+        al:()=>evento1()});
+    } else evento1();
+  } else {
+    G.soltoPerrosOK=!!(G.opsM1&&G.opsM1.perros&&!G.ops.perros2);
+    evento2();
+  }
+}
 const confirmarFase=conLock(function(){
   if(!G) return;
   if(G.fase===1){
     if(horasTot()>G.horas){
-      $('horasTxt').textContent='¡JUAN NO LLEGA! SOLTÁ ALGO: '+horasTot()+' / '+G.horas+' h';
+      $('horasTxt').textContent=(G.horas-horasTot())+' de '+G.horas;
+      $('horasLbl').textContent='¡JUAN NO LLEGA! SUELTEN ALGO';
       $('horasFill').style.background='var(--rojo)'; sfxNo();
-      $('horasBar').scrollIntoView({behavior:'smooth',block:'center'});
+      $('horason').scrollIntoView({behavior:'smooth',block:'center'});
       $('gbD2').innerHTML='¡SIN HORAS!<b class="mono">'+horasTot()+' / '+G.horas+' h — suelten algo</b>';
       setTimeout(()=>{ pintarHoras(); gBarra(); },2200);
       return;
     }
-    if(G.mes===1){
-      const caidas=TRAMPAS.filter(t=>G.ops[t.id]);
-      if(caidas.length){
-        G.trampas=caidas.length; G.pts-=caidas.length*1500;
-        caidas.forEach(t=>delete G.ops[t.id]);
-        pintarF1(); gBarra();
-        abrirEvento({kick:'JUAN DUDA… Y HACE BIEN', tit:'La plata rápida siempre la paga alguien',
-          txt:caidas.map(t=>'<b>'+t.n+':</b> '+t.caida).join('<br><br>')+'<br><br><b>Esta vez, casi la paga Juan.</b>',
-          seg:0, auto:0, ops:['Entendido: esas "oportunidades" afuera del plan'],
-          al:()=>evento1()});
-      } else evento1();
-    } else {
-      G.soltoPerrosOK=!!(G.opsM1&&G.opsM1.perros&&!G.ops.perros2);
-      evento2();
-    }
+    ejecutarFase1();
     return;
   }
   const resto=disponible()-asignado();
@@ -1326,9 +1892,56 @@ const confirmarFase=conLock(function(){
   cerrarFase();
 });
 function cerrarFase(){
-  confirmarFase._avisado=false;
-  clearInterval(gTimerInt); $('gBarra').classList.remove('on');
+  clearInterval(gTimerInt); gT.act=false; $('gBarra').classList.remove('on');
   if(G.mes===1) shock1(); else shock2();
+}
+/* Los imprevistos suman EXACTAMENTE lo que antes restaba el shock de golpe ($2.000 el mes 1,
+   $2.500 el mes 2). La matemática no cambió: cambió que ahora se vive en vez de leerse.
+   Nada de apostar: el mes pasa igual, lo único que decidiste ya lo decidiste antes. */
+const DIAS_MES=30;
+const IMPREVISTOS={
+ 1:[{d:8, n:'Se le rompió el celu', m:800, txt:'Sin celu no le entran los pedidos de dibujo.'},
+    {d:21, n:'Se rompió la bici del reparto', m:1200, txt:'El arreglo no espera: la usa todos los días.'}],
+ 2:[{d:6, n:'Le recortaron turnos en el café', m:1500, txt:'Bajó la venta y el dueño achicó la semana.'},
+    {d:23, n:'Se le rompieron los championes', m:1000, txt:'Los únicos que tiene para ir a laburar.'}]
+};
+let m30T=[];
+function correrMes(mes, colchon, cb){
+  m30T.forEach(clearTimeout); m30T=[];
+  const evs=IMPREVISTOS[mes], total=evs.reduce((a,e)=>a+e.m,0);
+  let quedan=colchon, deuda=0;
+  $('m30Kick').textContent='MES '+mes+' · DÍA POR DÍA';
+  $('m30Tit').textContent=mes===1?'La vida no avisa':'La vida no avisa (otra vez)';
+  $('m30Lbl').textContent='SU COLCHÓN · imprevistos + fondo';
+  $('m30Msg').innerHTML='';
+  const pintaColchon=()=>{
+    $('m30Plata').textContent=deuda?'−'+fmt(deuda).replace('−',''):fmt(quedan);
+    $('m30Plata').classList.toggle('vacio',!!deuda);
+    const bar=$('m30Bar').firstElementChild;
+    bar.style.width=(colchon>0?Math.max(0,quedan*100/colchon):0)+'%';
+    bar.classList.toggle('vacio',!!deuda);
+  };
+  $('m30Grid').innerHTML=Array.from({length:DIAS_MES},(_,i)=>'<div class="m30d" id="m30d'+(i+1)+'">'+(i+1)+'</div>').join('');
+  pintaColchon();
+  show('mes30'); gProg();
+  let t=350;
+  for(let d=1; d<=DIAS_MES; d++){
+    const ev=evs.find(e=>e.d===d);
+    m30T.push(setTimeout(()=>{
+      const el=$('m30d'+d); if(!el) return;
+      if(!ev){ el.classList.add('ok'); sfxTick(); return; }
+      el.classList.add('mal'); thump();
+      const cubre=Math.min(quedan,ev.m);
+      quedan-=cubre; deuda+=ev.m-cubre;
+      pintaColchon();
+      $('m30Msg').innerHTML='<span class="cual">Día '+d+' · '+ev.n+'<br>−'+fmt(ev.m)+'</span>'+
+        '<span class="como">'+(ev.m-cubre>0
+          ? 'No le alcanza el colchón: lo saca fiado.'
+          : 'Lo cubre con lo que había guardado. Ni se despeina.')+'</span>';
+    }, t));
+    t += ev ? 1500 : 85;
+  }
+  m30T.push(setTimeout(cb, t+900));
 }
 function shock1(){
   const cubre=(G.plan.imprev||0)+(G.plan.fondo||0);
@@ -1347,9 +1960,9 @@ function shock1(){
   G.pts+=G.shock1Ok?2000:-2000;
   G.cerrado=true;
   G.opsM1={...G.ops}; G.plan1={...G.plan}; G.tabAcum=G.plan.objetivo||0; G.olv1=olv1; G.fu1=fu1;
-  document.querySelector('#shock .kick').textContent='LA VIDA NO AVISA';
-  $('shockTit').textContent='¡Se rompió la bici del reparto!';
-  $('shockTxt').textContent='Justo cuando Juan arrancaba el mes. El arreglo no espera: $2.000, ya.';
+  document.querySelector('#shock .kick').textContent='ASÍ TERMINÓ EL MES 1';
+  $('shockTit').textContent=G.shock1Ok?'El mes no lo tumbó':'El mes lo dejó debiendo';
+  $('shockTxt').textContent='Dos imprevistos, $2.000 en total. Lo único que decidía si dolía o no, ya estaba decidido antes de que pasaran.';
   $('shockFx').textContent='−$2.000'; $('shockFx').style.color='var(--rojo)';
   $('shockVer').innerHTML=(G.shock1Ok
     ? 'Su plan tenía <b>'+fmt(cubre)+'</b> entre imprevistos y fondo: <span style="color:var(--verdeTxt)">LO CUBRE SIN DEUDA. +2.000 pts</span>'
@@ -1358,9 +1971,11 @@ function shock1(){
     +(vida1<2000?'<br><br><span style="color:var(--rojo)">Juan vivió a agua y laburo: un plan que no se banca también se cae (−1.000 pts)</span>':'');
   $('shockBtn').innerHTML='Seguir al mes 2 <svg class="ic"><use href="#i-flecha"/></svg>';
   $('shockBtn').onclick=mostrarInterludio;
-  show('shock'); thump();
-  setTimeout(()=>{ G.shock1Ok?sfxCoin():sfxNo(); if(G.shock1Ok) confetti(30); },600);
-  gProg();
+  correrMes(1, cubre, ()=>{
+    show('shock'); thump();
+    setTimeout(()=>{ G.shock1Ok?sfxCoin():sfxNo(); if(G.shock1Ok) confetti(30); },600);
+    gProg();
+  });
 }
 function mostrarInterludio(){
   const arr=Math.max(0,(G.plan1.imprev||0)+(G.plan1.fondo||0)-2000);
@@ -1374,7 +1989,7 @@ function mostrarInterludio(){
     '<div class="fila3"><span>Fuentes de ingreso usadas</span><span class="mono">'+G.fu1+(G.fu1>=3?' · +1.000 pts':' · sin bonus (3 dan bonus)')+'</span></div>'+
     (G.resto1>0?'<div class="fila3"><span>Plata sin nombre</span><span class="mono" style="color:var(--magenta-txt)">'+fmt(G.resto1)+' se evaporaron · −'+Math.round(G.resto1/2).toLocaleString('es-UY')+' pts</span></div>':'')+
     (G.austero?'<div class="fila3"><span>Vida a agua y laburo</span><span style="color:var(--magenta-txt);text-align:right;max-width:60%">un plan que no se banca también se cae · −1.000 pts</span></div>':'')+
-    '<div class="fila3"><span>Colchón que pasa al mes 2</span><span class="mono">'+fmt(arr)+'</span></div>'+
+    '<div class="fila3"><span>Colchón que pasa al mes 2</span><span class="mono">'+fmt(arr)+(arr?' · sin etiqueta: hay que repartirlo de nuevo':'')+'</span></div>'+
     (!G.shock1Ok?'<div class="fila3"><span>Y ojo…</span><span style="color:var(--magenta-txt);text-align:right;max-width:60%">el almacén no se olvida: el fiado se paga el mes que viene</span></div>':'')+
     '<div class="fila3"><span>La tableta ($8.000)</span><span class="mono">'+fmt(G.tabAcum)+' juntados</span></div>'+
     '<div class="fila3" style="font-weight:800"><span>PUNTOS DEL MES 1</span><span class="mono">'+G.pts.toLocaleString('es-UY')+' pts</span></div>';
@@ -1391,14 +2006,17 @@ function irMes2(){
   G.plan={};
   JGASTOS.forEach(c=>G.plan[c.id]=G.plan1[c.id]);
   JOLV.forEach(c=>G.plan[c.id]=0);
-  G.plan.fondo=arr; G.plan.meta2=0;
+  /* el colchón entra como plata disponible, pero hay que volver a etiquetarlo:
+     venía precargado en fondo y regalaba el shock 2 al que ya iba ganando */
+  G.plan.fondo=0; G.plan.meta2=0;
   /* el fiado del shock 1 viaja al mes 2: la deuda cobra primero */
   if(!G.shock1Ok){ G.fiado=Math.ceil(Math.max(500,2000-((G.plan1.imprev||0)+(G.plan1.fondo||0)))/500)*500; G.plan.fiado=G.fiado; }
   pintarF1(); show('f1'); $('gBarra').classList.add('on'); gTimer(1,180); gBarra(); gProg();
 }
 function shock2(){
   const cubre=(G.plan.imprev||0)+(G.plan.fondo||0);
-  G.shock2Ok=cubre>=1500;
+  /* el segundo golpe pega MÁS que el primero: en el mes 2 el equipo está más rico */
+  G.shock2Ok=cubre>=2500;
   G.resto2=disponible()-asignado();
   if(G.resto2>0) G.pts-=Math.round(G.resto2/2);
   G.pts+=extraTot()+ptsDest(Math.max(0,destino()-(G.arr||0)));
@@ -1408,28 +2026,30 @@ function shock2(){
   G.pts-=JOLV.filter(c=>!(G.plan[c.id]>0)&&!(c.id==='objetivo'&&(G.tabAcum>=JUAN.tableta||(G.plan.meta2||0)>0))).length*1500;
   const vida2=(G.plan.snacks||0)+(G.plan.subs||0)+(G.plan.personal||0);
   if(vida2<2000){ G.pts-=1000; G.austero=true; }
-  G.pts+=G.shock2Ok?1500:-1500;
+  G.pts+=G.shock2Ok?2500:-2500;
   const acero=G.shock1Ok&&G.shock2Ok;
   if(acero) G.pts+=1000;
   const tabOk=(G.tabAcum+(G.plan.objetivo||0))>=JUAN.tableta;
   if(tabOk) G.pts+=1500;
   if((G.plan.meta2||0)>=500) G.pts+=500;
   G.cerrado=true;
-  document.querySelector('#shock .kick').textContent='LA VIDA NO AVISA (OTRA VEZ)';
-  $('shockTit').textContent='¡Recortaron horas en el café!';
-  $('shockTxt').textContent='Bajó la venta y el dueño achicó turnos: este mes entran $1.500 menos. Nadie rompió nada… pero el golpe es igual de real: a veces el imprevisto no es un gasto, es plata que no llega.';
-  $('shockFx').textContent='−$1.500'; $('shockFx').style.color='var(--rojo)';
+  document.querySelector('#shock .kick').textContent='ASÍ TERMINÓ EL MES 2';
+  $('shockTit').textContent=G.shock2Ok?'Aguantó el segundo mes':'El segundo mes lo fundió';
+  $('shockTxt').textContent='$2.500 esta vez, y uno de los golpes no fue un gasto: fue plata que no llegó. El colchón sirve para los dos.';
+  $('shockFx').textContent='−$2.500'; $('shockFx').style.color='var(--rojo)';
   $('shockVer').innerHTML=(G.shock2Ok
-    ? 'Su plan tenía <b>'+fmt(cubre)+'</b> de colchón: <span style="color:var(--verdeTxt)">ABSORBE EL RECORTE SIN TOCAR EL RESTO. +1.500 pts</span>'
-    : 'Sin colchón, el recorte se comió el aporte en casa: <span style="color:var(--rojo)">Juan quedó debiendo adentro de su propia familia. −1.500 pts</span>')
+    ? 'Su plan tenía <b>'+fmt(cubre)+'</b> de colchón: <span style="color:var(--verdeTxt)">ABSORBE EL RECORTE SIN TOCAR EL RESTO. +2.500 pts</span>'
+    : 'Sin colchón, el recorte se comió el aporte en casa: <span style="color:var(--rojo)">Juan quedó debiendo adentro de su propia familia. −2.500 pts</span>')
     +(acero?'<br><br><span style="color:var(--verdeTxt)">COLCHÓN DE ACERO: dos tormentas, cero deudas. +1.000 pts extra</span>':'')
     +(G.resto2>0?'<br><br><span style="color:var(--rojo)">Quedaron '+fmt(G.resto2)+' sin nombre: se evaporaron (−'+Math.round(G.resto2/2).toLocaleString('es-UY')+' pts)</span>':'')
     +(G.austero?'<br><br><span style="color:var(--rojo)">Juan vivió a agua y laburo: un plan que no se banca también se cae (−1.000 pts)</span>':'')
     +(G.ev2?'<br><br>La oferta del contado: '+({A:'<span style="color:var(--rojo)">compraron ya — $1.900 menos este mes (−600 pts)</span>',B:'<span style="color:var(--verdeTxt)">la anotaron para comparar el mes que viene (+400 pts)</span>',C:'<span style="color:var(--verdeTxt)">no compraron nada (+300 pts)</span>'}[G.ev2]||''):'');
   $('shockBtn').innerHTML='Cerrar el trimestre <svg class="ic"><use href="#i-flecha"/></svg>';
   $('shockBtn').onclick=finDelEquipo;
-  show('shock'); thump();
-  setTimeout(()=>{ G.shock2Ok?sfxCoin():sfxNo(); if(acero) confetti(40); },600);
+  correrMes(2, cubre, ()=>{
+    show('shock'); thump();
+    setTimeout(()=>{ G.shock2Ok?sfxCoin():sfxNo(); if(acero) confetti(40); },600);
+  });
 }
 function finDelEquipo(){
   const tabTot=G.tabAcum+(G.plan.objetivo||0);
@@ -1439,19 +2059,33 @@ function finDelEquipo(){
     fuentes:Math.max(G.fu1||0,fuentesTot()), shock1Ok:G.shock1Ok, shock2Ok:G.shock2Ok,
     trampas:G.trampas, tabOk:tabTot>=JUAN.tableta, tabFalta:Math.max(0,JUAN.tableta-tabTot),
     meta2Ok:(G.plan.meta2||0)>=500, becaOk:!!(G.opsM1&&G.opsM1.beca), soltoOk:G.soltoPerrosOK};
-  SALA.prog[SALA.id]=p; SALA.playing=false;
+  SALA.prog[SALA.id]=p; SALA.playing=false; latir(false);
   SALA.ch.send({type:'broadcast',event:'fin',payload:p});
   show('espectador');
   $('espCode').textContent=SALA.code;
   pintarEsp(true);
 }
-function gProg(){
+const etapaActual=()=>['swipe','f1','f2','shock','inter','mes30'].find(s=>$(s)&&$(s).classList.contains('on'))||'';
+/* el proyector no tenía forma de saber el reloj de cada equipo: ahora late una vez por segundo */
+let latInt=null;
+function latir(on){ clearInterval(latInt); latInt=null; if(on) latInt=setInterval(()=>gProg(false),1000); }
+function gProg(guardar){
   if(!SALA||!SALA.playing||!SALA.ch||!G) return;
   const fase=G.mes===1?G.fase:2+G.fase;
   SALA.ch.send({type:'broadcast',event:'prog',payload:{id:SALA.id, ini:SALA.ini, fase, ronda:SALA.ronda,
-    extra:extraTot()+(G.mes===2?G.extra1:0), score:scoreAhora(), trampas:G.trampas, shock1Ok:G.shock1Ok}});
-  /* snapshot para retomar tras recarga/crash */
+    extra:extraTot()+(G.mes===2?G.extra1:0), score:scoreAhora(), trampas:G.trampas, shock1Ok:G.shock1Ok,
+    t:(gT.act?gT.t:null), gracia:!!gT.gracia, etapa:etapaActual(), mes:G.mes}});
+  /* snapshot para retomar tras recarga/crash (el latido no reescribe localStorage cada segundo) */
+  if(guardar===false) return;
   try{ localStorage.setItem('cpv_sala_'+SALA.code, JSON.stringify({id:SALA.id, ini:SALA.ini, ronda:SALA.ronda, G, ts:Date.now()})); }catch(e){}
+}
+/* rótulos cortos: "REPARTIENDO EL MES" se parte en dos líneas y el host se lee de lejos */
+function estadoDe(r){
+  if(r.caido) return 'SE CAYÓ';
+  if(r.fin) return '✓ CERRÓ';
+  if(r.etapa==='shock'||r.etapa==='inter'||r.etapa==='mes30') return '✓ CONFIRMÓ';
+  if(!r.en) return 'LISTO';
+  return (r.fase===2||r.fase===4)?'REPARTIENDO':'CONSIGUIENDO';
 }
 function pintarEsp(fuerza){
   if(!SALA) return;
@@ -1465,16 +2099,41 @@ function pintarEsp(fuerza){
   const jug=rows.filter(r=>r.en), vivos=jug.filter(r=>!r.caido);
   const todos=jug.some(r=>r.fin)&&vivos.length>0&&vivos.every(r=>r.fin);
   const enJuego=jug.length>0&&!todos;
-  /* en juego: orden estable alfabético y puntajes ocultos — el final no se quema */
-  if(enJuego) rows.sort((a,b)=>a.ini.localeCompare(b.ini));
+  /* en juego se ordena por lo conseguido (dato público) — el PUNTAJE sigue oculto, así que
+     el que va arriba en la carrera igual puede perder el podio por cómo repartió */
+  if(enJuego) rows.sort((a,b)=>(b.extra||0)-(a.extra||0)||a.ini.localeCompare(b.ini));
   else rows.sort((a,b)=>(b.score||0)-(a.score||0));
   const FASES={1:'MES 1 · CONSIGUIENDO PLATA',2:'MES 1 · REPARTIENDO EL MES',3:'MES 2 · RENEGOCIANDO',4:'MES 2 · CERRANDO EL PLAN'};
-  $('espEstado').textContent = rows.length===0?'ESPERANDO EQUIPOS…' : todos?'¡TRIMESTRE CERRADO!' : enJuego?'ASESORANDO EL TRIMESTRE':'EQUIPOS LISTOS';
+  if(Date.now()>=avisoHasta) $('espEstado').textContent = rows.length===0?'ESPERANDO EQUIPOS…' : todos?'¡TRIMESTRE CERRADO!' : enJuego?'ASESORANDO EL TRIMESTRE':'EQUIPOS LISTOS';
   /* en el lobby, lo importante es el código: gigante para copiarlo desde las otras máquinas */
   const lobby=!enJuego&&!todos;
   $('espLobbyCode').style.display=lobby?'':'none';
   if(lobby) $('espCodeBig').textContent=SALA.code;
-  $('espCols').innerHTML=rows.map((r,i)=>`
+  $('espCodeTop').textContent=lobby?'':SALA.code;
+  /* el reloj del host: el del equipo al que más le falta, para saber cuándo cierra el último */
+  const corriendo=jug.filter(r=>!r.fin&&!r.caido&&typeof r.t==='number'&&(r.etapa==='f1'||r.etapa==='f2'||r.etapa==='swipe'));
+  const tMax=corriendo.length?Math.max(...corriendo.map(r=>r.t)):null;
+  const enGracia=corriendo.some(r=>r.gracia)&&!corriendo.some(r=>!r.gracia);
+  $('espRelojBox').style.display=(enJuego&&tMax!=null)?'':'none';
+  if(enJuego&&tMax!=null){
+    const rel=$('espReloj');
+    rel.textContent=enGracia?'CIERRA '+tMax+'s':Math.floor(tMax/60)+':'+String(tMax%60).padStart(2,'0');
+    rel.classList.toggle('rojo',enGracia||tMax<=30);
+  }
+  /* mientras se juega: leaderboard por lo conseguido (el puntaje sigue oculto). Al final: podio */
+  const tabla=enJuego;
+  $('espCols').className=tabla?'tabla':'';
+  $('espCols').style.cssText=tabla?'display:flex;align-items:stretch':'display:flex;gap:18px;flex-wrap:wrap;justify-content:center;width:100%';
+  const maxExtra=Math.max(1,...rows.map(r=>r.extra||0));
+  $('espCols').innerHTML=rows.map((r,i)=>tabla?`
+    <div class="eqCol${r.caido?' caida':''}" style="border-top:6px solid ${cols[colorIdx[r.id]%4]}">
+      <div class="pos dsp">${i+1}</div>
+      <div class="nom dsp">${r.ini}</div>
+      <div class="pista"><i style="width:${Math.round((r.extra||0)*100/maxExtra)}%;background:${cols[colorIdx[r.id]%4]}"></i></div>
+      <div class="mmm">+${(r.extra||0).toLocaleString('es-UY')}</div>
+      <div class="est${r.fin||r.etapa==='shock'||r.etapa==='inter'||r.etapa==='mes30'?' ok':''}">${estadoDe(r)}</div>
+      <div class="sc">···</div>
+    </div>`:`
     <div class="eqCol${r.caido?' caida':''}" style="border-top:6px solid ${cols[colorIdx[r.id]%4]}">
       ${todos&&i===0?'<svg class="corona"><use href="#i-corona"/></svg>':''}
       <div class="nom dsp">${r.ini}${r.id===SALA.id&&!SALA.spec?' · VOS':''}</div>
@@ -1492,6 +2151,15 @@ function pintarEsp(fuerza){
         ${r.trampas?'<div class="fila2"><span>Plata rápida</span><span style="color:var(--rojo)">cayeron</span></div>':''}
         ${r.shock1Ok!=null?'<div class="fila2"><span>La bici</span><span style="color:'+(r.shock1Ok?'var(--verdeTxt)':'var(--rojo)')+'">'+(r.shock1Ok?'CUBIERTA':'LOS FUNDIÓ')+'</span></div>':''}`:'')}
     </div>`).join('');
+  /* lo que el facilitador mira para saber si puede seguir. Con los equipos en fases distintas,
+     un solo rótulo miente: va el desglose de cuántos hay en cada cosa */
+  $('espPie').style.display=enJuego?'':'none';
+  if(enJuego){
+    const cnt={};
+    jug.forEach(r=>{ const e=estadoDe(r); cnt[e]=(cnt[e]||0)+1; });
+    const mes=Math.max(1,...jug.map(r=>r.mes||1));
+    $('espPie').textContent='MES '+mes+' · '+Object.keys(cnt).map(k=>cnt[k]+' '+k).join('  ·  ');
+  }
   const ml=$('espMalas');
   if(todos){
     const li=[];
@@ -1501,7 +2169,7 @@ function pintarEsp(fuerza){
     if(fundidos.length) li.push('A '+fundidos.map(r=>r.ini).join(' y ')+' los golpearon las dos: sin imprevistos ni fondo, cualquier plan se cae dos veces.');
     const tramposos=jug.filter(r=>r.trampas>0);
     if(tramposos.length) li.push(tramposos.map(r=>r.ini).join(' y ')+' cayeron en la plata rápida: parecía el mejor ingreso de la grilla. Siempre lo parece.');
-    if(tramposos.length) li.push('Ojo con la diferencia: en las entradas y las apuestas te estafan a vos; prestar la cuenta te convierte a VOS en parte del delito. Una te vacía, la otra te marca.');
+    if(tramposos.length) li.push('Ojo con la diferencia: en algunas te estafan a vos y perdés plata; en otras, prestar tu cuenta te vuelve a VOS parte del delito. Una te vacía, la otra te marca.');
     const conBeca=jug.filter(r=>r.becaOk);
     if(conBeca.length) li.push(conBeca.map(r=>r.ini).join(' y ')+' postularon la beca a tiempo y el mes 2 cobraron sin poner una hora. Las ventanas del Estado no esperan.');
     const soltaron=jug.filter(r=>r.soltoOk);
@@ -1511,6 +2179,7 @@ function pintarEsp(fuerza){
     ml.innerHTML='<div class="mTit">El análisis del trimestre</div>'+li.map(x=>`<div class="mRow">${x}</div>`).join('')+
       '<div class="mRow"><b>Para la ronda:</b> ¿qué golpe fue peor: la bici rota o las horas recortadas? ¿Por qué el mismo colchón sirve para los dos?</div>';
   } else ml.style.display='none';
+  $('espForzar').style.display=(SALA.spec&&enJuego)?'':'none';
   $('espArrancar').style.display=(SALA.spec&&rows.length>0&&!enJuego)||(todos&&!SALA.spec)?'':'none';
   $('espArrancar').innerHTML=(todos?'Revancha ':'¡Arrancar! ')+'<svg class="ic"><use href="#i-flecha"/></svg>';
   if(todos&&!SALA.festejado){ SALA.festejado=true; revelarTrimestre(); }
