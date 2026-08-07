@@ -333,6 +333,26 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 #espectador::before,#espectador::after{content:'';position:fixed;left:0;right:0;height:8px;background:var(--cinta);z-index:5}
 #espectador::before{top:0} #espectador::after{bottom:0}
 #espectador .kick{color:var(--amarillo-of)}
+/* ====== HOST: el código no se esconde nunca y el reloj se ve desde el fondo del salón ====== */
+#espTop{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 34px 0;width:100%}
+#espTop .lz{min-width:0}
+#espTop .der{text-align:right}
+#espCodeTop{font-size:clamp(34px,6vw,68px);line-height:1;color:#fff;letter-spacing:.16em}
+#espReloj{font-size:clamp(34px,6vw,68px);line-height:1;color:#fff;font-variant-numeric:tabular-nums}
+#espReloj.rojo{color:var(--rosa-noche)}
+/* leaderboard en filas mientras se juega; el podio en columnas queda para el final */
+#espCols.tabla{flex-direction:column;gap:9px;width:100%;max-width:960px}
+#espCols.tabla .eqCol{display:flex;align-items:center;gap:16px;width:100%;max-width:none;min-width:0;
+  padding:11px 18px;text-align:left;border-top-width:1px!important}
+#espCols.tabla .pos{font-family:var(--font-display);font-weight:900;font-size:clamp(20px,2.6vw,34px);color:var(--amarillo-of);width:1.4em;flex-shrink:0}
+#espCols.tabla .nom{font-size:clamp(17px,2.2vw,27px);flex:0 0 auto;width:clamp(140px,22vw,260px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#espCols.tabla .pista{flex:1;height:20px;border-radius:var(--r-pill);background:rgba(255,255,255,.12);overflow:hidden;min-width:60px}
+#espCols.tabla .pista i{display:block;height:100%;border-radius:var(--r-pill);transition:width .5s var(--pop)}
+#espCols.tabla .mmm{font-family:var(--font-num);font-weight:700;font-size:clamp(14px,1.7vw,22px);color:#fff;flex-shrink:0;min-width:5.5em;text-align:right}
+#espCols.tabla .est{font-weight:700;font-size:clamp(11px,1.4vw,16px);color:rgba(255,255,255,.8);flex-shrink:0;width:clamp(96px,13vw,168px);text-align:right;letter-spacing:.5px}
+#espCols.tabla .est.ok{color:var(--lima-of)}
+#espCols.tabla .sc{display:none}
+#espPie{font-weight:700;letter-spacing:1.5px;font-size:clamp(13px,1.8vw,20px);color:rgba(255,255,255,.85)}
 .eqCol{flex:1;min-width:250px;max-width:430px;background:var(--glass);border:1px solid var(--glass-borde);box-shadow:var(--sombra-3);border-radius:var(--r-lg);padding:20px;text-align:center;position:relative;backdrop-filter:blur(8px)}
 @supports not (backdrop-filter:blur(8px)){.eqCol{background:var(--glass-solido)}}
 .eqCol.caida{opacity:.55;filter:grayscale(.6)}
@@ -542,15 +562,21 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 
 <!-- ================= SALA: espectador (proyector) ================= -->
 <section class="screen" id="espectador">
-  <div class="wiz" style="max-width:1150px;align-items:center;display:flex;flex-direction:column;gap:16px;padding-top:26px">
-    <div class="kick">SALA <span id="espCode"></span> · ASESORES DE JUAN IGNACIO</div>
-    <h2 class="dsp" id="espEstado" style="font-size:clamp(28px,5vw,50px);text-align:center">Conectando…</h2>
+  <div id="espTop">
+    <div class="lz"><div class="kick">SALA · <span id="espCode"></span></div><div class="dsp" id="espCodeTop"></div></div>
+    <div class="lz der" id="espRelojBox" style="display:none">
+      <div class="kick">TIEMPO</div><div class="dsp mono" id="espReloj">0:00</div>
+    </div>
+  </div>
+  <div class="wiz" style="max-width:1250px;align-items:center;display:flex;flex-direction:column;justify-content:center;gap:14px;padding-top:14px">
+    <h2 class="dsp" id="espEstado" style="font-size:clamp(24px,4vw,42px);text-align:center">Conectando…</h2>
     <div id="espLobbyCode" style="display:none;text-align:center">
-      <div class="dsp" style="font-size:clamp(80px,18vw,190px);line-height:1;color:#fff;letter-spacing:.12em;text-shadow:0 6px 40px rgba(0,0,0,.35)" id="espCodeBig"></div>
+      <div class="dsp" style="font-size:clamp(90px,20vw,230px);line-height:1;color:#fff;letter-spacing:.14em;text-shadow:0 6px 40px rgba(0,0,0,.35)" id="espCodeBig"></div>
       <div class="kick" style="margin-top:6px">EN CADA MÁQUINA: <span style="color:#fff">JUGAR EN EQUIPOS</span> → ESCRIBAN ESTE CÓDIGO → NOMBRE DEL EQUIPO</div>
       <div class="kick" style="margin-top:4px;opacity:.75">OJO: ¡ARRANCAR! ARRANCA EN TODAS LAS MÁQUINAS A LA VEZ</div>
     </div>
     <div id="espCols" style="display:flex;gap:18px;flex-wrap:wrap;justify-content:center;width:100%"></div>
+    <div id="espPie" style="display:none"></div>
     <div id="espMalas" class="caja" style="display:none;width:100%;padding:16px 20px"></div>
     <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px">
       <button class="btn amarillo grande dsp" id="espArrancar" style="display:none" onclick="arrancar()">¡Arrancar! <svg class="ic"><use href="#i-flecha"/></svg></button>
@@ -1066,7 +1092,7 @@ function salirSala(b){
   if(b){ delete b.dataset.arm; b.style.background=''; b.style.color=''; }
   if(SALA){ Object.values(SALA.timeouts||{}).forEach(clearTimeout); if(SALA.ch&&sbClient) sbClient.removeChannel(SALA.ch);
     try{ localStorage.removeItem('cpv_sala_'+SALA.code); }catch(e){} }
-  SALA=null; G=null; OPS=[]; lobbyPrev=0;
+  SALA=null; G=null; OPS=[]; lobbyPrev=0; latir(false);
   clearInterval(gTimerInt); clearTimeout(evTimer); evAl=null;
   $('evOv').classList.remove('on');
   $('gBarra').classList.remove('on'); show('home'); attract();
@@ -1082,7 +1108,7 @@ function pintarLobby(){
 }
 function retomarTrimestre(){
   const g=SALA&&SALA.guardado; if(!g||!g.G) return;
-  G=g.G; SALA.ronda=Math.max(SALA.ronda,g.ronda||0); SALA.playing=true; SALA.guardado=null;
+  G=g.G; SALA.ronda=Math.max(SALA.ronda,g.ronda||0); SALA.playing=true; SALA.guardado=null; latir(true);
   OPS=G.mes===1?mercadoMes1(G.seed):mercadoMes2();
   $('btnRetomar').style.display='none';
   if(G.fase===1){ pintarF1(); show('f1'); } else { pintarF2(); show('f2'); }
@@ -1217,7 +1243,7 @@ function empezarJuego(){
   OPS=mercadoMes1(G.seed);
   JGASTOS.forEach(c=>G.plan[c.id]=c.ini);
   JOLV.forEach(c=>G.plan[c.id]=0);
-  SALA.playing=true;
+  SALA.playing=true; latir(true);
   pintarF1(); show('f1'); $('gBarra').classList.add('on'); gBarra(); gTimer(1,240); mostrarCoach(1);
   gProg();
 }
@@ -1718,19 +1744,33 @@ function finDelEquipo(){
     fuentes:Math.max(G.fu1||0,fuentesTot()), shock1Ok:G.shock1Ok, shock2Ok:G.shock2Ok,
     trampas:G.trampas, tabOk:tabTot>=JUAN.tableta, tabFalta:Math.max(0,JUAN.tableta-tabTot),
     meta2Ok:(G.plan.meta2||0)>=500, becaOk:!!(G.opsM1&&G.opsM1.beca), soltoOk:G.soltoPerrosOK};
-  SALA.prog[SALA.id]=p; SALA.playing=false;
+  SALA.prog[SALA.id]=p; SALA.playing=false; latir(false);
   SALA.ch.send({type:'broadcast',event:'fin',payload:p});
   show('espectador');
   $('espCode').textContent=SALA.code;
   pintarEsp(true);
 }
-function gProg(){
+const etapaActual=()=>['f1','f2','shock','inter','mines'].find(s=>$(s)&&$(s).classList.contains('on'))||'';
+/* el proyector no tenía forma de saber el reloj de cada equipo: ahora late una vez por segundo */
+let latInt=null;
+function latir(on){ clearInterval(latInt); latInt=null; if(on) latInt=setInterval(()=>gProg(false),1000); }
+function gProg(guardar){
   if(!SALA||!SALA.playing||!SALA.ch||!G) return;
   const fase=G.mes===1?G.fase:2+G.fase;
   SALA.ch.send({type:'broadcast',event:'prog',payload:{id:SALA.id, ini:SALA.ini, fase, ronda:SALA.ronda,
-    extra:extraTot()+(G.mes===2?G.extra1:0), score:scoreAhora(), trampas:G.trampas, shock1Ok:G.shock1Ok}});
-  /* snapshot para retomar tras recarga/crash */
+    extra:extraTot()+(G.mes===2?G.extra1:0), score:scoreAhora(), trampas:G.trampas, shock1Ok:G.shock1Ok,
+    t:(gT.el?gT.t:null), gracia:!!gT.gracia, etapa:etapaActual(), mes:G.mes}});
+  /* snapshot para retomar tras recarga/crash (el latido no reescribe localStorage cada segundo) */
+  if(guardar===false) return;
   try{ localStorage.setItem('cpv_sala_'+SALA.code, JSON.stringify({id:SALA.id, ini:SALA.ini, ronda:SALA.ronda, G, ts:Date.now()})); }catch(e){}
+}
+/* rótulos cortos: "REPARTIENDO EL MES" se parte en dos líneas y el host se lee de lejos */
+function estadoDe(r){
+  if(r.caido) return 'SE CAYÓ';
+  if(r.fin) return '✓ CERRÓ';
+  if(r.etapa==='shock'||r.etapa==='inter') return '✓ CONFIRMÓ';
+  if(!r.en) return 'LISTO';
+  return (r.fase===2||r.fase===4)?'REPARTIENDO':'CONSIGUIENDO';
 }
 function pintarEsp(fuerza){
   if(!SALA) return;
@@ -1744,8 +1784,9 @@ function pintarEsp(fuerza){
   const jug=rows.filter(r=>r.en), vivos=jug.filter(r=>!r.caido);
   const todos=jug.some(r=>r.fin)&&vivos.length>0&&vivos.every(r=>r.fin);
   const enJuego=jug.length>0&&!todos;
-  /* en juego: orden estable alfabético y puntajes ocultos — el final no se quema */
-  if(enJuego) rows.sort((a,b)=>a.ini.localeCompare(b.ini));
+  /* en juego se ordena por lo conseguido (dato público) — el PUNTAJE sigue oculto, así que
+     el que va arriba en la carrera igual puede perder el podio por cómo repartió */
+  if(enJuego) rows.sort((a,b)=>(b.extra||0)-(a.extra||0)||a.ini.localeCompare(b.ini));
   else rows.sort((a,b)=>(b.score||0)-(a.score||0));
   const FASES={1:'MES 1 · CONSIGUIENDO PLATA',2:'MES 1 · REPARTIENDO EL MES',3:'MES 2 · RENEGOCIANDO',4:'MES 2 · CERRANDO EL PLAN'};
   if(Date.now()>=avisoHasta) $('espEstado').textContent = rows.length===0?'ESPERANDO EQUIPOS…' : todos?'¡TRIMESTRE CERRADO!' : enJuego?'ASESORANDO EL TRIMESTRE':'EQUIPOS LISTOS';
@@ -1753,7 +1794,31 @@ function pintarEsp(fuerza){
   const lobby=!enJuego&&!todos;
   $('espLobbyCode').style.display=lobby?'':'none';
   if(lobby) $('espCodeBig').textContent=SALA.code;
-  $('espCols').innerHTML=rows.map((r,i)=>`
+  $('espCodeTop').textContent=lobby?'':SALA.code;
+  /* el reloj del host: el del equipo al que más le falta, para saber cuándo cierra el último */
+  const corriendo=jug.filter(r=>!r.fin&&!r.caido&&typeof r.t==='number'&&(r.etapa==='f1'||r.etapa==='f2'));
+  const tMax=corriendo.length?Math.max(...corriendo.map(r=>r.t)):null;
+  const enGracia=corriendo.some(r=>r.gracia)&&!corriendo.some(r=>!r.gracia);
+  $('espRelojBox').style.display=(enJuego&&tMax!=null)?'':'none';
+  if(enJuego&&tMax!=null){
+    const rel=$('espReloj');
+    rel.textContent=enGracia?'CIERRA '+tMax+'s':Math.floor(tMax/60)+':'+String(tMax%60).padStart(2,'0');
+    rel.classList.toggle('rojo',enGracia||tMax<=30);
+  }
+  /* mientras se juega: leaderboard por lo conseguido (el puntaje sigue oculto). Al final: podio */
+  const tabla=enJuego;
+  $('espCols').className=tabla?'tabla':'';
+  $('espCols').style.cssText=tabla?'display:flex;align-items:stretch':'display:flex;gap:18px;flex-wrap:wrap;justify-content:center;width:100%';
+  const maxExtra=Math.max(1,...rows.map(r=>r.extra||0));
+  $('espCols').innerHTML=rows.map((r,i)=>tabla?`
+    <div class="eqCol${r.caido?' caida':''}" style="border-top:6px solid ${cols[colorIdx[r.id]%4]}">
+      <div class="pos dsp">${i+1}</div>
+      <div class="nom dsp">${r.ini}</div>
+      <div class="pista"><i style="width:${Math.round((r.extra||0)*100/maxExtra)}%;background:${cols[colorIdx[r.id]%4]}"></i></div>
+      <div class="mmm">+${(r.extra||0).toLocaleString('es-UY')}</div>
+      <div class="est${r.fin||r.etapa==='shock'||r.etapa==='inter'?' ok':''}">${estadoDe(r)}</div>
+      <div class="sc">···</div>
+    </div>`:`
     <div class="eqCol${r.caido?' caida':''}" style="border-top:6px solid ${cols[colorIdx[r.id]%4]}">
       ${todos&&i===0?'<svg class="corona"><use href="#i-corona"/></svg>':''}
       <div class="nom dsp">${r.ini}${r.id===SALA.id&&!SALA.spec?' · VOS':''}</div>
@@ -1771,6 +1836,15 @@ function pintarEsp(fuerza){
         ${r.trampas?'<div class="fila2"><span>Plata rápida</span><span style="color:var(--rojo)">cayeron</span></div>':''}
         ${r.shock1Ok!=null?'<div class="fila2"><span>La bici</span><span style="color:'+(r.shock1Ok?'var(--verdeTxt)':'var(--rojo)')+'">'+(r.shock1Ok?'CUBIERTA':'LOS FUNDIÓ')+'</span></div>':''}`:'')}
     </div>`).join('');
+  /* lo que el facilitador mira para saber si puede seguir. Con los equipos en fases distintas,
+     un solo rótulo miente: va el desglose de cuántos hay en cada cosa */
+  $('espPie').style.display=enJuego?'':'none';
+  if(enJuego){
+    const cnt={};
+    jug.forEach(r=>{ const e=estadoDe(r); cnt[e]=(cnt[e]||0)+1; });
+    const mes=Math.max(1,...jug.map(r=>r.mes||1));
+    $('espPie').textContent='MES '+mes+' · '+Object.keys(cnt).map(k=>cnt[k]+' '+k).join('  ·  ');
+  }
   const ml=$('espMalas');
   if(todos){
     const li=[];
