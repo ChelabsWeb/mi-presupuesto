@@ -243,21 +243,69 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 .opCard.bloq::before{background:var(--borde)}
 .opCard.fija{outline:2.5px dashed var(--violeta);outline-offset:-1px}
 .opCard .badgeF{position:absolute;top:9px;right:10px;background:var(--surface-violeta);color:var(--violeta);border-radius:var(--r-pill);padding:2px 10px;font-weight:700;font-size:9.5px;letter-spacing:.5px}
-.gRow{background:var(--surface);border:1px solid var(--borde);border-radius:var(--r-md);box-shadow:var(--sombra-1);padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.gRow.olv2{border-style:dashed;border-color:#D9C7F5;position:relative}
-.gRow.olv2::before{content:'LA QUE TODOS OLVIDAN';position:absolute;top:-10px;right:10px;background:var(--amarillo-of);color:var(--ink);border-radius:var(--r-pill);padding:2px 9px;font-family:var(--font-display);font-weight:900;font-size:9px;box-shadow:var(--sombra-1)}
-.gRow .tt{flex:1;min-width:140px}
-.gRow .tt b{display:block;font-size:clamp(13.5px,2vw,16px);line-height:1.15}
-.gRow .tt span{font-size:11.5px;font-weight:500;color:var(--ink-2)}
-.gRow .ctrl{display:flex;align-items:center;gap:8px}
-.gRow .ctrl button{width:46px;height:46px;border:none;border-radius:50%;background:var(--surface-violeta);color:var(--violeta);font-size:22px;font-weight:900;cursor:pointer;transition:transform var(--dur);touch-action:manipulation;user-select:none;-webkit-user-select:none}
-.gRow .ctrl button:hover{background:var(--violeta);color:#fff}
-.gRow .ctrl button:active{transform:scale(.92)}
-.gRow .ctrl button.min{opacity:.35}
-.gRow .ctrl .m{font-family:var(--font-num);font-weight:700;font-size:clamp(15px,2.5vw,20px);min-width:86px;text-align:center}
-/* secundario a propósito: el amarillo del sistema significa "esto da puntos", no "atajo" */
-.gRow .ctrl button.todo{width:auto;min-width:60px;padding:0 12px;font-size:11.5px;letter-spacing:.5px;border-radius:var(--r-pill);background:transparent;color:var(--ink-2);border:1.5px solid var(--borde)}
-.gRow .ctrl button.todo:hover{background:var(--surface-violeta);color:var(--violeta);border-color:var(--violeta)}
+/* ====== FASE 2 · REPARTIR: tarjetas que se tocan, no una planilla ====== */
+/* la plata que queda, arriba y grande: se tiene que VER vaciarse */
+#platon{position:sticky;top:0;z-index:20;background:var(--bg);padding:8px 0 10px}
+#platonCaja{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--borde);border-radius:var(--r-lg);box-shadow:var(--sombra-2);padding:12px 20px}
+#platonL{flex:1;min-width:200px}
+#platon .l{font-weight:700;letter-spacing:1.5px;font-size:clamp(10px,1.5vw,12.5px);color:var(--ink-2)}
+#platonN{font-family:var(--font-num);font-weight:700;font-size:clamp(28px,5vw,44px);line-height:1.05}
+#platonBar{height:14px;border-radius:var(--r-pill);background:#E9E1F8;overflow:hidden;margin-top:5px}
+/* sólido, no la cinta: comprimida al 10% la cinta de 5 colores es un manchón */
+#platonBar i{display:block;height:100%;background:var(--violeta);border-radius:var(--r-pill);transition:width .25s var(--pop)}
+#platon.listo #platonN{color:var(--lima-txt)} #platon.listo #platonBar i{background:var(--lima-of)}
+#platon.listo #platonLbl{color:var(--lima-txt)}
+#platon.rojo #platonN{color:var(--magenta-txt)} #platon.rojo #platonBar i{background:var(--magenta-of)}
+#platon.rojo #platonLbl{color:var(--magenta-txt)}
+#platonPts{text-align:right;flex-shrink:0}
+#platonPtsN{display:block;font-family:var(--font-num);font-weight:700;font-size:clamp(22px,3.6vw,36px);color:var(--violeta)}
+
+.gGrupo{margin:14px 0 8px;display:flex;align-items:center;gap:10px}
+.gGrupo .t{font-family:var(--font-display);font-weight:900;text-transform:uppercase;font-size:clamp(13px,2vw,17px)}
+.gGrupo .linea{flex:1;height:3px;background:var(--borde);border-radius:2px}
+.gGrupo.puntos .t{color:var(--naranja-txt)}
+.gGrupo.puntos .linea{background:var(--cinta);opacity:.65}
+
+.gCards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,196px),1fr));gap:12px}
+.gCard{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;overflow:hidden;
+  background:var(--surface);border:1.5px solid var(--borde);border-radius:var(--r-md);box-shadow:var(--sombra-1);
+  padding:30px 12px 12px;cursor:pointer;text-align:center;color:var(--ink);
+  touch-action:manipulation;user-select:none;-webkit-user-select:none;
+  transition:transform var(--dur),box-shadow var(--dur),border-color var(--dur)}
+.gCard:hover{transform:translateY(-3px);box-shadow:var(--sombra-2);border-color:var(--violeta)}
+.gCard:active{transform:scale(.97)}
+.gCard:focus-visible{outline:none;box-shadow:var(--focus)}
+.gCard .ci{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:var(--surface-violeta);color:var(--violeta)}
+.gCard .ci .ic{width:23px;height:23px}
+/* dos líneas fijas: si no, un nombre largo desalinea el monto de toda la fila */
+.gCard .nm{font-weight:700;font-size:clamp(12px,1.7vw,14px);line-height:1.2;min-height:2.4em;display:flex;align-items:center}
+.gCard .mt{font-family:var(--font-num);font-weight:700;font-size:clamp(18px,3vw,25px)}
+.gCard .pie{font-size:11px;font-weight:600;color:var(--ink-2);min-height:15px;width:100%}
+.gCard .pie .ok2{color:var(--lima-txt)}
+/* las que dan puntos: se distinguen sin leer nada */
+.gCard.da{border-color:var(--amarillo-of);background:linear-gradient(180deg,#FFFBEC,var(--surface) 60%)}
+.gCard.da::before{content:'DA PUNTOS';position:absolute;top:0;left:0;right:0;background:var(--amarillo-of);color:var(--ink);
+  font-family:var(--font-display);font-weight:900;font-size:9.5px;letter-spacing:.6px;padding:4px 0}
+.gCard.da .ci{background:#FDF0C4;color:var(--naranja-txt)}
+.gCard.da:hover{border-color:var(--naranja-of)}
+.gCard.fijo{background:var(--surface-2)}
+.gCard.fijo .ci{background:var(--borde);color:var(--ink-2)}
+.gCard.bloq{opacity:.5;cursor:not-allowed}
+/* botones chicos: el resto de la tarjeta es "sumar" */
+.gCard .mn,.gCard .td{position:absolute;top:6px;border:none;cursor:pointer;font-family:var(--font-ui);z-index:2}
+.gCard.da .mn,.gCard.da .td{top:26px}
+.gCard .mn{left:8px;width:30px;height:30px;border-radius:50%;background:var(--surface-2);color:var(--ink-2);font-size:19px;font-weight:900;line-height:1}
+.gCard .mn:hover{background:var(--magenta-of);color:#fff}
+.gCard .td{right:8px;height:30px;padding:0 10px;border-radius:var(--r-pill);background:transparent;border:1.5px solid var(--borde);color:var(--ink-2);font-size:10.5px;font-weight:900;letter-spacing:.5px}
+.gCard .td:hover{background:var(--violeta);border-color:var(--violeta);color:#fff}
+/* progreso de la tableta: la única meta con número, ahora se ve */
+.gCard .prog{display:block;height:7px;border-radius:var(--r-pill);background:#E9E1F8;overflow:hidden;margin:3px 0 2px}
+.gCard .prog i{display:block;height:100%;background:var(--naranja-of);transition:width .25s var(--pop)}
+/* la recompensa: los puntos saltan de la tarjeta */
+@keyframes flota{0%{opacity:0;transform:translateY(6px) scale(.8)}25%{opacity:1;transform:translateY(-6px) scale(1.05)}100%{opacity:0;transform:translateY(-34px) scale(1)}}
+.flota{position:absolute;right:9px;top:58%;pointer-events:none;z-index:3;
+  font-family:var(--font-display);font-weight:900;font-size:clamp(15px,2vw,19px);color:var(--lima-txt);
+  text-shadow:0 2px 10px rgba(255,255,255,.95);animation:flota .8s ease-out forwards}
 /* proyector noche */
 #espectador::before,#espectador::after{content:'';position:fixed;left:0;right:0;height:8px;background:var(--cinta);z-index:5}
 #espectador::before{top:0} #espectador::after{bottom:0}
@@ -419,9 +467,16 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 
 <!-- ================= SALA: fase 2 (ordenar) ================= -->
 <section class="screen" id="f2">
-  <div class="wiz" style="padding-bottom:150px">
+  <div class="wiz" style="padding-bottom:150px;max-width:1100px">
     <div class="wizHead"><div class="paso dsp" style="background:var(--rosa);color:#fff">PASO 2 · REPARTIR LA PLATA</div><h2 class="dsp">El mes de Juan, etiquetado</h2><div id="timer2" class="gtimer mono">4:00</div></div>
-    <p class="wizSub">Repartan el ingreso del mes. Los mínimos son sagrados (la casa no se negocia)… y las etiquetas del final, si quedan en $0, restan puntos. Los <b>− y +</b> van de a $500: mantené apretado y corre solo.</p>
+    <div id="platon"><div id="platonCaja">
+      <div id="platonL">
+        <div class="l" id="platonLbl">TE QUEDA POR REPARTIR</div>
+        <div id="platonN" class="mono">$0</div>
+        <div id="platonBar"><i style="width:100%"></i></div>
+      </div>
+      <div id="platonPts"><div class="l">PUNTOS</div><b class="mono" id="platonPtsN">0</b></div>
+    </div></div>
     <div id="gRows"></div>
   </div>
 </section>
@@ -861,14 +916,14 @@ const OPORTUNIDADES=[
 const JGASTOS=[
  {id:'casa', ic:'i-flia', n:'Aporte en casa', s:'no se negocia', min:3000, ini:3000, fijo:1},
  {id:'trans', ic:'i-bus', n:'Transporte', s:'para laburar', min:2000, ini:2500},
- {id:'snacks', ic:'i-olla', n:'Meriendas y salidas de comida', s:'recortable', min:0, ini:1500},
+ {id:'snacks', ic:'i-olla', n:'Comida y salidas', s:'recortable', min:0, ini:1500},
  {id:'subs', ic:'i-wifi', n:'Suscripciones', s:'¿las usa todas?', min:0, ini:500},
  {id:'personal', ic:'i-remera', n:'Gastos personales', s:'gustos, salidas, ropa · dejarlo en el piso también cuesta', min:500, ini:3500},
 ];
 const JOLV=[
  {id:'imprev', ic:'i-rayo', n:'Imprevistos', s:'la vida no avisa (~5%)'},
  {id:'fondo', ic:'i-chancho', n:'Fondo de emergencia', s:'el colchón que no tiene'},
- {id:'objetivo', ic:'i-estrella', n:'La tableta ($8.000)', s:'su gran objetivo, en cuotas propias'},
+ {id:'objetivo', ic:'i-estrella', n:'La tableta', s:'su gran objetivo, en cuotas propias'},
 ];
 
 let SALA=null, sbClient=null, sCode=[], sIni=[], sPaso=0, G=null, gTimerInt=null;
@@ -1246,34 +1301,82 @@ function pintarF2(){
   const p=document.querySelector('#f2 .paso'), h=document.querySelector('#f2 h2');
   p.textContent=G.mes===1?'MES 1 · PASO 2 · REPARTIR LA PLATA':'MES 2 · PASO 2 · EL PLAN FINAL';
   h.textContent=G.mes===1?'El mes de Juan, etiquetado':'El plan final, con lo aprendido';
-  const olvs=JOLV.slice();
-  const rows=JGASTOS.map(c=>gRowHTML(c,false)).concat(olvs.map(c=>gRowHTML(c,true)));
-  if(G.mes===2&&G.fiado) rows.unshift(gRowHTML({id:'fiado', ic:'i-cadena', n:'Fiado del almacén (la bici)', s:'la deuda cobra primero — no se negocia', min:G.fiado},false));
-  if(G.mes===2) rows.push(gRowHTML({id:'meta2', ic:'i-estrella', n:'Meta 2: curso de ilustración ($4.500)', s:'se desbloquea si la tableta queda asegurada'},true));
-  $('gRows').innerHTML=rows.join('');
+  /* las que dan puntos van primero: ahí está la decisión, y así no hay que scrollear para encontrarlas */
+  const dan=JOLV.map(c=>({...c, da:1}));
+  if(G.mes===2) dan.push({id:'meta2', ic:'i-estrella', n:'Meta 2: el curso', da:1});
+  const fijos=[];
+  if(G.mes===2&&G.fiado) fijos.push({id:'fiado', ic:'i-cadena', n:'Fiado del almacén', min:G.fiado, fijo:1});
+  JGASTOS.forEach(c=>fijos.push(c));
+  $('gRows').innerHTML=
+    '<div class="gGrupo puntos"><span class="t">Estas dan puntos</span><span class="linea"></span></div>'+
+    '<div class="gCards">'+dan.map(gCardHTML).join('')+'</div>'+
+    '<div class="gGrupo"><span class="t">Lo de todos los meses</span><span class="linea"></span></div>'+
+    '<div class="gCards">'+fijos.map(gCardHTML).join('')+'</div>';
   refrescarMeta2();
   gBarra();
 }
-function gRowHTML(c,olv){
-  return `<div class="gRow${olv?' olv2':''}" id="row_${c.id}">
-    <div class="icb"><svg class="ic"><use href="#${c.ic}"/></svg></div>
-    <div class="tt"><b>${c.n}</b><span>${c.s}${c.min?` · mínimo ${fmt(c.min)}`:''}</span></div>
-    <div class="ctrl">
-      <button class="menos" aria-label="restar 500 a ${c.n}" onpointerdown="repIni('${c.id}',-500)" onpointerup="repFin()" onpointerleave="repFin()" onclick="if(!event.detail)ajustar('${c.id}',-500)" oncontextmenu="return false">−</button>
-      <div class="m mono" id="pl_${c.id}">${fmt(G.plan[c.id]||0)}</div>
-      <button aria-label="sumar 500 a ${c.n}" onpointerdown="repIni('${c.id}',500)" onpointerup="repFin()" onpointerleave="repFin()" onclick="if(!event.detail)ajustar('${c.id}',500)" oncontextmenu="return false">+</button>
-      <button class="todo dsp" title="poner acá todo lo que falta repartir" onclick="ponerResto('${c.id}')">TODO</button>
-    </div>
+/* toda la tarjeta es "sumar $500": no hay que apuntarle a un botón chico */
+function gCardHTML(c){
+  const v=G.plan[c.id]||0;
+  return `<div class="gCard${c.da?' da':''}${c.fijo?' fijo':''}" id="row_${c.id}" role="button" tabindex="0"
+    aria-label="${c.n}: ${fmt(v)}. Sumar 500"
+    onpointerdown="repIni('${c.id}',500)" onpointerup="repFin()" onpointerleave="repFin()" oncontextmenu="return false"
+    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ajustar('${c.id}',500)}">
+    <button class="mn" tabindex="-1" aria-label="restar 500 a ${c.n}"
+      onpointerdown="event.stopPropagation();repIni('${c.id}',-500)" onpointerup="event.stopPropagation();repFin()" onpointerleave="repFin()"
+      onclick="event.stopPropagation();if(!event.detail)ajustar('${c.id}',-500)" oncontextmenu="return false">−</button>
+    <button class="td" tabindex="-1" title="poner acá todo lo que falta repartir"
+      onpointerdown="event.stopPropagation()" onclick="event.stopPropagation();ponerResto('${c.id}')">TODO</button>
+    <div class="ci"><svg class="ic"><use href="#${c.ic}"/></svg></div>
+    <div class="nm">${c.n}</div>
+    <div class="mt mono" id="pl_${c.id}">${fmt(v)}</div>
+    <div class="pie">${piePara(c.id, c.min||0)}</div>
   </div>`;
+}
+function piePara(id,min){
+  const v=G.plan[id]||0;
+  if(id==='objetivo'){
+    const t=G.tabAcum+v, pc=Math.min(100,Math.round(t*100/JUAN.tableta));
+    return '<span class="prog"><i style="width:'+pc+'%"></i></span>'+(t>=JUAN.tableta?'<span class="ok2">¡la tableta es suya!</span>':fmt(t)+' de '+fmt(JUAN.tableta));
+  }
+  if(min) return v>=min?'<span class="ok2">✓ mínimo cubierto</span>':'mín. '+fmt(min);
+  return '';
+}
+function refrescarPie(id){
+  const r=$('row_'+id); if(!r) return;
+  const p=r.querySelector('.pie'); if(p) p.innerHTML=piePara(id, minDe(id));
+}
+/* la recompensa: los puntos saltan de la tarjeta. Se acumulan para que el hold no escupa 9 por segundo */
+function flotarPts(id,n){
+  const card=$('row_'+id); if(!card) return;
+  let s=card.querySelector('.flota');
+  if(s){ clearTimeout(+s.dataset.t); s.dataset.n=(+s.dataset.n||0)+n; }
+  else { s=document.createElement('span'); s.className='flota'; s.dataset.n=n; card.appendChild(s); }
+  s.textContent='+'+(+s.dataset.n).toLocaleString('es-UY');
+  s.dataset.t=setTimeout(()=>s.remove(),800);
+}
+/* el equipo dejaba de ver su puntaje hasta el interludio: acá lo ve moverse con cada toque
+   (el proyector sigue mostrando ··· , así el podio no se quema) */
+function pintarPlaton(){
+  if(!G||G.fase!==2) return;
+  const disp=disponible(), resto=disp-asignado(), el=$('platon');
+  el.classList.toggle('listo',resto===0);
+  el.classList.toggle('rojo',resto<0);
+  $('platonLbl').textContent = resto>0?'TE QUEDA POR REPARTIR':resto===0?'¡TODO REPARTIDO!':'¡SE PASARON!';
+  $('platonN').textContent = resto===0?'✓':fmt(resto);
+  /* la barra se LLENA con lo que ya tiene nombre: terminar es verla completa, no verla vacía */
+  $('platonBar').firstElementChild.style.width=Math.max(0,Math.min(100, disp>0?asignado()*100/disp:0))+'%';
+  const pts=scoreAhora().toLocaleString('es-UY'), b=$('platonPtsN');
+  if(b.textContent!==pts){ b.textContent=pts; b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
 }
 function metaDesbloqueada(){ return G.mes===2 && (G.tabAcum+(G.plan.objetivo||0))>=JUAN.tableta; }
 function refrescarMeta2(){
   const r=$('row_meta2'); if(!r) return;
   const ok=metaDesbloqueada();
-  r.style.opacity=ok?'':'0.5';
-  r.querySelector('.tt span').textContent = ok
-    ? '¡la tableta está asegurada! el que llega a una meta ya mira la siguiente'
-    : 'se desbloquea si la tableta ('+fmt(JUAN.tableta)+') queda asegurada — llevan '+fmt(G.tabAcum+(G.plan.objetivo||0));
+  r.classList.toggle('bloq',!ok);
+  r.querySelector('.pie').innerHTML = ok
+    ? '<span class="ok2">✓ desbloqueada</span>'
+    : 'primero asegurá la tableta';
 }
 /* mantener presionado repite: asignar $6.000 deja de ser 12 toques */
 let repT=null,repI=null,repiendo=false;
@@ -1285,8 +1388,12 @@ function ponerResto(id){
   if(id==='meta2' && !metaDesbloqueada()){ sfxNo(); return; }
   const resto=disponible()-asignado();
   if(resto<=0){ sfxNo(); flashBarra(); return; }
+  const antes=scoreAhora();
   G.plan[id]=(G.plan[id]||0)+resto; sfxCoin();
   const m=$('pl_'+id); m.textContent=fmt(G.plan[id]); m.classList.remove('bump'); void m.offsetWidth; m.classList.add('bump');
+  refrescarPie(id);
+  const dif=scoreAhora()-antes;
+  if(dif>0) flotarPts(id,dif);
   if(G.mes===2) refrescarMeta2();
   gBarra(); gProg();
 }
@@ -1299,14 +1406,19 @@ function ajustar(id,delta){
   let v=(G.plan[id]||0)+delta;
   if(v<min){ sfxNo(); flashBarra(); return; }
   if(delta>0 && asignado()+delta>disponible()){ sfxNo(); flashBarra(); return; }
+  const antes=scoreAhora();
   G.plan[id]=v; sfxTap();
   const m=$('pl_'+id); m.textContent=fmt(v); m.classList.remove('bump'); void m.offsetWidth; m.classList.add('bump');
+  refrescarPie(id);
+  const dif=scoreAhora()-antes;
+  if(dif>0) flotarPts(id,dif);
   if(G.mes===2) refrescarMeta2();
   gBarra(); if(!repiendo) gProg();
 }
 function gBarra(){
   if(!G) return;
   if(G.fase===1){
+    $('gbD1').style.display=''; $('gbD3').style.display='';
     $('gbD1').innerHTML='EXTRA CONSEGUIDO<b class="mono">'+fmt(extraTot())+'</b>';
     $('gbD2').innerHTML='FUENTES NUEVAS<b class="mono">'+fuentesTot()+'</b>';
     $('gbD2').classList.remove('neg');
@@ -1314,12 +1426,13 @@ function gBarra(){
     $('gbSig').innerHTML=(G.mes===1?'A ordenar el mes':'Al plan final')+' <svg class="ic"><use href="#i-flecha"/></svg>';
   } else {
     const resto=disponible()-asignado();
-    $('gbD1').innerHTML='INGRESO DEL MES<b class="mono">'+fmt(disponible())+'</b>';
+    /* lo que falta repartir ya está arriba y gigante: acá abajo alcanza con el estado */
+    $('gbD1').style.display='none'; $('gbD3').style.display='none';
     $('gbD2').innerHTML=(resto<0?'¡PLAN EN ROJO!':resto>0?'FALTA REPARTIR':'TODO REPARTIDO')+'<b class="mono">'+(resto===0?'✓':fmt(resto))+'</b>';
     $('gbD2').classList.toggle('neg',resto<0);
     $('gbD2').classList.toggle('warn',resto>0);
-    $('gbD3').innerHTML='AHORRO CON DESTINO · las de amarillo<b class="mono">'+fmt(destino())+'</b>';
     $('gbSig').innerHTML='Confirmar el plan <svg class="ic"><use href="#i-flecha"/></svg>';
+    pintarPlaton();
   }
 }
 /* ----- eventos (modal con timer) ----- */

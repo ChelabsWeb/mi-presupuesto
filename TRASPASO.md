@@ -81,6 +81,24 @@ node suite.js                # corre la suite
   en `fondo` y le regalaba el shock 2 al que ya iba ganando; ahora hay que volver a repartirlo.
 - Detalle completo en el código, funciones `scoreAhora`, `cerrarFase`, `shock1`/`shock2`, `mostrarInterludio`, `finDelEquipo`.
 
+## La pantalla de repartir (agosto 2026)
+
+Era una planilla: párrafo de instrucciones de 3 líneas + 10 filas iguales con `−`/`+`. Ahora:
+
+- **Tarjetas en grilla**, agrupadas en **"Estas dan puntos"** (dorado, primero — ahí está la decisión)
+  y **"Lo de todos los meses"**. Sin descripciones: ícono, nombre corto, monto.
+- **Toda la tarjeta suma $500**; mantener apretado corre solo. El `−` y el `TODO` son chicos, en las
+  esquinas, con `stopPropagation`. La tarjeta es `role="button"` (no `<button>`, porque no se pueden
+  anidar botones) y maneja Enter/Espacio a mano.
+- **Cabezal `#platon`**: lo que falta repartir en grande + barra que **se llena** con lo que ya tiene
+  nombre + **el puntaje vivo** (`scoreAhora()`). El puntaje se muestra **solo en la máquina del equipo**;
+  el proyector sigue con `···` y el podio no se quema.
+- **`+N` flotante** al asignar a una etiqueta que da puntos (`flotarPts`, acumula para que el hold no
+  escupa uno cada 110 ms).
+- La barra de abajo oculta `gbD1`/`gbD3` en la fase 2 para no repetir lo que ya está arriba.
+  **`gbD2` se mantiene**: la suite depende de sus textos.
+- **La economía no se tocó.** Si `T2.16`/`T2.17` dejan de dar `31.275` / `−12.950`, algo se rompió.
+
 ## El reloj y el control del facilitador (agosto 2026)
 
 - Los cronómetros de fase **cierran de verdad**: al llegar a 0 hay 20s de gracia (`GRACIA`) y después

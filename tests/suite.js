@@ -252,13 +252,13 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     const congelado = await p.evaluate(async () => { gTimer(2, 100); pausarGT(true); const a = gT.t; await new Promise(r => setTimeout(r, 2200)); return { a, b: gT.t }; });
     ok('T6.2 el reloj se congela con modal arriba', congelado.a === congelado.b, JSON.stringify(congelado));
     await p.evaluate(() => { pausarGT(false); gTimer(2, 9999); });
-    // steppers con teclado (hoy solo respondían a pointer)
+    // la tarjeta entera suma, y responde a teclado (antes solo a pointer)
     const antes = await p.locator('#pl_snacks').textContent();
-    await p.locator('#row_snacks .ctrl button').nth(1).press('Enter'); await esp(200);
+    await p.locator('#row_snacks').press('Enter'); await esp(200);
     const despues = await p.locator('#pl_snacks').textContent();
-    ok('T6.3 stepper responde a teclado', antes === '$1.500' && despues === '$2.000', antes + ' → ' + despues);
+    ok('T6.3 la tarjeta responde a teclado', antes === '$1.500' && despues === '$2.000', antes + ' → ' + despues);
     // botón TODO: manda el sobrante entero a una etiqueta
-    await p.locator('#row_objetivo .ctrl button.todo').click(); await esp(250);
+    await p.locator('#row_objetivo .td').click(); await esp(250);
     const barra = await p.locator('#gbD2').textContent();
     ok('T6.4 TODO deja el reparto en cero', barra.includes('TODO REPARTIDO'), barra);
     const resto = await p.evaluate(() => disponible() - asignado());
