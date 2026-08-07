@@ -59,7 +59,14 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
   }
 
   /* ══════════ T2 · TRIMESTRE COMPLETO: score EXACTO calculado a mano ══════════ */
-  console.log('\n[T2] Trimestre completo (scores exactos: A=31.775, B=−11.950)');
+  /* Recálculo tras el rebalanceo del mes 2 (shock 2 a ±2.500/umbral 2.500 y colchón sin precargar):
+     A  31.775 − 500 (menos destino: el colchón ya no viene puesto en fondo)
+               + 1.000 (shock 2 cubierto ahora vale 2.500)
+               − 1.000 (el colchón sin repartir engorda la plata sin nombre: resto 2.400 → 4.400)
+             = 31.275
+     B  −11.950 − 1.000 (sin colchón, el shock 2 ahora resta 2.500) = −12.950
+        (a B el colchón no lo toca: cerró el mes 1 en cero)                                     */
+  console.log('\n[T2] Trimestre completo (scores exactos: A=31.275, B=−12.950)');
   const P = await mk(), A = await mk(), B = await mk();
   {
     await P.goto(U); await A.goto(U); await B.goto(U);
@@ -70,8 +77,15 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await P.waitForFunction(() => document.querySelectorAll('#espCols .eqCol').length === 2, null, { timeout: 15000 });
     await P.locator('#espArrancar').click();
     await A.waitForSelector('#f1.on', { timeout: 20000 }); await B.waitForSelector('#f1.on', { timeout: 20000 });
-    // A: 5 buenas + trampa
-    for (const id of ['cari', 'perros', 'cafe', 'iva', 'juegos', 'apuestas']) { await A.locator('#op_' + id).click(); await esp(70); }
+    // la grilla es sorteada: misma para toda la sala, distinta entre rondas
+    const gridA = await A.evaluate(() => OPS.map(o => o.id).join(','));
+    const gridB = await B.evaluate(() => OPS.map(o => o.id).join(','));
+    ok('T2.0a misma grilla en las dos máquinas', gridA === gridB, gridA + ' | ' + gridB);
+    ok('T2.0b salen 3 trampas de las 5', await A.evaluate(() => OPS.filter(o => o.trampa).length) === 3, gridA);
+    // A: 5 buenas + la primera trampa que le tocó (cualquiera resta lo mismo y ninguna pasa de 1 h)
+    for (const id of ['cari', 'perros', 'cafe', 'iva', 'juegos']) { await A.locator('#op_' + id).click(); await esp(70); }
+    await A.locator('.opCard.trampa').first().click(); await esp(70);
+    ok('T2.0c la trampa quedó elegida', await A.evaluate(() => OPS.some(o => o.trampa && G.ops[o.id])));
     await B.locator('#op_beca').click();
     await esp(700);
     // T2.1: proyector en vivo oculta scores
@@ -167,8 +181,8 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await esp(1200);
     const scores = await P.evaluate(() => Object.values(SALA.prog).map(p => ({ ini: p.ini, score: p.score })));
     const sA = scores.find(s => s.ini === 'LOS CAPOS').score, sB = scores.find(s => s.ini === 'TIBURONES').score;
-    ok('T2.16 score A exacto', sA === 31775, '' + sA + ' (esperado 31775)');
-    ok('T2.17 score B exacto', sB === -11950, '' + sB + ' (esperado −11950)');
+    ok('T2.16 score A exacto', sA === 31275, '' + sA + ' (esperado 31275)');
+    ok('T2.17 score B exacto', sB === -12950, '' + sB + ' (esperado −12950)');
     const podio = await P.locator('#espCols').textContent();
     ok('T2.18 podio ordena A primero', podio.indexOf('LOS CAPOS') < podio.indexOf('TIBURONES'));
     const analisis = await P.locator('#espMalas').textContent();
@@ -176,6 +190,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await P.screenshot({ path: path.join(OUT, 'sui_podio.png'), fullPage: true });
     /* ══════════ T3 · REVANCHA ══════════ */
     console.log('\n[T3] Revancha');
+    const seed1 = await A.evaluate(() => G.seed);
     await P.locator('#espArrancar').click();
     await A.waitForSelector('#f1.on', { timeout: 20000 });
     await B.waitForSelector('#f1.on', { timeout: 20000 });
@@ -184,6 +199,9 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     ok('T3.1 revancha reinicia mes 1', chipR.includes('MES 1'), chipR);
     ok('T3.2 extra en cero', extraR.includes('$0'), extraR);
     ok('T3.3 proyector resetea', !(await P.locator('#espMalas').isVisible()));
+    const seed2 = await A.evaluate(() => G.seed);
+    ok('T3.5 la revancha sortea otra grilla', seed2 !== seed1 && !!seed2, seed1 + ' → ' + seed2);
+    ok('T3.6 y sigue igual en las dos máquinas', (await A.evaluate(() => OPS.map(o => o.id).join(','))) === (await B.evaluate(() => OPS.map(o => o.id).join(','))));
     ok('T3.4 sin errores JS (P/A/B)', P._errs.length + A._errs.length + B._errs.length === 0, [...P._errs, ...A._errs, ...B._errs].join(';'));
   }
   await P.context().close(); await A.context().close(); await B.context().close();

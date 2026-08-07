@@ -58,8 +58,9 @@ node server.js &             # servidor estático en :8124 (sin dependencias)
 node suite.js                # corre la suite
 ```
 
-- **T1** herramienta personal, **T2** el trimestre completo, **T3** revancha, **T4** timeout real de 60s, **T5** estáticos.
-- **OJO:** T2 tiene **puntajes exactos calculados a mano** como test de regresión: `LOS CAPOS = 31.775`, `TIBURONES = −11.950`.
+- **T1** herramienta personal, **T2** el trimestre completo, **T3** revancha, **T4** timeout real de 60s,
+  **T5** estáticos, **T6** cierre automático por reloj + teclado + botón TODO, **T7** control del facilitador.
+- **OJO:** T2 tiene **puntajes exactos calculados a mano** como test de regresión: `LOS CAPOS = 31.275`, `TIBURONES = −12.950`.
   Esos números dependen de **todas** las constantes de la economía (puntos por destino, trampas −1.500, eventos, shocks, bonus).
   **Si tocás cualquier constante, los tests van a fallar** — no es un bug: recalculá a mano el esperado y actualizá la suite.
 - Los tests desactivan el tutorial (coach) vía `sessionStorage` para poder correr directo.
@@ -67,10 +68,29 @@ node suite.js                # corre la suite
 ## Cómo funciona la economía (resumen)
 
 - Juan gana $10.000 fijo + lo que consigan en changas/ventas (con horas limitadas: 12 la 1ª semana, 11 la 2ª).
-- **Trampas "PLATA RÁPIDA"** (entradas truchas, mula financiera, apuestas): parecen el mejor ingreso, al confirmar se anulan y restan −1.500 c/u.
+- **Trampas "PLATA RÁPIDA"** (5 en total: entradas truchas, mula financiera, apuestas, el kit que hay
+  que pagar, el sobrepago). **Salen 3 sorteadas por ronda**, en posiciones distintas: la revancha ya no es
+  un test de memoria. El sorteo usa un `seed` que viaja en el broadcast `start`, así que **todas las
+  máquinas ven exactamente la misma grilla** (si no, se rompe la equidad).
+  Al confirmar se anulan y restan −1.500 c/u.
 - **Repartir el mes:** las etiquetas de amarillo (imprevistos, fondo, tableta, meta 2) dan puntos; dejarlas en $0 resta; plata sin nombre "se evapora" (−mitad).
-- **Shocks:** la bici rota (−$2.000, mes 1) y el recorte de horas (−$1.500, mes 2). Si tenían colchón, lo absorben. Aguantar los dos = "Colchón de acero" +1.000.
+- **Shocks:** la bici rota (−$2.000, umbral $2.000, ±2.000 pts, mes 1) y el recorte de horas
+  (−$2.500, umbral $2.500, ±2.500 pts, mes 2). **El segundo pega más fuerte que el primero** a propósito:
+  en el mes 2 el equipo está más rico. Aguantar los dos = "Colchón de acero" +1.000.
+- **El colchón del mes 1 pasa al mes 2 como plata disponible, pero sin etiqueta.** Antes venía precargado
+  en `fondo` y le regalaba el shock 2 al que ya iba ganando; ahora hay que volver a repartirlo.
 - Detalle completo en el código, funciones `scoreAhora`, `cerrarFase`, `shock1`/`shock2`, `mostrarInterludio`, `finDelEquipo`.
+
+## El reloj y el control del facilitador (agosto 2026)
+
+- Los cronómetros de fase **cierran de verdad**: al llegar a 0 hay 20s de gracia (`GRACIA`) y después
+  `autoCerrarFase()` acomoda lo mínimo (suelta horas de más, recorta si el plan está en rojo) y confirma.
+  Antes el reloj solo escribía "¡CIERREN!" y un equipo lento congelaba al taller entero.
+- El reloj **se congela mientras hay un modal arriba** (los eventos ya traen su propio timer de 60s).
+- El proyector tiene **"Cerrar la fase en todas"** (broadcast `forzar`, doble confirmación) para destrabar la sala.
+- **`¡Arrancar!` avisa antes de reiniciar una ronda en curso**, y un equipo que está jugando **ignora**
+  un `start` de otra máquina. Antes, cualquiera que volviera al lobby y tocara el botón le tiraba el
+  trimestre abajo a todos.
 
 ## Lo último que se hizo (agosto 2026)
 
@@ -83,7 +103,11 @@ node suite.js                # corre la suite
 ## Pendientes / ideas para seguir
 
 - Probarlo en el proyector real del taller (si el violeta noche se ve lavado, subir la variable `--glass` a `.12`).
-- Validar el contenido de las trampas "plata rápida" con el equipo pedagógico del BCU.
-- **Variante B de la revancha:** rotar las trampas/eventos/shocks para que la 2ª ronda no sea idéntica.
+- **Validar con el equipo pedagógico del BCU las 2 trampas nuevas** (`kit` y `sobrepago`), escritas para
+  darle variedad a la revancha pero sin revisión pedagógica todavía.
+- **El badge naranja `PLATA RÁPIDA` sigue siendo 1:1 con "es trampa":** alcanza con mirar el color para
+  resolverlo, sin evaluar la oferta. Una opción es meter una changa legítima con el mismo badge, pero eso
+  cambia lo que el badge *significa* — decisión del equipo pedagógico, no técnica.
+- **Rotar también eventos y shocks** entre rondas (hoy solo rotan las trampas).
 - Integrar el desafío viral "$30.000 alcanzan" como un modo reto aparte.
 - Guía del facilitador (un one-pager con el guion del Trimestre para quien conduce el taller).

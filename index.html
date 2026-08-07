@@ -255,8 +255,9 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 .gRow .ctrl button:active{transform:scale(.92)}
 .gRow .ctrl button.min{opacity:.35}
 .gRow .ctrl .m{font-family:var(--font-num);font-weight:700;font-size:clamp(15px,2.5vw,20px);min-width:86px;text-align:center}
-.gRow .ctrl button.todo{width:auto;min-width:60px;padding:0 12px;font-size:12px;letter-spacing:.5px;border-radius:var(--r-pill);background:var(--amarillo-of);color:var(--ink)}
-.gRow .ctrl button.todo:hover{background:var(--amarillo-of);color:var(--ink);filter:brightness(1.06)}
+/* secundario a propósito: el amarillo del sistema significa "esto da puntos", no "atajo" */
+.gRow .ctrl button.todo{width:auto;min-width:60px;padding:0 12px;font-size:11.5px;letter-spacing:.5px;border-radius:var(--r-pill);background:transparent;color:var(--ink-2);border:1.5px solid var(--borde)}
+.gRow .ctrl button.todo:hover{background:var(--surface-violeta);color:var(--violeta);border-color:var(--violeta)}
 /* proyector noche */
 #espectador::before,#espectador::after{content:'';position:fixed;left:0;right:0;height:8px;background:var(--cinta);z-index:5}
 #espectador::before{top:0} #espectador::after{bottom:0}
@@ -942,7 +943,7 @@ function entrarSala(spec){
       if(payload.ronda<=SALA.ronda) return;
       /* un equipo con el trimestre a medias no se reinicia porque otra máquina tocó Arrancar */
       if(!SALA.spec&&SALA.playing&&G) return;
-      SALA.ronda=payload.ronda; SALA.festejado=false; SALA.prog={}; SALA.guardado=null;
+      SALA.ronda=payload.ronda; SALA.seed=payload.seed||1; SALA.festejado=false; SALA.prog={}; SALA.guardado=null;
       $('btnRetomar').style.display='none';
       Object.values(SALA.timeouts).forEach(clearTimeout); SALA.timeouts={};
       cuentaRegresiva(); });
@@ -990,7 +991,7 @@ function pintarLobby(){
 function retomarTrimestre(){
   const g=SALA&&SALA.guardado; if(!g||!g.G) return;
   G=g.G; SALA.ronda=Math.max(SALA.ronda,g.ronda||0); SALA.playing=true; SALA.guardado=null;
-  OPS=G.mes===1?mercadoMes1():mercadoMes2();
+  OPS=G.mes===1?mercadoMes1(G.seed):mercadoMes2();
   $('btnRetomar').style.display='none';
   if(G.fase===1){ pintarF1(); show('f1'); } else { pintarF2(); show('f2'); }
   $('gBarra').classList.add('on'); gBarra(); gTimer(G.fase,90); gProg(); sfxCoin();
@@ -1013,7 +1014,7 @@ const arrancar=conLock(function(){
     arrancar._reinicio=true;
     avisoSala('HAY UNA RONDA EN CURSO · TOCÁ DE NUEVO PARA REINICIARLA EN TODAS',()=>arrancar._reinicio=false); return; }
   arrancar._reinicio=false;
-  SALA.ch.send({type:'broadcast',event:'start',payload:{ronda:SALA.ronda+1}});
+  SALA.ch.send({type:'broadcast',event:'start',payload:{ronda:SALA.ronda+1, seed:Math.floor(Math.random()*1e9)+1}});
 });
 /* ---- control del facilitador: cerrar la fase en todas las máquinas desde el proyector ---- */
 function forzarTodas(b){
@@ -1057,13 +1058,24 @@ const TRAMPAS=[
   caida:'Eso tiene nombre: mula financiera. La plata era de estafas y la cuenta queda marcada — Juan pudo terminar denunciado por lavado. Cero pesos. −1.500 pts.'},
  {id:'apuestas', trampa:1, f:'PLATA RÁPIDA', n:'El "sistema infalible" de apuestas', d:'"Duplicás en una semana, te paso el grupo de Telegram"', m:4000, h:1,
   caida:'El único que duplica es el que cobra la seña del grupo. Juan puso $800 de prueba y no los vio más. Y ojo: aunque fuera \"legal\", apostar para generar ingreso termina igual — el que necesita recuperar, apuesta de nuevo. Eso ya no es plata: es un problema. −1.500 pts.'},
+ {id:'kit', trampa:1, f:'PLATA RÁPIDA', n:'Armar cajas en casa, pago semanal', d:'Aviso en Instagram: trabajo desde casa, solo hay que comprar el kit inicial', m:2200, h:1,
+  caida:'Si para empezar a cobrar tenés que pagar vos, no es un trabajo: es la estafa del anticipo. Juan puso $900 por el kit que nunca llegó, y la cuenta que le vendía desapareció. −1.500 pts.'},
+ {id:'sobrepago', trampa:1, f:'PLATA RÁPIDA', n:'La encuesta que paga de más', d:'Le depositan $5.000 "por error" y le piden que devuelva $3.000', m:2000, h:0,
+  caida:'El depósito original era falso y se cayó a los tres días; los $3.000 que devolvió eran de Juan. Regla simple: nadie te deposita de más por error. −1.500 pts.'},
 ];
+/* PRNG determinístico: todas las máquinas de la sala arman la misma grilla a partir del mismo seed */
+function rng(seed){ let a=(seed>>>0)||1; return ()=>{ a=(a+0x6D2B79F5)>>>0; let t=Math.imul(a^a>>>15,1|a); t=(t+Math.imul(t^t>>>7,61|t))^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function baraja(arr,r){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 let OPS=[];
 /* mismo ícono que usa cada fuente en el armador: se aprende una vez, se reconoce en todos lados */
 const FIC={'Salario':'i-bille','Cuenta propia':'i-herr','Changas':'i-mano','Reventa':'i-reci','Descuentos':'i-tag','Ayuda familiar':'i-cora','Devolución':'i-devol','Ayuda estatal':'i-estado','Premios':'i-copa','PLATA RÁPIDA':'i-rayo'};
-function mercadoMes1(){
-  const l=OPORTUNIDADES.slice();
-  l.splice(2,0,TRAMPAS[0]); l.splice(6,0,TRAMPAS[1]); l.splice(10,0,TRAMPAS[2]);
+/* la revancha era idéntica: mismas 3 trampas, siempre en el mismo lugar. Ahora salen 3 de 5,
+   en posiciones distintas, iguales para toda la sala (seed compartido en el arranque). */
+function mercadoMes1(seed){
+  const r=rng(seed), l=OPORTUNIDADES.slice();
+  const elegidas=baraja(TRAMPAS,r).slice(0,3);
+  const pos=baraja([1,2,3,4,5,6,7,8,9,10,11],r).slice(0,3).sort((a,b)=>a-b);
+  elegidas.forEach((t,i)=>l.splice(pos[i]+i,0,t));
   return l;
 }
 function mercadoMes2(){
@@ -1087,7 +1099,7 @@ function mercadoMes2(){
 const COACH={
  1:{t:'Son los asesores de Juan', b:'¡Jugamos!', r:[
    ['i-mano','<b>Toquen las tarjetas</b> para conseguirle plata extra a Juan. Cada trabajo gasta horas: tiene 12 por semana (arriba se cuentan).'],
-   ['i-rayo','Ojo con la <b>PLATA RÁPIDA</b>: parece el mejor negocio de la grilla… y siempre tiene trampa.'],
+   ['i-rayo','Antes de aceptar, miren <b>de dónde sale la plata</b>. Si paga mucho por casi nada de laburo, la pregunta es quién la está poniendo.'],
    ['i-flecha','Cuando estén listos, toquen <b>A ORDENAR EL MES</b>. Atentos: la vida pega golpes sorpresa — el que guarda, aguanta.']]},
  2:{t:'Ahora repartan la plata', b:'¡A repartir!', r:[
    ['i-bille','Con <b>− y +</b> le ponen nombre a cada peso del mes. Van de a $500: mantengan apretado y corre solo.'],
@@ -1109,8 +1121,8 @@ function cerrarCoach(){
 function empezarJuego(){
   G={mes:1, fase:1, ops:{}, plan:{}, pts:0, evPlata1:0, trampas:0, ev1:null, ev2:null,
      shock1Ok:null, shock2Ok:null, horas:12, opsM1:null, plan1:null, extra1:0, tabAcum:0, soltoPerrosOK:false,
-     cerrado:false, arr:0, fiado:0, resto1:0, resto2:0, austero:false};
-  OPS=mercadoMes1();
+     cerrado:false, arr:0, fiado:0, resto1:0, resto2:0, austero:false, seed:SALA.seed||1};
+  OPS=mercadoMes1(G.seed);
   JGASTOS.forEach(c=>G.plan[c.id]=c.ini);
   JOLV.forEach(c=>G.plan[c.id]=0);
   SALA.playing=true;
@@ -1145,13 +1157,14 @@ function gTimer(fase,seg){
 function pintarGT(){
   if(!gT.el) return;
   gT.el.textContent = gT.gracia ? 'CIERRA EN '+gT.t+'s' : Math.floor(gT.t/60)+':'+String(gT.t%60).padStart(2,'0');
+  if(gT.gracia||gT.t<=30) gT.el.classList.add('rojo');
 }
 function tickGT(){
   if(gT.pausado||!gT.el) return;
   gT.t--;
   if(!gT.gracia){
-    if(gT.t<=0){ gT.gracia=true; gT.t=GRACIA; gT.el.classList.add('rojo'); sfxNo(); }
-    else if(gT.t<=30){ gT.el.classList.add('rojo'); if(gT.t<=10) sfxTick(); }
+    if(gT.t<=0){ gT.gracia=true; gT.t=GRACIA; sfxNo(); }
+    else if(gT.t<=10) sfxTick();
     pintarGT(); return;
   }
   if(gT.t<=0){ clearInterval(gTimerInt); gT.el=null; autoCerrarFase(); return; }
@@ -1460,7 +1473,7 @@ function mostrarInterludio(){
     '<div class="fila3"><span>Fuentes de ingreso usadas</span><span class="mono">'+G.fu1+(G.fu1>=3?' · +1.000 pts':' · sin bonus (3 dan bonus)')+'</span></div>'+
     (G.resto1>0?'<div class="fila3"><span>Plata sin nombre</span><span class="mono" style="color:var(--magenta-txt)">'+fmt(G.resto1)+' se evaporaron · −'+Math.round(G.resto1/2).toLocaleString('es-UY')+' pts</span></div>':'')+
     (G.austero?'<div class="fila3"><span>Vida a agua y laburo</span><span style="color:var(--magenta-txt);text-align:right;max-width:60%">un plan que no se banca también se cae · −1.000 pts</span></div>':'')+
-    '<div class="fila3"><span>Colchón que pasa al mes 2</span><span class="mono">'+fmt(arr)+'</span></div>'+
+    '<div class="fila3"><span>Colchón que pasa al mes 2</span><span class="mono">'+fmt(arr)+(arr?' · sin etiqueta: hay que repartirlo de nuevo':'')+'</span></div>'+
     (!G.shock1Ok?'<div class="fila3"><span>Y ojo…</span><span style="color:var(--magenta-txt);text-align:right;max-width:60%">el almacén no se olvida: el fiado se paga el mes que viene</span></div>':'')+
     '<div class="fila3"><span>La tableta ($8.000)</span><span class="mono">'+fmt(G.tabAcum)+' juntados</span></div>'+
     '<div class="fila3" style="font-weight:800"><span>PUNTOS DEL MES 1</span><span class="mono">'+G.pts.toLocaleString('es-UY')+' pts</span></div>';
@@ -1477,14 +1490,17 @@ function irMes2(){
   G.plan={};
   JGASTOS.forEach(c=>G.plan[c.id]=G.plan1[c.id]);
   JOLV.forEach(c=>G.plan[c.id]=0);
-  G.plan.fondo=arr; G.plan.meta2=0;
+  /* el colchón entra como plata disponible, pero hay que volver a etiquetarlo:
+     venía precargado en fondo y regalaba el shock 2 al que ya iba ganando */
+  G.plan.fondo=0; G.plan.meta2=0;
   /* el fiado del shock 1 viaja al mes 2: la deuda cobra primero */
   if(!G.shock1Ok){ G.fiado=Math.ceil(Math.max(500,2000-((G.plan1.imprev||0)+(G.plan1.fondo||0)))/500)*500; G.plan.fiado=G.fiado; }
   pintarF1(); show('f1'); $('gBarra').classList.add('on'); gTimer(1,180); gBarra(); gProg();
 }
 function shock2(){
   const cubre=(G.plan.imprev||0)+(G.plan.fondo||0);
-  G.shock2Ok=cubre>=1500;
+  /* el segundo golpe pega MÁS que el primero: en el mes 2 el equipo está más rico */
+  G.shock2Ok=cubre>=2500;
   G.resto2=disponible()-asignado();
   if(G.resto2>0) G.pts-=Math.round(G.resto2/2);
   G.pts+=extraTot()+ptsDest(Math.max(0,destino()-(G.arr||0)));
@@ -1494,7 +1510,7 @@ function shock2(){
   G.pts-=JOLV.filter(c=>!(G.plan[c.id]>0)&&!(c.id==='objetivo'&&(G.tabAcum>=JUAN.tableta||(G.plan.meta2||0)>0))).length*1500;
   const vida2=(G.plan.snacks||0)+(G.plan.subs||0)+(G.plan.personal||0);
   if(vida2<2000){ G.pts-=1000; G.austero=true; }
-  G.pts+=G.shock2Ok?1500:-1500;
+  G.pts+=G.shock2Ok?2500:-2500;
   const acero=G.shock1Ok&&G.shock2Ok;
   if(acero) G.pts+=1000;
   const tabOk=(G.tabAcum+(G.plan.objetivo||0))>=JUAN.tableta;
@@ -1503,11 +1519,11 @@ function shock2(){
   G.cerrado=true;
   document.querySelector('#shock .kick').textContent='LA VIDA NO AVISA (OTRA VEZ)';
   $('shockTit').textContent='¡Recortaron horas en el café!';
-  $('shockTxt').textContent='Bajó la venta y el dueño achicó turnos: este mes entran $1.500 menos. Nadie rompió nada… pero el golpe es igual de real: a veces el imprevisto no es un gasto, es plata que no llega.';
-  $('shockFx').textContent='−$1.500'; $('shockFx').style.color='var(--rojo)';
+  $('shockTxt').textContent='Bajó la venta y el dueño achicó turnos: este mes entran $2.500 menos. Nadie rompió nada… pero el golpe es igual de real: a veces el imprevisto no es un gasto, es plata que no llega. Y este pega más fuerte que la bici.';
+  $('shockFx').textContent='−$2.500'; $('shockFx').style.color='var(--rojo)';
   $('shockVer').innerHTML=(G.shock2Ok
-    ? 'Su plan tenía <b>'+fmt(cubre)+'</b> de colchón: <span style="color:var(--verdeTxt)">ABSORBE EL RECORTE SIN TOCAR EL RESTO. +1.500 pts</span>'
-    : 'Sin colchón, el recorte se comió el aporte en casa: <span style="color:var(--rojo)">Juan quedó debiendo adentro de su propia familia. −1.500 pts</span>')
+    ? 'Su plan tenía <b>'+fmt(cubre)+'</b> de colchón: <span style="color:var(--verdeTxt)">ABSORBE EL RECORTE SIN TOCAR EL RESTO. +2.500 pts</span>'
+    : 'Sin colchón, el recorte se comió el aporte en casa: <span style="color:var(--rojo)">Juan quedó debiendo adentro de su propia familia. −2.500 pts</span>')
     +(acero?'<br><br><span style="color:var(--verdeTxt)">COLCHÓN DE ACERO: dos tormentas, cero deudas. +1.000 pts extra</span>':'')
     +(G.resto2>0?'<br><br><span style="color:var(--rojo)">Quedaron '+fmt(G.resto2)+' sin nombre: se evaporaron (−'+Math.round(G.resto2/2).toLocaleString('es-UY')+' pts)</span>':'')
     +(G.austero?'<br><br><span style="color:var(--rojo)">Juan vivió a agua y laburo: un plan que no se banca también se cae (−1.000 pts)</span>':'')
@@ -1587,7 +1603,7 @@ function pintarEsp(fuerza){
     if(fundidos.length) li.push('A '+fundidos.map(r=>r.ini).join(' y ')+' los golpearon las dos: sin imprevistos ni fondo, cualquier plan se cae dos veces.');
     const tramposos=jug.filter(r=>r.trampas>0);
     if(tramposos.length) li.push(tramposos.map(r=>r.ini).join(' y ')+' cayeron en la plata rápida: parecía el mejor ingreso de la grilla. Siempre lo parece.');
-    if(tramposos.length) li.push('Ojo con la diferencia: en las entradas y las apuestas te estafan a vos; prestar la cuenta te convierte a VOS en parte del delito. Una te vacía, la otra te marca.');
+    if(tramposos.length) li.push('Ojo con la diferencia: en algunas te estafan a vos y perdés plata; en otras, prestar tu cuenta te vuelve a VOS parte del delito. Una te vacía, la otra te marca.');
     const conBeca=jug.filter(r=>r.becaOk);
     if(conBeca.length) li.push(conBeca.map(r=>r.ini).join(' y ')+' postularon la beca a tiempo y el mes 2 cobraron sin poner una hora. Las ventanas del Estado no esperan.');
     const soltaron=jug.filter(r=>r.soltoOk);
