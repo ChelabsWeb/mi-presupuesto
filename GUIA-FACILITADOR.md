@@ -39,19 +39,31 @@
 | **Mes 1 · Conseguir plata** | 4:00 | Eligen changas y ventas. Tienen 12 h/semana. Hay 3 tarjetas **PLATA RÁPIDA** sorteadas entre 5. | *"No todo lo que paga es ingreso. Miren de dónde sale la plata."* No les digas cuáles son trampa. |
 | **Se revela la trampa** | — | Si cayeron, el juego explica cada una y les resta **−1.500 pts** c/u. | Acá parás 30 seg. **Es el momento pedagógico más fuerte del juego.** |
 | **Evento: el cliente urgente** | 1:00 | Cobrar $1.500 y faltar al parcial / negociar el plazo / rechazar. | *"¿Hay una tercera opción?"* (sí: negociar) |
-| **Mes 1 · Repartir la plata** | 3:15 | Reparten con `−` y `+`. Las **amarillas** dan puntos; en $0 restan **−1.500** c/u. | *"Cada peso con nombre. La plata sin nombre se gasta sola."* |
-| **Shock 1: se rompió la bici** | — | **−$2.000, ya.** Zafan si tenían **$2.000** entre imprevistos + fondo. | *"¿Quién tenía colchón?"* |
+| **Mes 1 · Repartir la plata** | 3:15 | Tocan las tarjetas para mandar plata. Las **amarillas** dan puntos; en $0 restan **−1.500** c/u. | *"Cada peso con nombre. La plata sin nombre se gasta sola."* |
+| **El mes, día por día** | ~7s | Pasan los 30 días. Caen **dos imprevistos ($2.000 en total)** y el colchón los absorbe… o no. | Callate y dejá que lo miren. Se explica solo. |
+| **Veredicto del mes 1** | — | Zafan si tenían **$2.000** entre imprevistos + fondo. | *"¿Quién tenía colchón?"* |
 | **Interludio** | — | Desglose del mes 1 con los puntos a la vista. | Dejalos leer. Acá entienden el puntaje. |
 | **Mes 2 · Renegociar** | 3:00 | El mercado cambió: ofertas que crecieron, otras que se pincharon, puertas cerradas. Ahora **11 h**. | *"Sostener también es decidir. ¿Qué sueltan?"* |
 | **Evento: la oferta imperdible** | 1:00 | Auriculares 40% off en 6 cuotas "sin interés". | *"¿La oferta es hoy o el precio es hoy?"* |
 | **Mes 2 · El plan final** | 4:00 | Se desbloquea la **meta 2** si la tableta quedó asegurada. | — |
-| **Shock 2: recortaron horas** | — | **−$2.500.** Pega **más fuerte** que el primero. Zafan con **$2.500** de colchón. | *"El imprevisto no siempre es un gasto: a veces es plata que no llega."* |
+| **El mes 2, día por día** | ~7s | Otros dos imprevistos, **$2.500** en total. Pega **más fuerte** que el primero. | *"El imprevisto no siempre es un gasto: a veces es plata que no llega."* |
 | **Podio** | — | Reveal del último al primero, corona y **análisis de la ronda**. | Leé el análisis en voz alta. Está escrito para eso. |
 
 **Total: 18 a 20 minutos.** Si te sobra tiempo, el proyector tiene **`Revancha`**: sortea otras trampas
 en otras posiciones, así que la segunda ronda no es de memoria.
 
 ---
+
+## Lo que ves vos en el proyector
+
+El **código de sala queda arriba a la izquierda todo el juego** (para el que llega tarde) y el **reloj
+arriba a la derecha**: es el del equipo al que más le falta, o sea *cuándo cierra el último*.
+
+En el medio, el **leaderboard**: puesto, equipo, barra de color y **plata conseguida**. Está ordenado por
+lo que consiguieron, **no por puntaje** — el puntaje sigue oculto hasta el podio. Eso es a propósito y da
+buenas discusiones: *el que va primero en la carrera puede perder igual por cómo repartió el mes.*
+
+Abajo, dónde está cada uno: **"MES 1 · 2 CONSIGUIENDO · 1 REPARTIENDO"**. Con eso sabés si podés seguir.
 
 ## Los dos controles que tenés que conocer
 

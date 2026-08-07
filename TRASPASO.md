@@ -81,6 +81,30 @@ node suite.js                # corre la suite
   en `fondo` y le regalaba el shock 2 al que ya iba ganando; ahora hay que volver a repartirlo.
 - Detalle completo en el código, funciones `scoreAhora`, `cerrarFase`, `shock1`/`shock2`, `mostrarInterludio`, `finDelEquipo`.
 
+## El host y "el mes día por día" (agosto 2026)
+
+**El proyector es un host tipo Kahoot.** Código fijo arriba a la izquierda todo el juego, reloj arriba a
+la derecha, leaderboard en filas mientras se juega y podio en columnas al final.
+
+- El host no tenía forma de saber el reloj de nadie: ahora cada equipo **late una vez por segundo**
+  (`latir()` → `gProg(false)`, que no reescribe localStorage) mandando `t`, `gracia`, `etapa` y `mes`.
+  El host muestra el **mayor** de los tiempos: "cuándo cierra el último".
+- El leaderboard se ordena por **plata conseguida**, que es dato público. **El puntaje sigue oculto**
+  (`···`, T2.1 lo verifica): el que lidera la carrera puede perder el podio por cómo repartió.
+- `estadoDe(r)` da rótulos cortos para que se lea de lejos, y el pie desglosa
+  "2 CONSIGUIENDO · 1 REPARTIENDO" — un rótulo único miente si están en fases distintas.
+
+**El shock dejó de ser una pantalla y pasó a jugarse** (`correrMes`, screen `#mes30`): se destapan los 30
+días y caen dos imprevistos que el colchón absorbe o no, en vivo.
+
+- **La economía NO cambió.** Los imprevistos suman exactamente lo que antes restaba el shock de golpe:
+  $800 + $1.200 = **$2.000** en el mes 1, $1.500 + $1.000 = **$2.500** en el mes 2. Mismos umbrales,
+  mismos puntos, mismos scores exactos en la suite.
+- **No es un juego de apuesta a propósito.** No hay "retirarse a tiempo": el mes pasa igual y lo único que
+  decidía el resultado ya se decidió antes. Mete la tensión de un Mines enseñando lo contrario — que es
+  clave en un juego cuyo propio contenido enseña a no apostar.
+- Dura ~7s. Por eso los `waitForSelector('#shock.on')` de la suite subieron a 25s.
+
 ## La pantalla de conseguir plata (agosto 2026)
 
 - **Cabezal `#horason`** (mismo CSS que `#platon`): horas libres que le quedan en grande + barra +

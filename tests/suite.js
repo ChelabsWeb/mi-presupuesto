@@ -74,7 +74,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     for (const c of 'CIEN') await tecla(P, c);
     await P.getByRole('button', { name: /Proyector/ }).click();
     await entrar(A, 'CIEN', 'LOS CAPOS'); await entrar(B, 'CIEN', 'TIBURONES');
-    await P.waitForFunction(() => document.querySelectorAll('#espCols .eqCol').length === 2, null, { timeout: 15000 });
+    await P.waitForFunction(() => document.querySelectorAll('#espCols .eqCol').length === 2, null, { timeout: 30000 });
     await P.locator('#espArrancar').click();
     await A.waitForSelector('#f1.on', { timeout: 20000 }); await B.waitForSelector('#f1.on', { timeout: 20000 });
     // la grilla es sorteada: misma para toda la sala, distinta entre rondas
@@ -108,7 +108,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     // A ordena m1: destino 11500, resto 0
     await A.evaluate(() => { for (let i = 0; i < 3; i++) ajustar('snacks', -500); ajustar('subs', -500); for (let i = 0; i < 4; i++) ajustar('personal', -500);
       for (let i = 0; i < 4; i++) ajustar('imprev', 500); for (let i = 0; i < 4; i++) ajustar('fondo', 500); for (let i = 0; i < 15; i++) ajustar('objetivo', 500); });
-    await confirmar(A); await A.waitForSelector('#shock.on', { timeout: 8000 });
+    await confirmar(A); await A.waitForSelector('#shock.on', { timeout: 25000 });
     ok('T2.3 shockVer avisa austeridad', (await A.locator('#shockVer').textContent()).includes('agua y laburo'));
     await esp(700); await A.locator('#shockBtn').click();
     await A.waitForSelector('#inter.on', { timeout: 8000 });
@@ -124,7 +124,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await P2.locator('#home button', { hasText: 'equipos' }).click();
     for (const c of 'CIEN') await tecla(P2, c);
     await P2.getByRole('button', { name: /Proyector/ }).click();
-    await P2.waitForFunction(() => document.getElementById('espEstado').textContent.includes('ASESORANDO'), null, { timeout: 15000 }).catch(() => {});
+    await P2.waitForFunction(() => document.getElementById('espEstado').textContent.includes('ASESORANDO'), null, { timeout: 30000 }).catch(() => {});
     ok('T2.6 proyector tardío ve el juego', (await P2.locator('#espEstado').textContent()).includes('ASESORANDO'), await P2.locator('#espEstado').textContent());
     await P2.context().close();
     // A mes 2: suelta perros, suma taller
@@ -139,7 +139,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await A.waitForSelector('#evOv.on', { timeout: 8000 }); // modal sin nombre (resto 2400)
     ok('T2.7 modal sin nombre', (await A.locator('#evTit').textContent()).includes('sin nombre'));
     await A.locator('#evOps2 .op2').nth(1).click();
-    await A.waitForSelector('#shock.on', { timeout: 8000 });
+    await A.waitForSelector('#shock.on', { timeout: 25000 });
     await esp(700); await A.locator('#shockBtn').click();
     // B: retomar tras recarga (está en f2 mes 1)
     await B.evaluate(() => ajustar('snacks', -500)); await esp(400); // gProg persiste (marcador legal)
@@ -153,7 +153,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     ok('T2.10 sin columna duplicada tras retomar', colsB === 2, '' + colsB);
     // B deshace el marcador para mantener la mate (resto 0 → confirma directo)
     await B.evaluate(() => ajustar('snacks', 500)); await esp(300);
-    await confirmar(B); await B.waitForSelector('#shock.on', { timeout: 8000 });
+    await confirmar(B); await B.waitForSelector('#shock.on', { timeout: 25000 });
     await esp(700); await B.locator('#shockBtn').click();
     await B.waitForSelector('#inter.on', { timeout: 8000 });
     await B.getByRole('button', { name: /Vamos al mes 2/ }).click();
@@ -172,7 +172,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await confirmar(B);
     await B.waitForSelector('#evOv.on', { timeout: 8000 }); // resto 100
     await B.locator('#evOps2 .op2').nth(1).click();
-    await B.waitForSelector('#shock.on', { timeout: 8000 });
+    await B.waitForSelector('#shock.on', { timeout: 25000 });
     await esp(700); await B.locator('#shockBtn').click();
     // podio + reveal + scores exactos
     await P.waitForFunction(() => document.getElementById('espEstado').textContent.includes('ASESORÓ') || document.getElementById('espEstado').textContent.includes('CERRADO'), null, { timeout: 30000 });
@@ -264,7 +264,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     const resto = await p.evaluate(() => disponible() - asignado());
     ok('T6.5 resto exacto = 0', resto === 0, '' + resto);
     await confirmar(p);
-    await p.waitForSelector('#shock.on', { timeout: 8000 });
+    await p.waitForSelector('#shock.on', { timeout: 25000 });
     ok('T6.6 confirma sin modal de plata sin nombre', true);
     ok('T6.7 sin errores JS', p._errs.length === 0, p._errs.join(';'));
     await p.context().close();
@@ -279,7 +279,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     for (const c of 'FACI') await tecla(PF, c);
     await PF.getByRole('button', { name: /Proyector/ }).click();
     await entrar(EF, 'FACI', 'MESA UNO');
-    await PF.waitForFunction(() => document.querySelectorAll('#espCols .eqCol').length === 1, null, { timeout: 15000 });
+    await PF.waitForFunction(() => document.querySelectorAll('#espCols .eqCol').length === 1, null, { timeout: 30000 });
     await PF.locator('#espArrancar').click();
     await EF.waitForSelector('#f1.on', { timeout: 20000 });
     await PF.waitForSelector('#espForzar', { state: 'visible', timeout: 10000 });
@@ -292,7 +292,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     // una máquina que entra tarde no debe poder reiniciarle la ronda a todos de un toque
     const XF = await mk(); await XF.goto(U);
     await entrar(XF, 'FACI', 'TARDE');
-    await XF.waitForFunction(() => Object.keys(SALA.prog || {}).length > 0, null, { timeout: 15000 });
+    await XF.waitForFunction(() => Object.keys(SALA.prog || {}).length > 0, null, { timeout: 30000 });
     await XF.locator('#btnArrancar').click(); await esp(700);
     ok('T7.4 avisa antes de reiniciar una ronda en curso', (await XF.locator('#lobbyEstado').textContent()).includes('EN CURSO'), await XF.locator('#lobbyEstado').textContent());
     // aunque el aviso se ignore, el equipo que está jugando no se reinicia

@@ -383,6 +383,23 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 #evBar i{display:block;height:100%;background:var(--cinta);width:100%}
 @keyframes evVacia{from{width:100%}to{width:0}}
 #evBar i.corre{animation:evVacia 45s linear forwards}
+/* ====== EL MES, DÍA POR DÍA ====== */
+#m30Colchon{padding:12px 22px;min-width:min(100%,320px)}
+#m30Colchon .l{font-weight:700;letter-spacing:1.5px;font-size:12px;color:var(--ink-2)}
+#m30Plata{font-size:clamp(30px,6vw,50px);line-height:1.05;color:var(--lima-txt)}
+#m30Plata.vacio{color:var(--magenta-txt)}
+#m30Bar{height:12px;border-radius:var(--r-pill);background:#E9E1F8;overflow:hidden;margin-top:6px}
+#m30Bar i{display:block;height:100%;width:100%;background:var(--lima-of);border-radius:var(--r-pill);transition:width .5s var(--pop)}
+#m30Bar i.vacio{background:var(--magenta-of)}
+#m30Grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;width:100%;max-width:460px}
+.m30d{aspect-ratio:1;border-radius:8px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-num);font-weight:700;font-size:clamp(10px,1.6vw,13px);color:#C9BEE4;
+  transition:transform .25s var(--pop),background .25s,color .25s}
+.m30d.ok{background:#D9F0C0;color:var(--lima-txt)}
+.m30d.mal{background:var(--magenta-of);color:#fff;transform:scale(1.18)}
+#m30Msg{min-height:3.2em;font-weight:700;font-size:clamp(14px,2.2vw,19px);line-height:1.35;max-width:520px}
+#m30Msg .cual{font-family:var(--font-display);font-weight:900;text-transform:uppercase;color:var(--magenta-txt);display:block;font-size:clamp(16px,2.6vw,23px)}
+#m30Msg .como{color:var(--ink-2);font-weight:600;font-size:.86em}
 /* interludio */
 #inter .wiz{align-items:center;display:flex;flex-direction:column;justify-content:center;text-align:center;gap:14px;min-height:100vh}
 #interCard{max-width:640px;width:100%;padding:22px;text-align:left}
@@ -545,6 +562,21 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
     <h2 class="dsp" style="font-size:clamp(28px,5vw,44px);margin:6px 0 12px">Mes 1, cerrado</h2>
     <div class="caja" id="interCard" style="margin-bottom:16px"></div>
     <button class="btn amarillo grande" onclick="irMes2()">Vamos al mes 2 <svg class="ic"><use href="#i-flecha"/></svg></button>
+  </div>
+</section>
+
+<!-- ========= SALA: el mes, día por día (reemplaza la pantalla estática del shock) ========= -->
+<section class="screen" id="mes30">
+  <div class="wiz" style="align-items:center;display:flex;flex-direction:column;justify-content:center;text-align:center;gap:12px;min-height:100vh;max-width:640px">
+    <div class="kick" id="m30Kick">EL MES DE JUAN, DÍA POR DÍA</div>
+    <h2 class="dsp" id="m30Tit" style="font-size:clamp(24px,4.6vw,40px)">La vida no avisa</h2>
+    <div id="m30Colchon" class="caja">
+      <div class="l" id="m30Lbl">SU COLCHÓN</div>
+      <div class="mono dsp" id="m30Plata">$0</div>
+      <div id="m30Bar"><i></i></div>
+    </div>
+    <div id="m30Grid"></div>
+    <div id="m30Msg"></div>
   </div>
 </section>
 
@@ -1093,7 +1125,7 @@ function salirSala(b){
   if(SALA){ Object.values(SALA.timeouts||{}).forEach(clearTimeout); if(SALA.ch&&sbClient) sbClient.removeChannel(SALA.ch);
     try{ localStorage.removeItem('cpv_sala_'+SALA.code); }catch(e){} }
   SALA=null; G=null; OPS=[]; lobbyPrev=0; latir(false);
-  clearInterval(gTimerInt); clearTimeout(evTimer); evAl=null;
+  clearInterval(gTimerInt); clearTimeout(evTimer); evAl=null; m30T.forEach(clearTimeout); m30T=[];
   $('evOv').classList.remove('on');
   $('gBarra').classList.remove('on'); show('home'); attract();
 }
@@ -1632,6 +1664,54 @@ function cerrarFase(){
   clearInterval(gTimerInt); gT.el=null; $('gBarra').classList.remove('on');
   if(G.mes===1) shock1(); else shock2();
 }
+/* Los imprevistos suman EXACTAMENTE lo que antes restaba el shock de golpe ($2.000 el mes 1,
+   $2.500 el mes 2). La matemática no cambió: cambió que ahora se vive en vez de leerse.
+   Nada de apostar: el mes pasa igual, lo único que decidiste ya lo decidiste antes. */
+const DIAS_MES=30;
+const IMPREVISTOS={
+ 1:[{d:8, n:'Se le rompió el celu', m:800, txt:'Sin celu no le entran los pedidos de dibujo.'},
+    {d:21, n:'Se rompió la bici del reparto', m:1200, txt:'El arreglo no espera: la usa todos los días.'}],
+ 2:[{d:6, n:'Le recortaron turnos en el café', m:1500, txt:'Bajó la venta y el dueño achicó la semana.'},
+    {d:23, n:'Se le rompieron los championes', m:1000, txt:'Los únicos que tiene para ir a laburar.'}]
+};
+let m30T=[];
+function correrMes(mes, colchon, cb){
+  m30T.forEach(clearTimeout); m30T=[];
+  const evs=IMPREVISTOS[mes], total=evs.reduce((a,e)=>a+e.m,0);
+  let quedan=colchon, deuda=0;
+  $('m30Kick').textContent='MES '+mes+' · DÍA POR DÍA';
+  $('m30Tit').textContent=mes===1?'La vida no avisa':'La vida no avisa (otra vez)';
+  $('m30Lbl').textContent='SU COLCHÓN · imprevistos + fondo';
+  $('m30Msg').innerHTML='';
+  const pintaColchon=()=>{
+    $('m30Plata').textContent=deuda?'−'+fmt(deuda).replace('−',''):fmt(quedan);
+    $('m30Plata').classList.toggle('vacio',!!deuda);
+    const bar=$('m30Bar').firstElementChild;
+    bar.style.width=(colchon>0?Math.max(0,quedan*100/colchon):0)+'%';
+    bar.classList.toggle('vacio',!!deuda);
+  };
+  $('m30Grid').innerHTML=Array.from({length:DIAS_MES},(_,i)=>'<div class="m30d" id="m30d'+(i+1)+'">'+(i+1)+'</div>').join('');
+  pintaColchon();
+  show('mes30'); gProg();
+  let t=350;
+  for(let d=1; d<=DIAS_MES; d++){
+    const ev=evs.find(e=>e.d===d);
+    m30T.push(setTimeout(()=>{
+      const el=$('m30d'+d); if(!el) return;
+      if(!ev){ el.classList.add('ok'); sfxTick(); return; }
+      el.classList.add('mal'); thump();
+      const cubre=Math.min(quedan,ev.m);
+      quedan-=cubre; deuda+=ev.m-cubre;
+      pintaColchon();
+      $('m30Msg').innerHTML='<span class="cual">Día '+d+' · '+ev.n+'<br>−'+fmt(ev.m)+'</span>'+
+        '<span class="como">'+(ev.m-cubre>0
+          ? 'No le alcanza el colchón: lo saca fiado.'
+          : 'Lo cubre con lo que había guardado. Ni se despeina.')+'</span>';
+    }, t));
+    t += ev ? 1500 : 85;
+  }
+  m30T.push(setTimeout(cb, t+900));
+}
 function shock1(){
   const cubre=(G.plan.imprev||0)+(G.plan.fondo||0);
   G.shock1Ok=cubre>=2000;
@@ -1649,9 +1729,9 @@ function shock1(){
   G.pts+=G.shock1Ok?2000:-2000;
   G.cerrado=true;
   G.opsM1={...G.ops}; G.plan1={...G.plan}; G.tabAcum=G.plan.objetivo||0; G.olv1=olv1; G.fu1=fu1;
-  document.querySelector('#shock .kick').textContent='LA VIDA NO AVISA';
-  $('shockTit').textContent='¡Se rompió la bici del reparto!';
-  $('shockTxt').textContent='Justo cuando Juan arrancaba el mes. El arreglo no espera: $2.000, ya.';
+  document.querySelector('#shock .kick').textContent='ASÍ TERMINÓ EL MES 1';
+  $('shockTit').textContent=G.shock1Ok?'El mes no lo tumbó':'El mes lo dejó debiendo';
+  $('shockTxt').textContent='Dos imprevistos, $2.000 en total. Lo único que decidía si dolía o no, ya estaba decidido antes de que pasaran.';
   $('shockFx').textContent='−$2.000'; $('shockFx').style.color='var(--rojo)';
   $('shockVer').innerHTML=(G.shock1Ok
     ? 'Su plan tenía <b>'+fmt(cubre)+'</b> entre imprevistos y fondo: <span style="color:var(--verdeTxt)">LO CUBRE SIN DEUDA. +2.000 pts</span>'
@@ -1660,9 +1740,11 @@ function shock1(){
     +(vida1<2000?'<br><br><span style="color:var(--rojo)">Juan vivió a agua y laburo: un plan que no se banca también se cae (−1.000 pts)</span>':'');
   $('shockBtn').innerHTML='Seguir al mes 2 <svg class="ic"><use href="#i-flecha"/></svg>';
   $('shockBtn').onclick=mostrarInterludio;
-  show('shock'); thump();
-  setTimeout(()=>{ G.shock1Ok?sfxCoin():sfxNo(); if(G.shock1Ok) confetti(30); },600);
-  gProg();
+  correrMes(1, cubre, ()=>{
+    show('shock'); thump();
+    setTimeout(()=>{ G.shock1Ok?sfxCoin():sfxNo(); if(G.shock1Ok) confetti(30); },600);
+    gProg();
+  });
 }
 function mostrarInterludio(){
   const arr=Math.max(0,(G.plan1.imprev||0)+(G.plan1.fondo||0)-2000);
@@ -1720,9 +1802,9 @@ function shock2(){
   if(tabOk) G.pts+=1500;
   if((G.plan.meta2||0)>=500) G.pts+=500;
   G.cerrado=true;
-  document.querySelector('#shock .kick').textContent='LA VIDA NO AVISA (OTRA VEZ)';
-  $('shockTit').textContent='¡Recortaron horas en el café!';
-  $('shockTxt').textContent='Bajó la venta y el dueño achicó turnos: este mes entran $2.500 menos. Nadie rompió nada… pero el golpe es igual de real: a veces el imprevisto no es un gasto, es plata que no llega. Y este pega más fuerte que la bici.';
+  document.querySelector('#shock .kick').textContent='ASÍ TERMINÓ EL MES 2';
+  $('shockTit').textContent=G.shock2Ok?'Aguantó el segundo mes':'El segundo mes lo fundió';
+  $('shockTxt').textContent='$2.500 esta vez, y uno de los golpes no fue un gasto: fue plata que no llegó. El colchón sirve para los dos.';
   $('shockFx').textContent='−$2.500'; $('shockFx').style.color='var(--rojo)';
   $('shockVer').innerHTML=(G.shock2Ok
     ? 'Su plan tenía <b>'+fmt(cubre)+'</b> de colchón: <span style="color:var(--verdeTxt)">ABSORBE EL RECORTE SIN TOCAR EL RESTO. +2.500 pts</span>'
@@ -1733,8 +1815,10 @@ function shock2(){
     +(G.ev2?'<br><br>La oferta del contado: '+({A:'<span style="color:var(--rojo)">compraron ya — $1.900 menos este mes (−600 pts)</span>',B:'<span style="color:var(--verdeTxt)">la anotaron para comparar el mes que viene (+400 pts)</span>',C:'<span style="color:var(--verdeTxt)">no compraron nada (+300 pts)</span>'}[G.ev2]||''):'');
   $('shockBtn').innerHTML='Cerrar el trimestre <svg class="ic"><use href="#i-flecha"/></svg>';
   $('shockBtn').onclick=finDelEquipo;
-  show('shock'); thump();
-  setTimeout(()=>{ G.shock2Ok?sfxCoin():sfxNo(); if(acero) confetti(40); },600);
+  correrMes(2, cubre, ()=>{
+    show('shock'); thump();
+    setTimeout(()=>{ G.shock2Ok?sfxCoin():sfxNo(); if(acero) confetti(40); },600);
+  });
 }
 function finDelEquipo(){
   const tabTot=G.tabAcum+(G.plan.objetivo||0);
@@ -1750,7 +1834,7 @@ function finDelEquipo(){
   $('espCode').textContent=SALA.code;
   pintarEsp(true);
 }
-const etapaActual=()=>['f1','f2','shock','inter','mines'].find(s=>$(s)&&$(s).classList.contains('on'))||'';
+const etapaActual=()=>['f1','f2','shock','inter','mes30'].find(s=>$(s)&&$(s).classList.contains('on'))||'';
 /* el proyector no tenía forma de saber el reloj de cada equipo: ahora late una vez por segundo */
 let latInt=null;
 function latir(on){ clearInterval(latInt); latInt=null; if(on) latInt=setInterval(()=>gProg(false),1000); }
@@ -1768,7 +1852,7 @@ function gProg(guardar){
 function estadoDe(r){
   if(r.caido) return 'SE CAYÓ';
   if(r.fin) return '✓ CERRÓ';
-  if(r.etapa==='shock'||r.etapa==='inter') return '✓ CONFIRMÓ';
+  if(r.etapa==='shock'||r.etapa==='inter'||r.etapa==='mes30') return '✓ CONFIRMÓ';
   if(!r.en) return 'LISTO';
   return (r.fase===2||r.fase===4)?'REPARTIENDO':'CONSIGUIENDO';
 }
@@ -1816,7 +1900,7 @@ function pintarEsp(fuerza){
       <div class="nom dsp">${r.ini}</div>
       <div class="pista"><i style="width:${Math.round((r.extra||0)*100/maxExtra)}%;background:${cols[colorIdx[r.id]%4]}"></i></div>
       <div class="mmm">+${(r.extra||0).toLocaleString('es-UY')}</div>
-      <div class="est${r.fin||r.etapa==='shock'||r.etapa==='inter'?' ok':''}">${estadoDe(r)}</div>
+      <div class="est${r.fin||r.etapa==='shock'||r.etapa==='inter'||r.etapa==='mes30'?' ok':''}">${estadoDe(r)}</div>
       <div class="sc">···</div>
     </div>`:`
     <div class="eqCol${r.caido?' caida':''}" style="border-top:6px solid ${cols[colorIdx[r.id]%4]}">
