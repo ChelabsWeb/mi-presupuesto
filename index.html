@@ -235,6 +235,12 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 /* la grilla se aprieta: 12-15 tarjetas tienen que entrar sin scrollear con el reloj corriendo */
 /* 326px = 3 columnas cómodas: más angosto los títulos se parten en 4 líneas y se lee peor */
 #cardsOp{grid-template-columns:repeat(auto-fill,minmax(min(100%,326px),1fr));gap:11px}
+/* todas exactamente iguales: alto fijo + título y bajada recortados a 2 líneas.
+   (grid-auto-rows:1fr no alcanza: sin altura en el contenedor, el fr colapsa a auto) */
+.opCard{display:flex;height:118px}
+.opCard .top{flex:1;min-width:0}
+.opCard .tt{overflow:hidden}
+.opCard .tt b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .opCard .tt span.d{font-size:11.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .opCard .plata{flex-shrink:0;text-align:right}
 .hrsChip{display:inline-block;margin-top:3px;padding:2px 9px;border-radius:var(--r-pill);background:var(--surface-2);
@@ -282,10 +288,10 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 .gGrupo.puntos .t{color:var(--naranja-txt)}
 .gGrupo.puntos .linea{background:var(--cinta);opacity:.65}
 
-.gCards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,196px),1fr));gap:12px}
+.gCards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,196px),1fr));gap:12px;grid-auto-rows:1fr}
 .gCard{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;overflow:hidden;
   background:var(--surface);border:1.5px solid var(--borde);border-radius:var(--r-md);box-shadow:var(--sombra-1);
-  padding:30px 12px 12px;cursor:pointer;text-align:center;color:var(--ink);
+  padding:30px 12px 12px;height:186px;cursor:pointer;text-align:center;color:var(--ink);
   touch-action:manipulation;user-select:none;-webkit-user-select:none;
   transition:transform var(--dur),box-shadow var(--dur),border-color var(--dur)}
 .gCard:hover{transform:translateY(-3px);box-shadow:var(--sombra-2);border-color:var(--violeta)}
@@ -296,7 +302,8 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 /* dos líneas fijas: si no, un nombre largo desalinea el monto de toda la fila */
 .gCard .nm{font-weight:700;font-size:clamp(12px,1.7vw,14px);line-height:1.2;min-height:2.4em;display:flex;align-items:center}
 .gCard .mt{font-family:var(--font-num);font-weight:700;font-size:clamp(18px,3vw,25px)}
-.gCard .pie{font-size:11px;font-weight:600;color:var(--ink-2);min-height:15px;width:100%}
+/* pie siempre pegado abajo: si no, la barra de progreso de la tableta hace esa tarjeta más alta */
+.gCard .pie{font-size:11px;font-weight:600;color:var(--ink-2);min-height:15px;width:100%;margin-top:auto;padding-top:4px}
 .gCard .pie .ok2{color:var(--lima-txt)}
 /* las que dan puntos: se distinguen sin leer nada */
 .gCard.da{border-color:var(--amarillo-of);background:linear-gradient(180deg,#FFFBEC,var(--surface) 60%)}
@@ -953,6 +960,16 @@ function armarTeclasSala(){
   const del=document.createElement('button'); del.textContent='⌫'; del.onclick=()=>salaKey(null); tec.appendChild(del);
   const ok=document.createElement('button'); ok.textContent='LISTO'; ok.className='listo dsp'; ok.onclick=salaListo; tec.appendChild(ok);
 }
+/* el teclado en pantalla es para el touch; en una laptop se escribe con el teclado de verdad */
+document.addEventListener('keydown',e=>{
+  if(!$('sala').classList.contains('on')) return;
+  if(e.ctrlKey||e.altKey||e.metaKey) return;
+  audioInit();
+  if(e.key==='Backspace'){ e.preventDefault(); salaKey(null); return; }
+  if(e.key==='Enter'){ e.preventDefault(); salaListo(); return; }
+  if(e.key===' '){ e.preventDefault(); salaKey(' '); return; }
+  if(e.key.length===1 && /[a-záéíóúüñ]/i.test(e.key)){ e.preventDefault(); salaKey(e.key.toUpperCase()); }
+});
 function salaKey(l){ sfxTap(); const buf=sPaso===0?sCode:sIni, max=sPaso===0?4:12;
   if(l===null) buf.pop();
   else if(l===' '&&(sPaso===0||!buf.length)) return;
@@ -975,7 +992,8 @@ function pintarSala(){
   bv.textContent=sPaso===1?'← Cambiar código':'Volver';
   bv.onclick=sPaso===1?()=>{ sPaso=0; sfxTap(); pintarSala(); }:()=>{ show('home'); attract(); };
   $('salaTit').textContent=sPaso===0?'Código de sala':'Nombre del equipo';
-  $('salaHint').textContent=sPaso===0?'Elijan un código de 4 letras y pónganlo igual en todas las máquinas.':'Así los ve el resto en el tablero (hasta 12 letras).';
+  $('salaHint').innerHTML=(sPaso===0?'Elijan un código de 4 letras y pónganlo igual en todas las máquinas.':'Así los ve el resto en el tablero (hasta 12 letras).')
+    +'<br><span style="font-weight:600;color:var(--ink-2);font-size:.85em">Escribí con el teclado · Enter para seguir</span>';
   const rC=$('slotsCode'); rC.innerHTML='';
   for(let i=0;i<4;i++){ const d=document.createElement('div'); d.className='slot'+(sPaso===0&&i===Math.min(sCode.length,3)?' act':''); d.textContent=sCode[i]||''; rC.appendChild(d); }
   $('slotsIni').style.display=sPaso===1?'flex':'none';
