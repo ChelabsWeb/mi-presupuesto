@@ -10,10 +10,23 @@ function ok(nombre, cond, detalle) { R.push([cond ? 'PASS' : 'FAIL', nombre, det
 
 async function tecla(p, ch) { const l = ch === ' ' ? '␣' : ch; await p.locator('#salaTeclas button').filter({ hasText: new RegExp('^' + l + '$') }).first().click(); }
 async function entrar(p, code, nom) {
-  await p.locator('#home button', { hasText: 'equipos' }).click();
+  await p.locator('#home button', { hasText: 'Entrar a una sala' }).click();
   for (const c of code) await tecla(p, c);
   await tecla(p, 'LISTO'); for (const c of nom) await tecla(p, c); await tecla(p, 'LISTO');
   await p.waitForSelector('#btnArrancar', { state: 'visible', timeout: 15000 });
+}
+/* el host crea la sala: le viene un codigo sorteado, se borra y se escribe el que queremos */
+async function crearSala(p, code) {
+  await p.locator('#home button', { hasText: 'Crear sala' }).click();
+  for (let i = 0; i < 4; i++) await p.keyboard.press('Backspace');
+  await p.keyboard.type(code);
+  await p.keyboard.press('Enter');
+}
+/* el mes 1 arranca en el mercado de a una; los tests van derecho a la grilla */
+async function aGrilla(p) {
+  await p.waitForSelector('#swipe.on', { timeout: 25000 });
+  await p.locator('#swVerTodas').click();
+  await p.waitForSelector('#f1.on', { timeout: 10000 });
 }
 async function confirmar(p) { await esp(600); await p.locator('#gbSig').click(); }
 
@@ -70,13 +83,11 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
   const P = await mk(), A = await mk(), B = await mk();
   {
     await P.goto(U); await A.goto(U); await B.goto(U);
-    await P.locator('#home button', { hasText: 'equipos' }).click();
-    for (const c of 'CIEN') await tecla(P, c);
-    await P.getByRole('button', { name: /Proyector/ }).click();
+    await crearSala(P, 'CIEN');
     await entrar(A, 'CIEN', 'LOS CAPOS'); await entrar(B, 'CIEN', 'TIBURONES');
     await P.waitForFunction(() => document.querySelectorAll('#espCols .eqCol').length === 2, null, { timeout: 30000 });
     await P.locator('#espArrancar').click();
-    await A.waitForSelector('#f1.on', { timeout: 20000 }); await B.waitForSelector('#f1.on', { timeout: 20000 });
+    await aGrilla(A); await aGrilla(B);
     // la grilla es sorteada: misma para toda la sala, distinta entre rondas
     const gridA = await A.evaluate(() => OPS.map(o => o.id).join(','));
     const gridB = await B.evaluate(() => OPS.map(o => o.id).join(','));
@@ -121,9 +132,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     // proyector tardío entra ahora
     const P2 = await mk();
     await P2.goto(U);
-    await P2.locator('#home button', { hasText: 'equipos' }).click();
-    for (const c of 'CIEN') await tecla(P2, c);
-    await P2.getByRole('button', { name: /Proyector/ }).click();
+    await crearSala(P2, 'CIEN');
     await P2.waitForFunction(() => document.getElementById('espEstado').textContent.includes('ASESORANDO'), null, { timeout: 30000 }).catch(() => {});
     ok('T2.6 proyector tardío ve el juego', (await P2.locator('#espEstado').textContent()).includes('ASESORANDO'), await P2.locator('#espEstado').textContent());
     await P2.context().close();
@@ -192,8 +201,8 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     console.log('\n[T3] Revancha');
     const seed1 = await A.evaluate(() => G.seed);
     await P.locator('#espArrancar').click();
-    await A.waitForSelector('#f1.on', { timeout: 20000 });
-    await B.waitForSelector('#f1.on', { timeout: 20000 });
+    await aGrilla(A);
+    await aGrilla(B);
     const chipR = await A.locator('#f1 .paso').textContent();
     const extraR = await A.locator('#horasExtra').textContent(); // el extra vive en el cabezal de la fase 1
     ok('T3.1 revancha reinicia mes 1', chipR.includes('MES 1'), chipR);
@@ -215,7 +224,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await p.locator('#btnArrancar').click(); await esp(700); // aviso única máquina
     ok('T4.1 aviso única máquina', (await p.locator('#lobbyEstado').textContent()).includes('ÚNICA'));
     await p.locator('#btnArrancar').click();
-    await p.waitForSelector('#f1.on', { timeout: 20000 });
+    await aGrilla(p);
     await p.locator('#op_iva').click(); await confirmar(p);
     await p.waitForSelector('#evOv.on', { timeout: 8000 });
     const pts0 = await p.evaluate(() => G.pts);
@@ -239,7 +248,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await entrar(p, 'RELO', 'CRONOS');
     await p.locator('#btnArrancar').click(); await esp(700);
     await p.locator('#btnArrancar').click();
-    await p.waitForSelector('#f1.on', { timeout: 20000 });
+    await aGrilla(p);
     // hace falta ingreso extra real: con el plan inicial ($11.000) y solo $10.000 de sueldo, se arranca en rojo
     for (const id of ['iva', 'beca', 'juegos', 'cari']) { await p.locator('#op_' + id).click(); await esp(80); }
     // el reloj llega a cero → gracia → la fase se cierra sola (sin tocar Confirmar)
@@ -290,18 +299,59 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await p.context().close();
   }
 
+  /* ══════════ T8 · EL MERCADO DE A UNA (swipe) ══════════ */
+  console.log('\n[T8] Mercado de a una');
+  {
+    const p = await mk();
+    await p.goto(U);
+    await entrar(p, 'SWIP', 'DEDOS');
+    await p.locator('#btnArrancar').click(); await esp(700);
+    await p.locator('#btnArrancar').click();
+    await p.waitForSelector('#swipe.on', { timeout: 25000 });
+    ok('T8.1 el mes 1 arranca en el mercado de a una', true);
+    const id0 = await p.evaluate(() => OPS[swIdx].id);
+    // botón: la agarro
+    await p.locator('#swSi').click(); await esp(250);
+    ok('T8.2 el botón la agarra', await p.evaluate(i => !!G.ops[i], id0), id0);
+    ok('T8.3 avanza a la siguiente', await p.evaluate(() => swIdx) === 1);
+    // botón: paso
+    const id1 = await p.evaluate(() => OPS[swIdx].id);
+    await p.locator('#swNo').click(); await esp(250);
+    ok('T8.4 el botón la descarta', await p.evaluate(i => !G.ops[i], id1) && await p.evaluate(() => swIdx) === 2);
+    // arrastrar a la derecha = la agarra
+    const id2 = await p.evaluate(() => OPS[swIdx].id);
+    const c = await p.locator('#swCard').boundingBox();
+    await p.mouse.move(c.x + c.width / 2, c.y + c.height / 2);
+    await p.mouse.down();
+    await p.mouse.move(c.x + c.width / 2 + 200, c.y + c.height / 2, { steps: 12 });
+    await esp(120);
+    const selloVisible = await p.evaluate(() => +getComputedStyle(document.querySelector('#swCard .sello.si')).opacity > .5);
+    await p.mouse.up(); await esp(500);
+    ok('T8.5 el sello aparece al arrastrar', selloVisible);
+    ok('T8.6 arrastrar a la derecha la agarra', await p.evaluate(i => !!G.ops[i], id2), id2);
+    // sin horas, el botón se apaga solo
+    await p.evaluate(() => { G.horas = 0; pintarSwipe(); });
+    ok('T8.7 sin horas no se puede agarrar', await p.locator('#swSi').isDisabled());
+    await p.evaluate(() => { G.horas = 12; pintarSwipe(); });
+    // recorrer toda la pila cae en la grilla
+    await p.evaluate(() => { swIdx = OPS.length - 1; pintarSwipe(); });
+    await p.locator('#swNo').click();
+    await p.waitForSelector('#f1.on', { timeout: 8000 });
+    ok('T8.8 al terminar la pila cae en la grilla', true);
+    ok('T8.9 sin errores JS', p._errs.length === 0, p._errs.join(';'));
+    await p.context().close();
+  }
+
   /* ══════════ T7 · CONTROL DEL FACILITADOR + GUARD DE REINICIO ══════════ */
   console.log('\n[T7] Facilitador y guard de reinicio');
   {
     const PF = await mk(), EF = await mk();
     await PF.goto(U); await EF.goto(U);
-    await PF.locator('#home button', { hasText: 'equipos' }).click();
-    for (const c of 'FACI') await tecla(PF, c);
-    await PF.getByRole('button', { name: /Proyector/ }).click();
+    await crearSala(PF, 'FACI');
     await entrar(EF, 'FACI', 'MESA UNO');
     await PF.waitForFunction(() => document.querySelectorAll('#espCols .eqCol').length === 1, null, { timeout: 30000 });
     await PF.locator('#espArrancar').click();
-    await EF.waitForSelector('#f1.on', { timeout: 20000 });
+    await aGrilla(EF);
     await PF.waitForSelector('#espForzar', { state: 'visible', timeout: 10000 });
     ok('T7.1 botón del facilitador visible con la ronda en juego', true);
     await PF.locator('#espForzar').click(); await esp(400); // primer toque = arma

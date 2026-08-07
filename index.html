@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -282,6 +282,48 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 #platonPts{text-align:right;flex-shrink:0}
 #platonPtsN{display:block;font-family:var(--font-num);font-weight:700;font-size:clamp(22px,3.6vw,36px);color:var(--violeta)}
 
+/* ====== EL MERCADO DE A UNA (mes 1): decidir por instinto, con el reloj corriendo ====== */
+#swBarra{display:flex;gap:10px;width:100%;justify-content:space-between}
+#swBarra>div{flex:1;background:var(--surface);border:1px solid var(--borde);border-radius:var(--r-md);box-shadow:var(--sombra-1);padding:8px 12px;text-align:center}
+#swBarra .l{display:block;font-weight:700;letter-spacing:1px;font-size:10px;color:var(--ink-2)}
+#swBarra b{font-family:var(--font-num);font-weight:700;font-size:clamp(17px,2.8vw,23px)}
+#swBarra .sinh b{color:var(--magenta-txt)}
+#swPila{position:relative;width:100%;height:clamp(290px,44vh,380px)}
+.swCard{position:absolute;inset:0;background:var(--surface);border:1.5px solid var(--borde);border-radius:var(--r-lg);
+  box-shadow:var(--sombra-3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+  padding:26px 24px;text-align:center;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;overflow:hidden}
+.swCard::before{content:'';position:absolute;top:0;left:0;right:0;height:7px;background:var(--violeta)}
+.swCard.trampa::before{background:var(--naranja-of)}
+/* gris y sin contenido: al correr la de adelante tiene que leerse "hay más", no un hueco blanco */
+.swCard.detras{transform:scale(.95) translateY(13px);background:var(--surface-2);box-shadow:var(--sombra-1);z-index:0}
+.swCard.detras .ci{opacity:.3}
+#swPila .swCard:not(.detras){z-index:1}
+.swCard.va{transition:transform .32s ease-out,opacity .32s}
+.swCard .ci{width:64px;height:64px;display:flex;align-items:center;justify-content:center;border-radius:16px;background:var(--surface-violeta);color:var(--violeta)}
+.swCard .ci .ic{width:36px;height:36px}
+.swCard.trampa .ci{background:#FFE6D6;color:var(--naranja-txt)}
+.swCard .nm{font-family:var(--font-display);font-weight:900;text-transform:uppercase;font-size:clamp(18px,3.4vw,26px);line-height:1.1}
+.swCard .mt{font-family:var(--font-num);font-weight:700;font-size:clamp(30px,6vw,46px);color:var(--lima-txt);line-height:1}
+.swCard .hr{font-weight:700;font-size:clamp(12px,1.8vw,15px);color:var(--ink-2);background:var(--surface-2);border-radius:var(--r-pill);padding:4px 14px}
+.swCard .d{font-weight:500;font-size:clamp(12.5px,1.9vw,15px);color:var(--ink-2);line-height:1.35;max-width:88%}
+.swCard .fte{font-weight:700;letter-spacing:1.5px;font-size:11px;color:var(--violeta)}
+.swCard.trampa .fte{color:var(--naranja-txt)}
+.swCard .nohrs{font-weight:800;font-size:12.5px;color:var(--magenta-txt)}
+/* el sello que aparece al arrastrar */
+.swCard .sello{position:absolute;top:20px;font-family:var(--font-display);font-weight:900;font-size:clamp(24px,5vw,38px);
+  border:5px solid;border-radius:12px;padding:2px 14px;opacity:0;transition:opacity .12s;pointer-events:none}
+.swCard .sello.si{right:18px;transform:rotate(13deg);color:var(--lima-txt);border-color:var(--lima-txt)}
+.swCard .sello.no{left:18px;transform:rotate(-13deg);color:var(--magenta-txt);border-color:var(--magenta-txt)}
+#swBtns{display:flex;gap:16px;justify-content:center}
+.swB{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:clamp(112px,26vw,146px);
+  min-height:60px;border:none;border-radius:var(--r-pill);cursor:pointer;font-family:var(--font-display);font-weight:900;
+  font-size:22px;box-shadow:var(--sombra-2);transition:transform var(--dur) var(--pop)}
+.swB span{font-family:var(--font-ui);font-weight:700;font-size:12px;letter-spacing:.5px}
+.swB.no{background:var(--surface);color:var(--magenta-txt);border:2px solid var(--borde)}
+.swB.si{background:var(--lima-of);color:#173D00}
+.swB:hover{transform:translateY(-3px)}
+.swB:active{transform:scale(.95)}
+.swB:disabled{opacity:.35;cursor:not-allowed;transform:none}
 /* ====== LOS BILLETES: repartir plata tiene que parecerse a repartir plata ====== */
 #fajo{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:9px 4px 0}
 .bill{position:relative;width:clamp(74px,10vw,104px);aspect-ratio:2.05/1;border-radius:7px;flex-shrink:0;
@@ -480,7 +522,8 @@ body.arrastrando .gCard{cursor:copy}
     </div>
     <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
       <button class="btn amarillo grande" onclick="irPaso(1)">Armarlo <svg class="ic"><use href="#i-flecha"/></svg></button>
-      <button class="btn grande" onclick="verSala()"><svg class="ic"><use href="#i-wifi"/></svg> El Trimestre de Juan · jugar en equipos</button>
+      <button class="btn grande" onclick="verSala('host')"><svg class="ic"><use href="#i-wifi"/></svg> Crear sala · soy el proyector</button>
+      <button class="btn grande" onclick="verSala()">Entrar a una sala</button>
       <button class="btn" id="btnSeguir" style="display:none" onclick="irPaso(1)"><svg class="ic"><use href="#i-replay"/></svg> Seguir el mío</button>
     </div>
     <div id="ticker"></div>
@@ -497,7 +540,6 @@ body.arrastrando .gCard{cursor:copy}
     <div class="salaSlots" id="slotsIni" style="display:none"></div>
     <div id="salaTeclas"></div>
     <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px">
-      <button class="btn" id="btnProyector" onclick="entrarProyector()"><svg class="ic"><use href="#i-wifi"/></svg> Proyector: solo mirar</button>
       <button class="btn" id="btnSalaVolver">Volver</button>
     </div>
   </div>
@@ -550,6 +592,27 @@ body.arrastrando .gCard{cursor:copy}
     </div></div>
     <div class="caja" id="f1Caso" style="padding:11px 16px;margin-bottom:12px;font-weight:600;font-size:clamp(12.5px,1.8vw,15px)"></div>
     <div class="cards" id="cardsOp"></div>
+  </div>
+</section>
+
+<!-- ========= SALA: el mercado, de a una (mes 1) ========= -->
+<section class="screen" id="swipe">
+  <div class="wiz" style="align-items:center;display:flex;flex-direction:column;justify-content:center;gap:12px;max-width:560px;min-height:100vh;padding-bottom:20px">
+    <div class="wizHead" style="width:100%;justify-content:space-between">
+      <div class="paso dsp" style="background:var(--azul);color:#fff">MES 1 · CONSEGUIR PLATA</div>
+      <div class="gtimer mono" id="timerSw">4:00</div>
+    </div>
+    <div id="swBarra">
+      <div><span class="l">HORAS LIBRES</span><b class="mono" id="swHoras">12</b></div>
+      <div><span class="l">CONSEGUIDO</span><b class="mono" id="swExtra">$0</b></div>
+      <div><span class="l">OFERTA</span><b class="mono" id="swCount">1/15</b></div>
+    </div>
+    <div id="swPila"></div>
+    <div id="swBtns">
+      <button class="swB no" id="swNo" onclick="swDecide(0)">✕<span>Paso</span></button>
+      <button class="swB si" id="swSi" onclick="swDecide(1)">✓<span>La agarro</span></button>
+    </div>
+    <button class="btn" id="swVerTodas" onclick="swSalir()" style="padding:9px 18px;font-size:14px">Ver todas juntas</button>
   </div>
 </section>
 
@@ -1041,8 +1104,15 @@ const JOLV=[
  {id:'objetivo', ic:'i-estrella', n:'La tableta', s:'su gran objetivo, en cuotas propias'},
 ];
 
-let SALA=null, sbClient=null, sCode=[], sIni=[], sPaso=0, G=null, gTimerInt=null;
-function verSala(){ sCode=[]; sIni=[]; sPaso=0; armarTeclasSala(); pintarSala(); show('sala'); $('barra').classList.remove('on'); $('gBarra').classList.remove('on'); }
+let SALA=null, sbClient=null, sCode=[], sIni=[], sPaso=0, sModo='equipo', G=null, gTimerInt=null;
+/* el que crea la sala es el proyector y no configura nada: le viene un código sorteado y toca LISTO */
+const CODIGOS=['TEJA','PINO','SOLE','RUTA','MATE','CERR','BOTA','LOMA','NIDO','CANO','FARO','TUNA'];
+function verSala(modo){
+  sModo=modo==='host'?'host':'equipo';
+  sCode=sModo==='host'?CODIGOS[Math.floor(Math.random()*CODIGOS.length)].split(''):[];
+  sIni=[]; sPaso=0; armarTeclasSala(); pintarSala(); show('sala');
+  $('barra').classList.remove('on'); $('gBarra').classList.remove('on');
+}
 function armarTeclasSala(){
   const tec=$('salaTeclas'); if(tec.childElementCount) return;
   'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ '.split('').forEach(l=>{ const b=document.createElement('button'); b.textContent=l===' '?'␣':l; b.onclick=()=>salaKey(l); tec.appendChild(b); });
@@ -1072,23 +1142,29 @@ function salaInvalido(p){
   setTimeout(()=>{ h.style.color=''; if($('sala').classList.contains('on')) pintarSala(); },2000);
 }
 function salaListo(){
-  if(sPaso===0){ if(sCode.length!==4){ salaInvalido(0); return; } sPaso=1; sfxCoin(); pintarSala(); }
+  if(sPaso===0){
+    if(sCode.length!==4){ salaInvalido(0); return; }
+    if(sModo==='host'){ sfxCoin(); entrarSala(true); return; }  /* el host no elige nada más */
+    sPaso=1; sfxCoin(); pintarSala();
+  }
   else { if(sIni.join('').trim().length<2){ salaInvalido(1); return; } entrarSala(); }
 }
 function pintarSala(){
-  $('btnProyector').style.display=sPaso===0?'':'none';
   const bv=$('btnSalaVolver');
   bv.textContent=sPaso===1?'← Cambiar código':'Volver';
   bv.onclick=sPaso===1?()=>{ sPaso=0; sfxTap(); pintarSala(); }:()=>{ show('home'); attract(); };
-  $('salaTit').textContent=sPaso===0?'Código de sala':'Nombre del equipo';
-  $('salaHint').innerHTML=(sPaso===0?'Elijan un código de 4 letras y pónganlo igual en todas las máquinas.':'Así los ve el resto en el tablero (hasta 12 letras).')
+  $('salaTit').textContent=sPaso===0?(sModo==='host'?'El código de tu sala':'Código de sala'):'Nombre del equipo';
+  $('salaHint').innerHTML=(sPaso===0
+      ?(sModo==='host'
+        ?'Este es el código que van a escribir los equipos. Cambialo si querés, o dale <b>Enter</b> y listo.'
+        :'Escribí el código que muestra el proyector.')
+      :'Así los ve el resto en el tablero (hasta 12 letras).')
     +'<br><span style="font-weight:600;color:var(--ink-2);font-size:.85em">Escribí con el teclado · Enter para seguir</span>';
   const rC=$('slotsCode'); rC.innerHTML='';
   for(let i=0;i<4;i++){ const d=document.createElement('div'); d.className='slot'+(sPaso===0&&i===Math.min(sCode.length,3)?' act':''); d.textContent=sCode[i]||''; rC.appendChild(d); }
   $('slotsIni').style.display=sPaso===1?'flex':'none';
   $('slotsIni').innerHTML='<div class="nameBox dsp">'+(sIni.join('').replace(/ /g,'&nbsp;'))+'<span class="caret"></span></div>';
 }
-function entrarProyector(){ if(sCode.length!==4){ salaInvalido(0); return; } entrarSala(true); }
 function loadSB(){ return window.supabase?Promise.resolve():new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
 function reintentar(){
   $('btnRetryL').style.display='none'; $('btnRetryE').style.display='none';
@@ -1209,8 +1285,9 @@ function forzarCierreLocal(){
   if(!G||!SALA||!SALA.playing) return;
   if($('evOv').classList.contains('on')){ resolverEv(evAuto,true); return; }
   if($('coachOv').classList.contains('on')) cerrarCoach();
+  if($('swipe').classList.contains('on')){ swSalir(); }
   if($('f1').classList.contains('on')||$('f2').classList.contains('on')){
-    clearInterval(gTimerInt); gT.el=null; autoCerrarFase();
+    clearInterval(gTimerInt); gT.act=false; autoCerrarFase();
   }
 }
 function cuentaRegresiva(){
@@ -1307,7 +1384,7 @@ function empezarJuego(){
   JGASTOS.forEach(c=>G.plan[c.id]=c.ini);
   JOLV.forEach(c=>G.plan[c.id]=0);
   SALA.playing=true; latir(true);
-  pintarF1(); show('f1'); $('gBarra').classList.add('on'); gBarra(); gTimer(1,240); mostrarCoach(1);
+  iniSwipe(); $('gBarra').classList.add('on'); gBarra(); gTimer(1,240); mostrarCoach(1);
   gProg();
 }
 const extraTot=()=>OPS.reduce((a,o)=>a+(G.ops[o.id]?o.m:0),0);
@@ -1327,28 +1404,31 @@ function scoreAhora(){
 /* el reloj cierra de verdad: al llegar a cero hay GRACIA segundos y después la fase se cierra sola.
    Sin esto, un equipo lento congela al taller entero: el podio espera a que TODOS terminen. */
 const GRACIA=20;
-let gT={t:0, el:null, gracia:false, pausado:false};
+/* el reloj se pinta en la pantalla que esté activa, no en un id fijo: la fase 1 pasa por
+   dos pantallas (el swipe y la grilla) y el reloj es el mismo */
+let gT={t:0, act:false, gracia:false, pausado:false};
 function gTimer(fase,seg){
   clearInterval(gTimerInt);
-  const el=$('timer'+fase); if(!el) return;
-  gT={t:seg, el, gracia:false, pausado:false};
-  el.classList.remove('rojo'); pintarGT();
+  gT={t:seg, act:true, gracia:false, pausado:false};
+  document.querySelectorAll('.gtimer').forEach(e=>e.classList.remove('rojo'));
+  pintarGT();
   gTimerInt=setInterval(tickGT,1000);
 }
 function pintarGT(){
-  if(!gT.el) return;
-  gT.el.textContent = gT.gracia ? 'CIERRA EN '+gT.t+'s' : Math.floor(gT.t/60)+':'+String(gT.t%60).padStart(2,'0');
-  if(gT.gracia||gT.t<=30) gT.el.classList.add('rojo');
+  if(!gT.act) return;
+  const el=document.querySelector('.screen.on .gtimer'); if(!el) return;
+  el.textContent = gT.gracia ? 'CIERRA EN '+gT.t+'s' : Math.floor(gT.t/60)+':'+String(gT.t%60).padStart(2,'0');
+  if(gT.gracia||gT.t<=30) el.classList.add('rojo');
 }
 function tickGT(){
-  if(gT.pausado||!gT.el) return;
+  if(gT.pausado||!gT.act) return;
   gT.t--;
   if(!gT.gracia){
     if(gT.t<=0){ gT.gracia=true; gT.t=GRACIA; sfxNo(); }
     else if(gT.t<=10) sfxTick();
     pintarGT(); return;
   }
-  if(gT.t<=0){ clearInterval(gTimerInt); gT.el=null; autoCerrarFase(); return; }
+  if(gT.t<=0){ clearInterval(gTimerInt); gT.act=false; autoCerrarFase(); return; }
   pintarGT(); sfxTick();
 }
 /* el reloj se congela mientras hay un modal arriba: el evento ya trae su propio timer */
@@ -1363,7 +1443,7 @@ function autoCerrarFase(){
       if(!peor) break;
       delete G.ops[peor.id];
     }
-    pintarF1(); gBarra(); gProg(); ejecutarFase1();
+    pintarF1(); show('f1'); gBarra(); gProg(); ejecutarFase1();
   } else {
     let g=0;
     while(asignado()>disponible() && g++<400){
@@ -1373,6 +1453,73 @@ function autoCerrarFase(){
     }
     pintarF2(); gBarra(); gProg(); cerrarFase();
   }
+}
+/* ---- el mercado de a una, solo en el mes 1 ----
+   En el mes 2 va la grilla directo: ahí hay que COMPARAR lo que tenías con lo que quedó
+   (ofertas que crecieron, que se pincharon, puertas cerradas) y de a una no se puede.
+   Al terminar la pila se cae en la grilla igual, para repasar antes de confirmar. */
+let swIdx=0, swDrag=null;
+function iniSwipe(){ swIdx=0; pintarSwipe(); show('swipe'); }
+function swSalir(){ swDrag=null; pintarF1(); show('f1'); gBarra(); gProg(); }
+function pintarSwipe(){
+  if(swIdx>=OPS.length){ swSalir(); return; }
+  const o=OPS[swIdx], sig=OPS[swIdx+1];
+  const libres=G.horas-horasTot();
+  const noEntra=!o.bloq&&!o.fija&&o.h>libres;
+  $('swHoras').textContent=libres+' de '+G.horas;
+  $('swHoras').parentElement.classList.toggle('sinh',libres<=0);
+  $('swExtra').textContent=fmt(extraTot());
+  $('swCount').textContent=(swIdx+1)+'/'+OPS.length;
+  $('swSi').disabled=!!(o.bloq||o.fija||noEntra);
+  $('swPila').innerHTML=
+    (sig?'<div class="swCard detras'+(sig.trampa?' trampa':'')+'"><div class="ci"><svg class="ic"><use href="#'+(FIC[sig.f]||'i-bille')+'"/></svg></div></div>':'')+
+    '<div class="swCard'+(o.trampa?' trampa':'')+'" id="swCard" onpointerdown="swIni(event)">'+
+      '<div class="sello si">LA AGARRO</div><div class="sello no">PASO</div>'+
+      '<div class="fte">'+o.f+'</div>'+
+      '<div class="ci"><svg class="ic"><use href="#'+(FIC[o.f]||'i-bille')+'"/></svg></div>'+
+      '<div class="nm">'+o.n+'</div>'+
+      '<div class="mt">'+(o.bloq?'—':'+'+fmt(o.m))+'</div>'+
+      '<div class="hr">'+o.h+' h por semana</div>'+
+      '<div class="d">'+o.d+'</div>'+
+      (o.bloq?'<div class="nohrs">Esta puerta ya se cerró</div>':o.fija?'<div class="nohrs">Ya la tiene fija</div>':
+       noEntra?'<div class="nohrs">No le quedan horas para esto</div>':'')+
+    '</div>';
+}
+function swIni(e){
+  const c=$('swCard'); if(!c) return;
+  e.preventDefault(); c.setPointerCapture(e.pointerId);
+  swDrag={x0:e.clientX, c};
+  c.onpointermove=swMueve; c.onpointerup=swSuelta; c.onpointercancel=swSuelta;
+}
+function swMueve(e){
+  if(!swDrag) return;
+  const dx=e.clientX-swDrag.x0, c=swDrag.c;
+  c.style.transform='translateX('+dx+'px) rotate('+(dx/22)+'deg)';
+  const si=c.querySelector('.sello.si'), no=c.querySelector('.sello.no');
+  si.style.opacity=dx>40?Math.min(1,(dx-40)/60):0;
+  no.style.opacity=dx<-40?Math.min(1,(-dx-40)/60):0;
+}
+function swSuelta(e){
+  if(!swDrag) return;
+  const dx=e.clientX-swDrag.x0, c=swDrag.c;
+  swDrag=null; c.onpointermove=c.onpointerup=c.onpointercancel=null;
+  if(Math.abs(dx)<95){ c.style.transform=''; c.querySelectorAll('.sello').forEach(s=>s.style.opacity=0); return; }
+  if(dx>0 && $('swSi').disabled){ c.style.transform=''; c.querySelectorAll('.sello').forEach(s=>s.style.opacity=0); sfxNo(); return; }
+  c.classList.add('va');
+  c.style.transform='translateX('+(dx>0?900:-900)+'px) rotate('+(dx>0?32:-32)+'deg)';
+  c.style.opacity='0';
+  swDecide(dx>0?1:0, true);
+}
+function swDecide(si, yaAnimado){
+  if(!G||swIdx>=OPS.length) return;
+  const o=OPS[swIdx];
+  if(si){
+    if($('swSi').disabled){ sfxNo(); return; }
+    G.ops[o.id]=true; sfxCoin();
+  } else sfxTap();
+  swIdx++;
+  gBarra(); gProg();
+  setTimeout(pintarSwipe, yaAnimado?300:0);
 }
 /* ----- fase EXPANDIR (mes 1 y mes 2) ----- */
 function pintarF1(){
@@ -1745,7 +1892,7 @@ const confirmarFase=conLock(function(){
   cerrarFase();
 });
 function cerrarFase(){
-  clearInterval(gTimerInt); gT.el=null; $('gBarra').classList.remove('on');
+  clearInterval(gTimerInt); gT.act=false; $('gBarra').classList.remove('on');
   if(G.mes===1) shock1(); else shock2();
 }
 /* Los imprevistos suman EXACTAMENTE lo que antes restaba el shock de golpe ($2.000 el mes 1,
@@ -1918,7 +2065,7 @@ function finDelEquipo(){
   $('espCode').textContent=SALA.code;
   pintarEsp(true);
 }
-const etapaActual=()=>['f1','f2','shock','inter','mes30'].find(s=>$(s)&&$(s).classList.contains('on'))||'';
+const etapaActual=()=>['swipe','f1','f2','shock','inter','mes30'].find(s=>$(s)&&$(s).classList.contains('on'))||'';
 /* el proyector no tenía forma de saber el reloj de cada equipo: ahora late una vez por segundo */
 let latInt=null;
 function latir(on){ clearInterval(latInt); latInt=null; if(on) latInt=setInterval(()=>gProg(false),1000); }
@@ -1927,7 +2074,7 @@ function gProg(guardar){
   const fase=G.mes===1?G.fase:2+G.fase;
   SALA.ch.send({type:'broadcast',event:'prog',payload:{id:SALA.id, ini:SALA.ini, fase, ronda:SALA.ronda,
     extra:extraTot()+(G.mes===2?G.extra1:0), score:scoreAhora(), trampas:G.trampas, shock1Ok:G.shock1Ok,
-    t:(gT.el?gT.t:null), gracia:!!gT.gracia, etapa:etapaActual(), mes:G.mes}});
+    t:(gT.act?gT.t:null), gracia:!!gT.gracia, etapa:etapaActual(), mes:G.mes}});
   /* snapshot para retomar tras recarga/crash (el latido no reescribe localStorage cada segundo) */
   if(guardar===false) return;
   try{ localStorage.setItem('cpv_sala_'+SALA.code, JSON.stringify({id:SALA.id, ini:SALA.ini, ronda:SALA.ronda, G, ts:Date.now()})); }catch(e){}
@@ -1964,7 +2111,7 @@ function pintarEsp(fuerza){
   if(lobby) $('espCodeBig').textContent=SALA.code;
   $('espCodeTop').textContent=lobby?'':SALA.code;
   /* el reloj del host: el del equipo al que más le falta, para saber cuándo cierra el último */
-  const corriendo=jug.filter(r=>!r.fin&&!r.caido&&typeof r.t==='number'&&(r.etapa==='f1'||r.etapa==='f2'));
+  const corriendo=jug.filter(r=>!r.fin&&!r.caido&&typeof r.t==='number'&&(r.etapa==='f1'||r.etapa==='f2'||r.etapa==='swipe'));
   const tMax=corriendo.length?Math.max(...corriendo.map(r=>r.t)):null;
   const enGracia=corriendo.some(r=>r.gracia)&&!corriendo.some(r=>!r.gracia);
   $('espRelojBox').style.display=(enJuego&&tMax!=null)?'':'none';

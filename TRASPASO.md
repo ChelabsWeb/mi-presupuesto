@@ -105,6 +105,31 @@ días y caen dos imprevistos que el colchón absorbe o no, en vivo.
   clave en un juego cuyo propio contenido enseña a no apostar.
 - Dura ~7s. Por eso los `waitForSelector('#shock.on')` de la suite subieron a 25s.
 
+## Crear sala vs. entrar (agosto 2026)
+
+Antes había un solo botón y el proyector tenía que escribir el código **y además** acordarse de tocar
+"Proyector: solo mirar". Ahora son dos caminos desde el home:
+
+- **Crear sala · soy el proyector**: le viene un **código sorteado** de `CODIGOS` ya cargado. Toca Enter
+  y es host. No configura nada más — no elige modo ni pone nombre.
+- **Entrar a una sala**: escribe el código que ve en el proyector y el nombre del equipo.
+
+El botón `#btnProyector` y `entrarProyector()` se eliminaron.
+
+## El mercado de a una (swipe) — agosto 2026
+
+El mes 1 arranca en **`#swipe`**: una oferta por vez, a pantalla completa. Se arrastra a la derecha para
+agarrarla (con sello **LA AGARRO**) o a la izquierda para pasar; también hay botones ✕ / ✓.
+
+- **Solo en el mes 1.** En el mes 2 va la grilla directo, porque ahí hay que **comparar** lo que tenías
+  con lo que quedó (ofertas que crecieron, que se pincharon, puertas cerradas), y de a una no se puede.
+- **Al terminar la pila cae en la grilla** (`swSalir()`), para repasar antes de confirmar. El botón
+  **"Ver todas juntas"** hace el mismo salto en cualquier momento: el swipe es para decidir rápido,
+  la grilla para comparar. Los tests usan ese botón (`aGrilla()`).
+- Si no le quedan horas, el ✓ se apaga solo y la tarjeta lo dice.
+- **El reloj ya no vive en un id fijo**: `pintarGT()` pinta en `.screen.on .gtimer`, porque la fase 1
+  ahora pasa por dos pantallas. `gT.el` pasó a ser `gT.act`.
+
 ## La pantalla de conseguir plata (agosto 2026)
 
 - **Cabezal `#horason`** (mismo CSS que `#platon`): horas libres que le quedan en grande + barra +

@@ -11,11 +11,11 @@
 (el modo sala usa Supabase Realtime; sin internet no hay juego). Audio ayuda pero no es obligatorio.
 
 1. En **todas** las máquinas: abrir `https://chelabsweb.github.io/mi-presupuesto/`
-2. En la del **proyector**: `El Trimestre de Juan · jugar en equipos` → escribir un **código de 4 letras**
-   (inventalo vos: `TEJA`, `PIN1`, lo que sea) → **`Proyector: solo mirar`**.
-   La pantalla se pone violeta noche y muestra **el código gigante**.
-3. En **cada máquina de equipo**: mismo botón → **el mismo código** → **nombre del equipo**
-   (que lo elijan ellos, hasta 12 letras: engancha más).
+2. En la del **proyector**: **`Crear sala · soy el proyector`**. Ya te viene un código sorteado —
+   dale **Enter** y listo. (Si querés otro, borralo y escribí el que quieras.) La pantalla se pone
+   violeta noche y muestra **el código gigante**.
+3. En **cada máquina de equipo**: **`Entrar a una sala`** → **el código del proyector** → **nombre del
+   equipo** (que lo elijan ellos, hasta 12 letras: engancha más).
 4. El proyector va mostrando las máquinas conectadas. Cuando estén todas, **desde el proyector**
    tocás **`¡Arrancar!`** — arranca en todas a la vez, con cuenta regresiva.
 
@@ -36,7 +36,7 @@
 
 | Momento | Reloj | Qué pasa | Qué decís vos |
 |---|---|---|---|
-| **Mes 1 · Conseguir plata** | 4:00 | Eligen changas y ventas. Tienen 12 h/semana. Hay 3 tarjetas **PLATA RÁPIDA** sorteadas entre 5. | *"No todo lo que paga es ingreso. Miren de dónde sale la plata."* No les digas cuáles son trampa. |
+| **Mes 1 · Conseguir plata** | 4:00 | Las ofertas van pasando **de a una**: la arrastran a la derecha para agarrarla o a la izquierda para pasar. Tienen 12 h/semana y hay 3 tarjetas **PLATA RÁPIDA** sorteadas entre 5. Con **"Ver todas juntas"** pasan a la grilla para comparar. | *"No todo lo que paga es ingreso. Miren de dónde sale la plata."* No les digas cuáles son trampa. |
 | **Se revela la trampa** | — | Si cayeron, el juego explica cada una y les resta **−1.500 pts** c/u. | Acá parás 30 seg. **Es el momento pedagógico más fuerte del juego.** |
 | **Evento: el cliente urgente** | 1:00 | Cobrar $1.500 y faltar al parcial / negociar el plazo / rechazar. | *"¿Hay una tercera opción?"* (sí: negociar) |
 | **Mes 1 · Repartir la plata** | 3:15 | **Arrastran billetes** ($500/$1.000/$5.000) a donde va la plata — o tocan la tarjeta para sumar de a $500. Las **amarillas** dan puntos; en $0 restan **−1.500** c/u. | *"Cada peso con nombre. La plata sin nombre se gasta sola."* |
