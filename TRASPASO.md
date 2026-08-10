@@ -116,6 +116,22 @@ Antes había un solo botón y el proyector tenía que escribir el código **y ad
 
 El botón `#btnProyector` y `entrarProyector()` se eliminaron.
 
+## El tutorial para proyectar (agosto 2026)
+
+Screen **`#tuto`**, 8 pantallas que el docente pasa **antes** de jugar, en el proyector. Se abre con el
+botón **"Cómo se juega"** del lobby del proyector (`#espTuto`, visible solo antes de arrancar) y también
+desde el home.
+
+- Se pasa con **flechas / Espacio / PageUp-Down**, `Esc` para salir: en un proyector nadie quiere buscar
+  el mouse. Los botones están igual para touch.
+- Hereda el **violeta noche** (`#tuto` está en el mismo selector que `#espectador`).
+- Las slides viven en el array `TUTO` (`t` título, `v` HTML del visual, `x` texto). Los visuales son
+  **maquetas mínimas** con `.tvCard` / `.tvBill` / `.tvDias`, no capturas: si cambia la UI del juego no
+  se rompen ni quedan desactualizadas.
+- **Una idea por pantalla y nada de párrafos**: el que explica es el docente, esto es el apoyo.
+- Ojo con `.tvDias`: los `<i>` necesitan `display:block` y el grid `flex:0 0 auto`, si no colapsan
+  dentro del contenedor flex y la pantalla queda vacía.
+
 ## La subasta a ciegas (agosto 2026)
 
 **Lo único del juego donde los equipos compiten de verdad.** Hasta acá eran tres partidas paralelas con

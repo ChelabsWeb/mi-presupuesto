@@ -38,7 +38,7 @@
   --rojo:var(--magenta-txt); --rosa:var(--naranja-of);
 }
 /* violeta noche: mismos nombres, otros valores (los estilos inline del JS heredan) */
-#espectador,#goOv{
+#espectador,#goOv,#tuto{
   --tinta:#FFFFFF; --muted:rgba(255,255,255,.75);
   --papel:transparent; --papel2:var(--glass); --borde:var(--glass-borde);
   --verdeTxt:#74D526; --rojo:var(--rosa-noche);
@@ -282,6 +282,42 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:600;letter-spac
 #platonPts{text-align:right;flex-shrink:0}
 #platonPtsN{display:block;font-family:var(--font-num);font-weight:700;font-size:clamp(22px,3.6vw,36px);color:var(--violeta)}
 
+/* ====== TUTORIAL PARA PROYECTAR: se lee desde el fondo del salón ====== */
+#tuto{padding:26px 4vw 0}
+#tuto::before,#tuto::after{content:'';position:fixed;left:0;right:0;height:8px;background:var(--cinta);z-index:5}
+#tuto::before{top:0} #tuto::after{bottom:0}
+#tuto .kick{color:var(--amarillo-of)}
+#tutoBody{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;max-width:1000px;margin:0 auto;width:100%}
+#tutoTit{font-size:clamp(30px,5.6vw,64px);line-height:1.02;color:#fff}
+#tutoTxt{font-weight:600;font-size:clamp(15px,2.3vw,28px);line-height:1.45;color:rgba(255,255,255,.9);max-width:900px}
+#tutoTxt b{color:var(--amarillo-of)}
+#tutoTxt .chico{display:block;margin-top:10px;font-size:.72em;color:rgba(255,255,255,.62);font-weight:500}
+#tutoVisual{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;min-height:clamp(120px,22vh,210px)}
+/* maquetas mínimas: no son capturas, son el gesto */
+.tvCard{background:var(--glass);border:1.5px solid var(--glass-borde);border-radius:var(--r-md);padding:14px 18px;
+  min-width:clamp(120px,17vw,190px);color:#fff;text-align:center;backdrop-filter:blur(6px)}
+.tvCard .n{font-family:var(--font-display);font-weight:900;font-size:clamp(12px,1.5vw,17px);line-height:1.15}
+.tvCard .m{font-family:var(--font-num);font-weight:700;font-size:clamp(19px,3vw,34px);color:var(--lima-of);margin-top:3px}
+.tvCard .s{font-size:clamp(10px,1.2vw,14px);color:rgba(255,255,255,.7);font-weight:600;margin-top:3px}
+.tvCard.oro{border-color:var(--amarillo-of);background:rgba(251,197,4,.14)}
+.tvCard.oro .m{color:var(--amarillo-of)}
+.tvCard.mal{border-color:var(--naranja-of);background:rgba(247,96,37,.16)}
+.tvFlecha{font-size:clamp(22px,3.6vw,44px);color:var(--amarillo-of);font-weight:900}
+.tvBill{width:clamp(78px,10vw,116px);aspect-ratio:2.05/1;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-num);font-weight:700;font-size:clamp(13px,1.8vw,20px);color:#231045;border:1.5px solid rgba(0,0,0,.2);
+  box-shadow:2px 2px 0 rgba(0,0,0,.18),4px 4px 0 rgba(0,0,0,.12)}
+/* flex:0 0 auto + display:block, si no los <i> inline colapsan dentro del contenedor flex */
+.tvDias{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;width:min(88vw,460px);flex:0 0 auto}
+.tvDias i{display:block;aspect-ratio:1;border-radius:6px;background:rgba(255,255,255,.16)}
+.tvDias i.ok{background:rgba(116,213,38,.55)}
+.tvDias i.mal{background:var(--magenta-of)}
+#tutoPie{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:16px 0 26px}
+#tutoPie .btn{background:transparent;color:#fff;border-color:var(--glass-borde)}
+#tutoPie .btn.amarillo{background:var(--amarillo-of);color:var(--ink);border:none}
+#tutoPie .btn:disabled{opacity:.3;cursor:not-allowed}
+#tutoPuntos{display:flex;gap:7px}
+#tutoPuntos i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.28)}
+#tutoPuntos i.act{background:var(--amarillo-of);transform:scale(1.3)}
 /* ====== SUBASTA A CIEGAS: lo único donde los equipos se pelean entre sí ====== */
 #subOferta{padding:16px 20px;width:100%}
 #subOferta .n{font-family:var(--font-display);font-weight:900;text-transform:uppercase;font-size:clamp(18px,3.2vw,26px);line-height:1.1}
@@ -551,6 +587,7 @@ body.arrastrando .gCard{cursor:copy}
       <button class="btn grande" onclick="verSala('host')"><svg class="ic"><use href="#i-wifi"/></svg> Crear sala · soy el proyector</button>
       <button class="btn grande" onclick="verSala()">Entrar a una sala</button>
       <button class="btn" id="btnSeguir" style="display:none" onclick="irPaso(1)"><svg class="ic"><use href="#i-replay"/></svg> Seguir el mío</button>
+      <button class="btn" onclick="abrirTuto()">Cómo se juega</button>
     </div>
     <div id="ticker"></div>
   </div>
@@ -617,6 +654,22 @@ body.arrastrando .gCard{cursor:copy}
     </div></div>
     <div class="caja" id="f1Caso" style="padding:11px 16px;margin-bottom:12px;font-weight:600;font-size:clamp(12.5px,1.8vw,15px)"></div>
     <div class="cards" id="cardsOp"></div>
+  </div>
+</section>
+
+<!-- ========= TUTORIAL PARA PROYECTAR (lo pasa el docente antes de jugar) ========= -->
+<section class="screen" id="tuto">
+  <div id="tutoBody">
+    <div id="tutoNum" class="kick"></div>
+    <h2 class="dsp" id="tutoTit"></h2>
+    <div id="tutoVisual"></div>
+    <div id="tutoTxt"></div>
+  </div>
+  <div id="tutoPie">
+    <button class="btn" id="tutoAnt" onclick="tutoIr(-1)">← Anterior</button>
+    <div id="tutoPuntos"></div>
+    <button class="btn amarillo dsp" id="tutoSig" onclick="tutoIr(1)">Siguiente →</button>
+    <button class="btn" onclick="cerrarTuto()">Salir</button>
   </div>
 </section>
 
@@ -751,6 +804,7 @@ body.arrastrando .gCard{cursor:copy}
     <div id="espMalas" class="caja" style="display:none;width:100%;padding:16px 20px"></div>
     <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px">
       <button class="btn amarillo grande dsp" id="espArrancar" style="display:none" onclick="arrancar()">¡Arrancar! <svg class="ic"><use href="#i-flecha"/></svg></button>
+      <button class="btn" id="espTuto" style="display:none" onclick="abrirTuto()">Cómo se juega</button>
       <button class="btn" id="espForzar" style="display:none" onclick="forzarTodas(this)">Cerrar la fase en todas</button>
       <button class="btn amarillo" id="btnRetryE" style="display:none" onclick="reintentar()">Reintentar</button>
       <button class="btn" onclick="salirSala(this)">Salir</button>
@@ -2066,6 +2120,73 @@ function mostrarInterludio(){
     '<div class="fila3" style="font-weight:800"><span>PUNTOS DEL MES 1</span><span class="mono">'+G.pts.toLocaleString('es-UY')+' pts</span></div>';
   show('inter'); sfxCoin();
 }
+/* ---- TUTORIAL PARA PROYECTAR ----
+   Lo pasa el docente antes de jugar. Cada pantalla es UNA idea, sin párrafos: el que explica es él,
+   esto es el apoyo visual. Se pasa con las flechas del teclado o con los botones. */
+const ic=n=>'<svg class="ic" style="width:1.5em;height:1.5em"><use href="#'+n+'"/></svg>';
+const TUTO=[
+ {t:'Ustedes son los asesores de Juan',
+  v:'<div class="tvCard"><div class="n">JUAN IGNACIO · 19</div><div class="m">$10.000</div><div class="s">por mes, en un café</div></div>'+
+    '<div class="tvFlecha">+</div>'+
+    '<div class="tvCard oro"><div class="n">SU SUEÑO</div><div class="m">$8.000</div><div class="s">una tableta gráfica</div></div>',
+  x:'Vive en La Teja, estudia de noche y le quedan <b>12 horas libres por semana</b>.<br>Ustedes le manejan la plata durante <b>2 meses</b>.<span class="chico">Gana el equipo que arme el mejor plan. No el que junte más.</span>'},
+ {t:'Cada equipo, una máquina',
+  v:'<div class="tvCard"><div class="n">ESTA PANTALLA</div><div class="s" style="margin-top:8px">muestra el código,<br>el reloj y las posiciones</div></div>'+
+    '<div class="tvFlecha">→</div>'+
+    '<div class="tvCard oro"><div class="n">LA DE USTEDES</div><div class="s" style="margin-top:8px">entrar a una sala<br>+ el código de acá<br>+ nombre del equipo</div></div>',
+  x:'Elijan un nombre de equipo que se lea de lejos: va a estar todo el juego en esta pantalla.<span class="chico">La partida la arranco yo desde acá. Ustedes solo entran y esperan.</span>'},
+ {t:'Paso 1 · Consíganle laburo',
+  v:'<div class="tvCard"><div class="n">CARICATURAS<br>POR ENCARGO</div><div class="m">+$2.500</div><div class="s">4 h · rinde $625/h</div></div>'+
+    '<div class="tvFlecha">←→</div>'+
+    '<div class="tvCard"><div class="n">PASEO DE<br>PERROS</div><div class="m">+$1.800</div><div class="s">3 h · rinde $600/h</div></div>',
+  x:'Las ofertas pasan <b>de a una</b>: arrastren a la derecha para agarrarla, a la izquierda para pasar.<br>Ojo con las <b>horas</b>: son 12 y no más.<span class="chico">Cada tarjeta dice cuánto rinde POR HORA. Ese número sirve para comparar.</span>'},
+ {t:'No todo lo que paga es ingreso',
+  v:'<div class="tvCard mal"><div class="n">PLATA RÁPIDA</div><div class="m">+$4.000</div><div class="s">1 h · rinde $4.000/h</div></div>',
+  x:'Algunas ofertas pagan muchísimo por casi nada de laburo.<br><b>Antes de aceptar, pregúntense de dónde sale esa plata.</b><span class="chico">Si nadie regala nada, ¿por qué te pagarían tanto a vos?</span>'},
+ {t:'Paso 2 · Repartan el mes',
+  v:'<div class="tvBill" style="background:#A8E86A">500</div><div class="tvBill" style="background:#FBC504">1.000</div><div class="tvBill" style="background:#F9A03F">5.000</div>'+
+    '<div class="tvFlecha">→</div>'+
+    '<div class="tvCard oro"><div class="n">IMPREVISTOS</div><div class="s">DA PUNTOS</div></div>',
+  x:'Arrastren los billetes a donde va cada peso.<br>Las tarjetas <b>amarillas dan puntos</b>; si quedan en $0, <b>restan</b>.<span class="chico">Y la plata que dejen sin repartir se evapora: la mitad se pierde.</span>'},
+ {t:'Después pasa el mes',
+  v:'<div class="tvDias"><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="mal"></i><i class="ok"></i><i class="ok"></i>'+
+    '<i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i>'+
+    '<i class="ok"></i><i class="mal"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>',
+  x:'Los 30 días pasan solos y en el medio <b>se rompen cosas</b>.<br>Si guardaron para imprevistos, Juan ni se despeina. Si no, va al fiado.<span class="chico">Acá no hay nada que tocar: lo que decidía esto ya lo decidieron antes.</span>'},
+ {t:'La subasta: una sola para todos',
+  v:'<div class="tvCard oro"><div class="n">EL MURAL<br>DE LA FERIA</div><div class="m">+$3.200</div><div class="s">se lo lleva UN equipo</div></div>',
+  x:'Cada equipo ofrece <b>horas en secreto</b>. Se lo lleva el que más ofrece… <b>y las paga</b>.<span class="chico">Esas horas ya no las tienen para el resto del mes. Ojo con entusiasmarse.</span>'},
+ {t:'¿Y cómo se gana?',
+  v:'<div class="tvCard"><div class="n">CONSEGUIR PLATA</div><div class="s" style="margin-top:6px">suma</div></div>'+
+    '<div class="tvCard oro"><div class="n">GUARDAR CON<br>UN DESTINO</div><div class="s" style="margin-top:6px">suma más</div></div>'+
+    '<div class="tvCard mal"><div class="n">DEJARLA<br>SIN NOMBRE</div><div class="s" style="margin-top:6px">resta</div></div>',
+  x:'El puntaje queda <b>oculto hasta el final</b>: van a ver la plata que junta cada equipo, no quién va ganando.<span class="chico">Spoiler: casi nunca gana el que más junta. Gana el que mejor la ordena.</span>'},
+];
+let tutoI=0;
+function abrirTuto(){ tutoI=0; pintarTuto(); show('tuto'); }
+function cerrarTuto(){ sfxTap(); if(SALA&&SALA.spec){ show('espectador'); pintarEsp(); } else { show('home'); attract(); } }
+function pintarTuto(){
+  const s=TUTO[tutoI];
+  $('tutoNum').textContent='CÓMO SE JUEGA · '+(tutoI+1)+' DE '+TUTO.length;
+  $('tutoTit').textContent=s.t;
+  $('tutoVisual').innerHTML=s.v||'';
+  $('tutoTxt').innerHTML=s.x;
+  $('tutoAnt').disabled=tutoI===0;
+  $('tutoSig').innerHTML=tutoI===TUTO.length-1?'¡A jugar!':'Siguiente →';
+  $('tutoPuntos').innerHTML=TUTO.map((_,i)=>'<i class="'+(i===tutoI?'act':'')+'"></i>').join('');
+}
+function tutoIr(d){
+  if(tutoI+d<0) return;
+  if(tutoI+d>=TUTO.length){ cerrarTuto(); return; }
+  tutoI+=d; sfxTap(); pintarTuto();
+}
+/* el docente pasa las pantallas con las flechas, sin buscar el mouse en el proyector */
+document.addEventListener('keydown',e=>{
+  if(!$('tuto').classList.contains('on')) return;
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); tutoIr(1); }
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); tutoIr(-1); }
+  else if(e.key==='Escape'){ e.preventDefault(); cerrarTuto(); }
+});
 /* ---- SUBASTA A CIEGAS ----
    Lo único del juego donde los equipos compiten de verdad: hasta acá eran tres partidas
    paralelas con un marcador compartido. Una sola changa buena, se la lleva un equipo.
@@ -2340,6 +2461,8 @@ function pintarEsp(fuerza){
     ml.innerHTML='<div class="mTit">El análisis del trimestre</div>'+li.map(x=>`<div class="mRow">${x}</div>`).join('')+
       '<div class="mRow"><b>Para la ronda:</b> ¿qué golpe fue peor: la bici rota o las horas recortadas? ¿Por qué el mismo colchón sirve para los dos?</div>';
   } else ml.style.display='none';
+  /* el tutorial se muestra antes de arrancar, que es cuando el docente lo explica */
+  $('espTuto').style.display=(SALA.spec&&!enJuego&&!todos)?'':'none';
   $('espForzar').style.display=(SALA.spec&&enJuego)?'':'none';
   $('espArrancar').style.display=(SALA.spec&&rows.length>0&&!enJuego)||(todos&&!SALA.spec)?'':'none';
   $('espArrancar').innerHTML=(todos?'Revancha ':'¡Arrancar! ')+'<svg class="ic"><use href="#i-flecha"/></svg>';
