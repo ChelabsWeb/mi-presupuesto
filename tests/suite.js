@@ -13,7 +13,7 @@ async function entrar(p, code, nom) {
   await p.locator('#home button', { hasText: 'Entrar a una sala' }).click();
   for (const c of code) await tecla(p, c);
   await tecla(p, 'LISTO'); for (const c of nom) await tecla(p, c); await tecla(p, 'LISTO');
-  await p.waitForSelector('#btnArrancar', { state: 'visible', timeout: 15000 });
+  await p.waitForFunction(() => document.getElementById('lobbyEstado').textContent.includes('ADENTRO'), null, { timeout: 30000 });
 }
 /* el host crea la sala: le viene un codigo sorteado, se borra y se escribe el que queremos */
 async function crearSala(p, code) {
@@ -21,6 +21,24 @@ async function crearSala(p, code) {
   for (let i = 0; i < 4; i++) await p.keyboard.press('Backspace');
   await p.keyboard.type(code);
   await p.keyboard.press('Enter');
+}
+/* el mes 2 arranca con la subasta a ciegas: ofertar 0 la deja desierta y no toca los scores */
+async function pasarSubasta(p) {
+  await p.waitForSelector('#subasta.on', { timeout: 15000 });
+  await p.locator('#subOk').click();
+  await p.waitForFunction(() => document.getElementById('subOk').textContent.includes('mes 2'), null, { timeout: 40000 });
+  await p.locator('#subOk').click();
+  await p.waitForSelector('#f1.on', { timeout: 10000 });
+}
+/* solo el proyector arranca: todo test que juegue necesita un host */
+async function salaLista(mk, code, nombre) {
+  const H = await mk(), E = await mk();
+  await H.goto(U); await E.goto(U);
+  await crearSala(H, code);
+  await entrar(E, code, nombre);
+  await H.waitForFunction(() => document.querySelectorAll('#espCols .eqCol').length === 1, null, { timeout: 30000 });
+  await H.locator('#espArrancar').click();
+  return { H, E };
 }
 /* el mes 1 arranca en el mercado de a una; los tests van derecho a la grilla */
 async function aGrilla(p) {
@@ -128,7 +146,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     const ptsM1 = await A.evaluate(() => G.pts);
     ok('T2.5 pts mes 1 exactos (15.375)', ptsM1 === 15375, '' + ptsM1);
     await A.getByRole('button', { name: /Vamos al mes 2/ }).click();
-    await A.waitForSelector('#f1.on', { timeout: 8000 });
+    await pasarSubasta(A);
     // proyector tardío entra ahora
     const P2 = await mk();
     await P2.goto(U);
@@ -166,7 +184,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await esp(700); await B.locator('#shockBtn').click();
     await B.waitForSelector('#inter.on', { timeout: 8000 });
     await B.getByRole('button', { name: /Vamos al mes 2/ }).click();
-    await B.waitForSelector('#f1.on', { timeout: 8000 });
+    await pasarSubasta(B);
     ok('T2.11 fiado en caso mes 2', (await B.locator('#f1Caso').textContent()).includes('fiado'));
     await confirmar(B);
     await B.waitForSelector('#evOv.on', { timeout: 8000 });
@@ -218,12 +236,8 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
   /* ══════════ T4 · TIMEOUT DEL EVENTO (60s reales) ══════════ */
   console.log('\n[T4] Timeout del evento (esperando 62s…)');
   {
-    const p = await mk();
-    await p.goto(U);
-    await entrar(p, 'SOLO', 'UNITARIO');
-    await p.locator('#btnArrancar').click(); await esp(700); // aviso única máquina
-    ok('T4.1 aviso única máquina', (await p.locator('#lobbyEstado').textContent()).includes('ÚNICA'));
-    await p.locator('#btnArrancar').click();
+    const { H, E: p } = await salaLista(mk, 'SOLO', 'UNITARIO');
+    ok('T4.1 el equipo no puede arrancar la partida', await p.locator('#btnArrancar').count() === 0);
     await aGrilla(p);
     await p.locator('#op_iva').click(); await confirmar(p);
     await p.waitForSelector('#evOv.on', { timeout: 8000 });
@@ -243,11 +257,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
   /* ══════════ T6 · RELOJ QUE CIERRA, TECLADO Y BOTÓN "TODO" ══════════ */
   console.log('\n[T6] Cierre automático, teclado y reparto rápido');
   {
-    const p = await mk();
-    await p.goto(U);
-    await entrar(p, 'RELO', 'CRONOS');
-    await p.locator('#btnArrancar').click(); await esp(700);
-    await p.locator('#btnArrancar').click();
+    const { E: p } = await salaLista(mk, 'RELO', 'CRONOS');
     await aGrilla(p);
     // hace falta ingreso extra real: con el plan inicial ($11.000) y solo $10.000 de sueldo, se arranca en rojo
     for (const id of ['iva', 'beca', 'juegos', 'cari']) { await p.locator('#op_' + id).click(); await esp(80); }
@@ -302,11 +312,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
   /* ══════════ T8 · EL MERCADO DE A UNA (swipe) ══════════ */
   console.log('\n[T8] Mercado de a una');
   {
-    const p = await mk();
-    await p.goto(U);
-    await entrar(p, 'SWIP', 'DEDOS');
-    await p.locator('#btnArrancar').click(); await esp(700);
-    await p.locator('#btnArrancar').click();
+    const { E: p } = await salaLista(mk, 'SWIP', 'DEDOS');
     await p.waitForSelector('#swipe.on', { timeout: 25000 });
     ok('T8.1 el mes 1 arranca en el mercado de a una', true);
     const id0 = await p.evaluate(() => OPS[swIdx].id);
@@ -342,6 +348,43 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await p.context().close();
   }
 
+  /* ══════════ T9 · SUBASTA A CIEGAS ══════════ */
+  console.log('\n[T9] Subasta a ciegas');
+  {
+    const H = await mk(), E1 = await mk(), E2 = await mk();
+    await H.goto(U); await E1.goto(U); await E2.goto(U);
+    await crearSala(H, 'PUJA');
+    await entrar(E1, 'PUJA', 'ALTOS'); await entrar(E2, 'PUJA', 'BAJOS');
+    await H.waitForFunction(() => document.querySelectorAll('#espCols .eqCol').length === 2, null, { timeout: 30000 });
+    await H.locator('#espArrancar').click();
+    for (const p of [E1, E2]) await aGrilla(p);
+    // saltar al estado de subasta: acá se prueba el remate, no el camino hasta él
+    for (const p of [E1, E2]) await p.evaluate(() => { G.mes = 2; G.horas = 11; G.ops = {}; OPS = []; abrirSubasta(); });
+    await esp(600);
+    ok('T9.1 nadie ve la oferta del otro', (await E1.locator('#subEstado').textContent()).trim() === '');
+    for (let i = 0; i < 5; i++) await E1.locator('.subB').last().click();
+    for (let i = 0; i < 2; i++) await E2.locator('.subB').last().click();
+    ok('T9.2 la puja sube con los botones', (await E1.locator('#subH').textContent()) === '5');
+    await E1.locator('#subOk').click(); await esp(300);
+    ok('T9.3 tras ofertar queda esperando', (await E1.locator('#subEstado').textContent()).includes('Esperando'));
+    await E2.locator('#subOk').click();
+    await E1.waitForFunction(() => document.getElementById('subOk').textContent.includes('mes 2'), null, { timeout: 30000 });
+    await E2.waitForFunction(() => document.getElementById('subOk').textContent.includes('mes 2'), null, { timeout: 30000 });
+    ok('T9.4 gana el que más ofrece', (await E1.locator('#subTit').textContent()).includes('ustedes'), await E1.locator('#subTit').textContent());
+    ok('T9.5 el que pierde lo ve', (await E2.locator('#subTit').textContent()).includes('ALTOS'), await E2.locator('#subTit').textContent());
+    ok('T9.6 se muestran todas las pujas al cerrar', (await E2.locator('#subEstado').textContent()).includes('BAJOS: 2 h'));
+    // el ganador PAGA lo que ofertó: esas horas ya no las tiene
+    await E1.locator('#subOk').click();
+    await E1.waitForSelector('#f1.on', { timeout: 10000 });
+    ok('T9.7 el ganador paga las horas que ofertó', await E1.evaluate(() => horasTot()) === 5, '' + await E1.evaluate(() => horasTot()));
+    ok('T9.8 y no puede soltar la changa que ganó', await E1.evaluate(() => OPS.find(o => o.id === 'lote').fija) === 1);
+    await E2.locator('#subOk').click();
+    await E2.waitForSelector('#f1.on', { timeout: 10000 });
+    ok('T9.9 el perdedor conserva todas sus horas', await E2.evaluate(() => horasTot()) === 0);
+    ok('T9.10 sin errores JS', H._errs.length + E1._errs.length + E2._errs.length === 0, [...H._errs, ...E1._errs, ...E2._errs].join(';'));
+    await H.context().close(); await E1.context().close(); await E2.context().close();
+  }
+
   /* ══════════ T7 · CONTROL DEL FACILITADOR + GUARD DE REINICIO ══════════ */
   console.log('\n[T7] Facilitador y guard de reinicio');
   {
@@ -359,14 +402,14 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await PF.locator('#espForzar').click();
     await EF.waitForSelector('#evOv.on', { timeout: 10000 });
     ok('T7.3 el proyector cierra la fase de los equipos', true);
-    // una máquina que entra tarde no debe poder reiniciarle la ronda a todos de un toque
+    // una máquina que entra tarde no puede reiniciarle la ronda a nadie: no tiene con qué
     const XF = await mk(); await XF.goto(U);
     await entrar(XF, 'FACI', 'TARDE');
     await XF.waitForFunction(() => Object.keys(SALA.prog || {}).length > 0, null, { timeout: 30000 });
-    await XF.locator('#btnArrancar').click(); await esp(700);
-    ok('T7.4 avisa antes de reiniciar una ronda en curso', (await XF.locator('#lobbyEstado').textContent()).includes('EN CURSO'), await XF.locator('#lobbyEstado').textContent());
-    // aunque el aviso se ignore, el equipo que está jugando no se reinicia
-    await XF.locator('#btnArrancar').click(); await esp(1500);
+    ok('T7.4 el que entra tarde no tiene botón de arrancar', await XF.locator('#btnArrancar').count() === 0);
+    // y aunque mandara un start a mano, el equipo que juega lo ignora
+    await XF.evaluate(() => SALA.ch.send({ type: 'broadcast', event: 'start', payload: { ronda: 99, seed: 7 } }));
+    await esp(1500);
     ok('T7.5 el equipo en juego ignora el start ajeno', await EF.locator('#goOv.on').count() === 0 && await EF.locator('#evOv.on').count() === 1);
     ok('T7.6 sin errores JS', PF._errs.length + EF._errs.length + XF._errs.length === 0, [...PF._errs, ...EF._errs, ...XF._errs].join(';'));
     await PF.context().close(); await EF.context().close(); await XF.context().close();

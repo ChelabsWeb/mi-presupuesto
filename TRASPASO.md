@@ -116,6 +116,33 @@ Antes había un solo botón y el proyector tenía que escribir el código **y ad
 
 El botón `#btnProyector` y `entrarProyector()` se eliminaron.
 
+## La subasta a ciegas (agosto 2026)
+
+**Lo único del juego donde los equipos compiten de verdad.** Hasta acá eran tres partidas paralelas con
+un marcador compartido. Va al **arranque del mes 2**, entre el interludio y el mercado (`abrirSubasta()`
+→ `mes2Mercado()`, screen `#subasta`).
+
+- Una sola changa buena (`LOTE`, el mural, +$3.200). Cada equipo ofrece **horas en secreto**.
+- **Subasta a primer precio: el que gana PAGA lo que ofertó.** Esas horas se le descuentan del mes
+  (el lote entra a `OPS` con `h` = lo pujado y `fija:1`, así no lo puede soltar). Por eso ofertar alto
+  tiene costo real: te quedás sin horas para el resto del mercado.
+- **Resuelve el proyector**, que es el único que ve todas las pujas (`pujaRecibida` → `resolverSubasta`
+  → broadcast `remate`). Esto es lo que hace que "solo el host arranca" sea necesario, no un capricho.
+- **Empate o todos en cero: queda desierta.** Por eso los tests ofertan 0 y los scores exactos no cambian.
+- **Desfasaje entre equipos:** el proyector espera **25s desde la primera puja** y resuelve con lo que haya;
+  cada equipo auto-oferta a los 30s si no tocó nada. Al que llega tarde se le re-emite el remate ya cantado
+  (`SALA.remate`) para que no quede colgado — pero no participa. Si los equipos van muy desfasados,
+  alinealos antes con "Cerrar la fase en todas".
+
+## Solo el proyector arranca la partida (agosto 2026)
+
+Se eliminó `#btnArrancar` del lobby de los equipos: ahora ven "ESPERANDO QUE EL PROYECTOR ARRANQUE".
+`arrancar()` corta de entrada si no es `SALA.spec`. Además de evitar arranques accidentales, es lo que
+permite que el host sea el árbitro de la subasta.
+
+**Ojo con los tests:** todo test que juegue necesita un host. Está el helper `salaLista(mk, code, nombre)`
+que arma proyector + equipo y arranca.
+
 ## El mercado de a una (swipe) — agosto 2026
 
 El mes 1 arranca en **`#swipe`**: una oferta por vez, a pantalla completa. Se arrastra a la derecha para

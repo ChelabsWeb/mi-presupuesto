@@ -43,6 +43,7 @@
 | **El mes, día por día** | ~7s | Pasan los 30 días. Caen **dos imprevistos ($2.000 en total)** y el colchón los absorbe… o no. | Callate y dejá que lo miren. Se explica solo. |
 | **Veredicto del mes 1** | — | Zafan si tenían **$2.000** entre imprevistos + fondo. | *"¿Quién tenía colchón?"* |
 | **Interludio** | — | Desglose del mes 1 con los puntos a la vista. | Dejalos leer. Acá entienden el puntaje. |
+| **Subasta a ciegas** | ~1 min | **Una sola changa buena para toda la sala.** Cada equipo ofrece **horas en secreto** y se la lleva el que más pone… **y las paga**. Al cerrar se revelan todas las ofertas. | *"¿Cuánto vale? Ojo que las horas que ofrecen ya no las tienen para el resto del mes."* Es el momento más ruidoso del taller. |
 | **Mes 2 · Renegociar** | 3:00 | El mercado cambió: ofertas que crecieron, otras que se pincharon, puertas cerradas. Ahora **11 h**. | *"Sostener también es decidir. ¿Qué sueltan?"* |
 | **Evento: la oferta imperdible** | 1:00 | Auriculares 40% off en 6 cuotas "sin interés". | *"¿La oferta es hoy o el precio es hoy?"* |
 | **Mes 2 · El plan final** | 4:00 | Se desbloquea la **meta 2** si la tableta quedó asegurada. | — |
@@ -99,6 +100,8 @@ El proyector ya te tira el análisis. Sumale estas:
   mucha plata por casi nada de laburo).
 - Ojo con **la diferencia entre estafas**: en las entradas truchas o el "sistema infalible" **te estafan a vos**.
   En prestar la cuenta para giros, **vos pasás a ser parte del delito**. Una te vacía, la otra te marca.
+- **De la subasta:** ¿el que ganó el mural hizo negocio? Pagó horas que después le faltaron. *Ganar una
+  subasta pagando de más se llama "maldición del ganador" y pasa igual con un auto, un alquiler o un celular.*
 - **¿Al equipo que ganó le entró más plata, o la ordenó mejor?** (casi siempre: la ordenó mejor)
 - **¿Alguno dejó plata sin repartir?** Esa se evapora a la mitad — como en la vida.
 
