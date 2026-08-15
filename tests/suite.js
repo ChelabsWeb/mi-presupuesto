@@ -348,6 +348,40 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await p.context().close();
   }
 
+  /* ══════════ T10 · TUTORIAL PARA PROYECTAR ══════════ */
+  console.log('\n[T10] Tutorial');
+  {
+    const p = await mk();
+    await p.goto(U);
+    await p.locator('#home button', { hasText: 'Cómo se juega' }).click();
+    await p.waitForSelector('#tuto.on', { timeout: 8000 });
+    const total = await p.evaluate(() => TUTO.length);
+    ok('T10.1 abre desde el home', (await p.locator('#tutoNum').textContent()).includes('1 DE ' + total));
+    ok('T10.2 no se puede retroceder en la primera', await p.locator('#tutoAnt').isDisabled());
+    // el docente pasa con las flechas, sin buscar el mouse en el proyector
+    await p.keyboard.press('ArrowRight'); await esp(200);
+    ok('T10.3 avanza con la flecha', (await p.locator('#tutoNum').textContent()).includes('2 DE'));
+    await p.keyboard.press('ArrowLeft'); await esp(200);
+    ok('T10.4 vuelve con la flecha', (await p.locator('#tutoNum').textContent()).includes('1 DE'));
+    // todas las pantallas tienen título, texto y se pintan sin romper
+    for (let i = 0; i < total - 1; i++) { await p.keyboard.press('ArrowRight'); await esp(90); }
+    const ultima = await p.evaluate(() => ({ tit: tutoTit.textContent, txt: tutoTxt.textContent.length, vis: tutoVisual.children.length }));
+    ok('T10.5 llega a la última entera', ultima.tit.length > 0 && ultima.txt > 40 && ultima.vis > 0, JSON.stringify(ultima));
+    ok('T10.6 la última invita a jugar', (await p.locator('#tutoSig').textContent()).includes('jugar'));
+    await p.locator('#tutoSig').click(); await esp(300);
+    ok('T10.7 al terminar vuelve al home', await p.locator('#home.on').count() === 1);
+    // y desde el proyector queda accesible antes de arrancar
+    const H = await mk(); await H.goto(U);
+    await crearSala(H, 'TUTO');
+    await H.waitForSelector('#espTuto', { state: 'visible', timeout: 20000 });
+    await H.locator('#espTuto').click();
+    await H.waitForSelector('#tuto.on', { timeout: 8000 });
+    await H.keyboard.press('Escape'); await esp(300);
+    ok('T10.8 desde el proyector vuelve al proyector', await H.locator('#espectador.on').count() === 1);
+    ok('T10.9 sin errores JS', p._errs.length + H._errs.length === 0, [...p._errs, ...H._errs].join(';'));
+    await p.context().close(); await H.context().close();
+  }
+
   /* ══════════ T9 · SUBASTA A CIEGAS ══════════ */
   console.log('\n[T9] Subasta a ciegas');
   {
