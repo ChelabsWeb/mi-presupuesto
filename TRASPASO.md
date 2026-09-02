@@ -19,8 +19,8 @@ Juego web para el **Taller 2 "Presupuesto y Opciones"** del programa Pin! (BCU, 
 
 ## Cómo está hecho (stack)
 
-- **Un solo `index.html`** (~2.800 líneas): HTML + CSS + JS vanilla, sin frameworks, sin build.
-  **Fuentes embebidas en base64** (Archivo, Archivo Black, Chivo Mono: las mismas que 12 Meses, copiadas de su `index.html`). Nada de Google Fonts: anda sin internet salvo el modo sala.
+- **Un solo `index.html`** (~2.900 líneas): HTML + CSS + JS vanilla, sin frameworks, sin build.
+  **Fuentes embebidas en base64** (Fredoka, Nunito, Chivo Mono). Nada de Google Fonts: anda sin internet salvo el modo sala.
 - **`sw.js`**: service worker (cachea para offline; red-primero). Al cambiar el HTML subí el número de `C` (hoy `cpvpresu-v4`), la suite lo chequea.
 - **`tests/suite.js`**: suite E2E con Playwright (ver abajo).
 - **Multijugador sin servidor propio:** **Supabase Realtime** (solo canales broadcast/presence, sin base de datos). Proyecto "Sistema EDO by Chelabs". La API key del código es **publishable** (pública por diseño).
@@ -29,9 +29,11 @@ Juego web para el **Taller 2 "Presupuesto y Opciones"** del programa Pin! (BCU, 
 
 Pedido: polish visual anti-slop como el de 12 Meses, **más fácil y entendible, más divertido y un poco más largo**.
 
-1. **Misma piel que 12 Meses.** Se abandonó el "violeta noche" propio: ahora los dos juegos del stand son una familia (papel `#F3EEE2`, tinta `#003B8B`, amarillo, botones con canto de 3px, cero degradados/glass/sombras violetas). La cinta de 5 colores desapareció. El proyector es claro (el violeta se lavaba en proyectores reales).
-   - Los nombres de variables viejas (`--tinta`, `--rojo`, `--azul`, `--ink-2`, `--surface-violeta`, `--magenta-txt`…) siguen existiendo como **alias** en `:root`, porque el JS y el HTML emiten estilos inline con esos nombres. No los borres.
-   - `.dsp` es Archivo Black (un solo peso): no le pongas `font-weight:900`, el navegador sintetiza una negrita fea.
+1. **Piel "tablero de mesa"** (elegida por el usuario entre seis direcciones: cartón kraft con puntitos, cartas troqueladas con doble marco `.carta`, fichas de madera `.ficha`, botones con sombra dura desplazada, marco de madera en el proyector). Fuentes **Fredoka** (display, `--font-display`) + **Nunito** (UI) + Chivo Mono (relojes/números tabulares), las tres embebidas en base64 (sin Google Fonts). Tokens en `:root`: `--kraft`, `--crema`, `--cremita`, `--tinta` (marrón-negro), `--rojo` ladrillo, `--lima` y `--amarillo` oficiales, `--madera`.
+   - Los nombres de variables viejas (`--papel`, `--azul`, `--violeta`, `--ink-2`, `--surface-violeta`, `--magenta-txt`, `--verdeTxt`…) siguen existiendo como **alias** en `:root`, porque el JS y el HTML emiten estilos inline con esos nombres. No los borres.
+   - **Íconos = Twemoji** (`<symbol id="e-<codepoint>">` en el sprite, CC BY 4.0), un dibujo por changa/etiqueta (`ic:'e-…'` en `OPORTUNIDADES`, `TRAMPAS`, `mercadoMes2/3`, `JGASTOS`, `JOLV`, `INGRESOS`, `GASTOS`, `OLVIDADAS`). Se pintan con `icoSvg(id)`: clase `tw` (relleno) para `e-…`, `ic` (trazo) para los `i-…` de la UI. Para sumar uno: bajar el SVG de `https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/<codepoint>.svg`, envolverlo en `<symbol id="e-<codepoint>" viewBox="0 0 36 36">` y meterlo en el sprite.
+   - **Menos texto**: la carta del mercado tiene `corta` (una línea) y el "?" abre la `nota` completa (`verNota`); los eventos son cortos en la máquina y la historia larga (`EV_LARGO`) la muestra el proyector mientras algún equipo está `DECIDIENDO` (etapa `evento`/`trampa` en el latido, `evActual`); el boletín agrupa los renglones por `g` (plata/guardado/golpe/bonus/resta) y pliega el detalle; el cierre del mes es sello + dos números + chips (`#shockSello`, `#shockNums`, `#shockVer`); el lobby explica con tres fichas.
+   - El proyector tiene **pista** (`#espPista`): cada sticker avanza según la plata conseguida (el puntaje sigue oculto).
 2. **Equipos con sticker, sin tipear.** El lobby muestra los 12 animales de 12 Meses (`AVATARES`, `<symbol id="av-K">` en el sprite, Twemoji CC BY 4.0: mantener el crédito en `#credito`, README y acá). `SALA.av` viaja por presence, `prog`, `fin` y `puja`; los tomados se apagan (`avTomados`); al recibir `start` un equipo sin sticker recibe uno libre (`avLibre`). El nombre del equipo es el del animal. `retomar` guarda `av` en el snapshot.
 3. **Tres meses de verdad.** El motor se generalizó: `MESES[n]` (horas, relojes `t1`/`t2`, `umbral`, `pts`, `golpe`, `imprevistos`), `cerrarMes()` reemplaza a `shock1/shock2`, `irMes(n)` a `irMes2`, `mercadoDe(n)` incluye `mercadoMes3()`. Fase en el latido = `(mes-1)*2+fase` (1..6). El mes 3: mercado que consolida lo sostenido (cliente fijo, cantina, taller, otro mural si ganaron la subasta), **evento de la tableta en vidriera** (`evento3`: contado / 12 cuotas / amigo; las cuotas meten `G.cuota=850` como gasto fijo y `G.tabletaCuotas`), tres imprevistos ($3.000). Umbrales: 2.000 / 2.500 / 3.000. Colchón de acero = los tres (+1.500). La tableta en cuotas **no** cobra el bonus de +1.500.
 4. **Boletín del mes** (`mostrarInterludio`): cada renglón que suma o resta queda anotado en `G.bol` durante `cerrarMes()` y se muestra con signo y puntos; veredicto grande arriba; total del mes y acumulado. Es la misma cuenta de siempre, legible.
@@ -85,6 +87,8 @@ Entre el interludio del mes 1 y el mercado del mes 2 (`abrirSubasta` → `mes2Me
 - La tarjeta de reparto es `role="button"` (no `<button>`, no se pueden anidar botones).
 - El reloj se pinta en `.screen.on .gtimer` (`pintarGT`), porque la fase 1 pasa por dos pantallas.
 - `.opCard` necesita `overflow:visible` para que el badge PLATA RÁPIDA no se recorte (el recorte de 2 líneas vive en `.tt`).
+- La carta del mercado (`.swCard`) es una grilla de filas de altura fija: no cambia de tamaño entre changas. Si agregás una fila, sumala a `grid-template-rows`.
+- Twemoji se pinta con relleno: nunca le pongas la clase `ic` (que fuerza `fill:none`) a un `e-…`.
 - `.wizHead` es una grilla `paso/h2 | timer`: el reloj no se cae a una segunda fila con títulos largos.
 - El coach y los eventos pausan el reloj (`pausarGT`).
 - `evento3` se decide **después** de `irMes(3)`: la cuota se agrega al plan en el propio evento (`G.plan.cuota=850`), no en `irMes`.

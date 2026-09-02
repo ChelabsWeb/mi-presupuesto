@@ -23,7 +23,7 @@ Armá tu presupuesto en 3 pasos y 5 minutos, con la cartilla del taller: las **9
 
 ## Cómo está hecho
 
-Un solo `index.html` (HTML + CSS + JS vanilla, sin build), fuentes embebidas (Archivo, Archivo Black y Chivo Mono: anda sin internet salvo el modo sala), `sw.js` para offline. **Mismo sistema visual que [12 Meses](https://github.com/ChelabsWeb/endeudarse-bien-stand)**: papel cálido, tinta azul, paleta oficial BCU · Central para Vos, botones con canto, cero degradados.
+Un solo `index.html` (HTML + CSS + JS vanilla, sin build), fuentes embebidas (Fredoka, Nunito y Chivo Mono: anda sin internet salvo el modo sala), `sw.js` para offline. Piel **"tablero de mesa"**: cartón kraft, cartas troqueladas, fichas de madera con dibujos [Twemoji](https://github.com/jdecked/twemoji) (CC BY 4.0), amarillo y lima oficiales de Central para Vos, y un proyector con pista donde los equipos avanzan como peones.
 
 Tests: `cd tests && npm install && node server.js &` y `node suite.js` (Playwright; ver `tests/README.md`). Deploy: push a `main` → GitHub Pages.
 

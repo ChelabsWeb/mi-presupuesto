@@ -500,9 +500,10 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     const faltan = usados.filter(u => !defs.has(u));
     ok('T5.1 IDs referenciados existen', faltan.length === 0, faltan.join(','));
     ok('T5.2 sw v4', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('cpvpresu-v4'));
-    ok('T5.3 misma piel que 12 Meses, fuentes embebidas (sin Google Fonts)', h.includes("'Archivo Black'") && h.includes('#F3EEE2') && h.includes("'Chivo Mono'") && !h.includes('fonts.googleapis'));
+    ok('T5.3 piel tablero de mesa, fuentes embebidas (sin Google Fonts)', h.includes("font-family:'Fredoka'") && h.includes("font-family:'Nunito'") && h.includes("'Chivo Mono'") && h.includes('--kraft:') && !h.includes('fonts.googleapis'));
     ok('T5.4 los 12 stickers están en el sprite', new Set([...h.matchAll(/<symbol id="av-([a-z]+)"/g)].map(m => m[1])).size === 12);
-    ok('T5.5 sin restos de la piel violeta', !h.includes('#2B0A50') && !h.includes('--cinta') && !h.includes('backdrop-filter'));
+    ok('T5.5 sin restos de pieles viejas', !h.includes('#2B0A50') && !h.includes('--cinta') && !h.includes('backdrop-filter') && !h.includes("'Archivo Black'"));
+    ok('T5.6 ninguna changa ni etiqueta quedó con ícono de línea', !/ic:'i-[a-z]+'/.test(h));
   }
 
   console.log('\n════════ RESUMEN ════════');
