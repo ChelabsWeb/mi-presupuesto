@@ -40,7 +40,7 @@ Pedido: polish visual anti-slop como el de 12 Meses, **más fácil y entendible,
 
 ## Cómo se juega en el taller
 
-1. **Proyector:** "Crear sala" → le viene un código sorteado → Enter. Queda como host con el código gigante.
+1. **Proyector:** "Crear sala" y listo: sortea un código (`codigoNuevo`, ~40 palabras de 4 letras) y entra directo como host con el código gigante. Para volver a entrar a una sala que ya anda (proyector tardío, recarga) o para los tests: "Proyector con código" (`verSala('hostcode')`).
 2. **Equipos:** "Entrar con código" → el código → tocan un sticker. Aparecen en el proyector.
 3. Desde el proyector se toca **¡Arrancar!** (solo el host puede).
 4. Tres meses; puntaje oculto (`···`) hasta el **reveal final** con podio y análisis.

@@ -665,6 +665,7 @@ body.arrastrando .gCard{cursor:copy}
   <div class="cta2">
     <button class="btn" onclick="abrirTuto()">Cómo se juega</button>
     <button class="btn" onclick="irPaso(1)"><svg class="ic"><use href="#i-bille"/></svg> Armá tu presupuesto</button>
+    <button class="btn" onclick="verSala('hostcode')" title="Para volver a entrar como proyector a una sala que ya está andando">Proyector con código</button>
     <button class="btn" id="btnSeguir" style="display:none" onclick="irPaso(1)"><svg class="ic"><use href="#i-replay"/></svg> Seguir el mío</button>
   </div>
   <div id="ticker"></div>
@@ -1332,10 +1333,14 @@ const JOLV=[
 
 let SALA=null, sbClient=null, sCode=[], sModo='equipo', G=null, gTimerInt=null;
 /* el que crea la sala es el proyector y no configura nada: le viene un código sorteado y toca LISTO */
-const CODIGOS=['TEJA','PINO','SOLE','RUTA','MATE','CERR','BOTA','LOMA','NIDO','CANO','FARO','TUNA'];
+const CODIGOS=['TEJA','PINO','SOLE','RUTA','MATE','CERR','BOTA','LOMA','NIDO','CANO','FARO','TUNA','LUNA','RAMA','PAVO','DUNA','GOMA','LIMA','NUBE','PALO','RIZO','SAPO','TABA','VELA','YUYO','ZETA','BUHO','COPA','DADO','FILA','GATO','HADA','JUGO','KILO','LOBO','MOTO','NATA','OLLA','PEZ','RANA'];
+function codigoNuevo(){ let c=CODIGOS[Math.floor(Math.random()*CODIGOS.length)]; while(c.length<4) c+='X'; return c.split(''); }
+/* "Crear sala" no pregunta nada: sortea el código y ya es el proyector. "Proyector con código" (acceso
+   secundario) es para volver a entrar a una sala que ya está andando, o para los tests. */
 function verSala(modo){
-  sModo=modo==='host'?'host':'equipo';
-  sCode=sModo==='host'?CODIGOS[Math.floor(Math.random()*CODIGOS.length)].split(''):[];
+  if(modo==='host'){ sModo='host'; sCode=codigoNuevo(); $('barra').classList.remove('on'); $('gBarra').classList.remove('on'); sfxCoin(); entrarSala(true); return; }
+  sModo=modo==='hostcode'?'host':'equipo';
+  sCode=sModo==='host'?codigoNuevo():[];
   armarTeclasSala(); pintarSala(); show('sala');
   $('barra').classList.remove('on'); $('gBarra').classList.remove('on');
 }
@@ -1375,7 +1380,7 @@ function pintarSala(){
   bv.onclick=()=>{ show('home'); attract(); };
   $('salaTit').textContent=sModo==='host'?'El código de tu sala':'Código de sala';
   $('salaHint').innerHTML=(sModo==='host'
-        ?'Este es el código que van a escribir los equipos. Cambialo si querés, o dale <b>Enter</b> y listo.'
+        ?'Para volver a entrar como proyector a una sala que ya está andando: escribí su código y dale <b>Enter</b>.'
         :'Las 4 letras que muestra el proyector. El equipo se elige después, con un sticker.')
     +'<br><span style="font-size:.85em">Escribí con el teclado · Enter para seguir</span>';
   const rC=$('slotsCode'); rC.innerHTML='';

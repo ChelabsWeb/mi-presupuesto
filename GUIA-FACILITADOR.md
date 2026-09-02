@@ -15,8 +15,8 @@ Todas entran a **`https://chelabsweb.github.io/mi-presupuesto/`**
 | En el proyector | En cada máquina de equipo |
 |---|---|
 | **`Crear sala`** | **`Entrar con código`** |
-| Ya te viene un código sorteado → **Enter** | Escriben **el código del proyector** |
-| Listo, sos host | **Tocan un sticker**: ese es su equipo (Tiburones, Pulpos, Zorros…) |
+| Listo: el código aparece solo, gigante | Escriben **el código del proyector** |
+| Ya sos host | **Tocan un sticker**: ese es su equipo (Tiburones, Pulpos, Zorros…) |
 
 Nadie tipea nombres. Los stickers ya tomados se apagan. Si un equipo no eligió cuando arrancás, el juego le asigna uno libre.
 
@@ -92,7 +92,7 @@ Si sobra tiempo: **`Revancha`** en el proyector. Sortea otras trampas en otras p
 | Un equipo desaparece del tablero | A los 20 s queda en gris como **SE CAYÓ** y el juego sigue sin él. Si vuelve, se reincorpora. |
 | Un equipo tarda una eternidad | **`Cerrar la fase en todas`**. |
 | Un equipo llegó tarde a la subasta | Se resuelve sin él a los 25 s de la primera oferta. |
-| El proyector se prendió tarde | Entrá con el mismo código y `Crear sala`: se pone al día solo. |
+| El proyector se prendió tarde o se recargó | En el inicio, **`Proyector con código`** → el código de la sala → Enter: se pone al día solo. |
 | Dos equipos quieren el mismo sticker | No pueden: el tomado se apaga. Que elijan otro. |
 
 ---

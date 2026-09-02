@@ -20,9 +20,9 @@ async function entrar(p, code, idx) {
   await p.locator('#avGrid .avBtn').nth(idx || 0).click();
   await p.waitForFunction(() => /ADENTRO|CONECTADOS/.test(document.getElementById('lobbyEstado').textContent), null, { timeout: 30000 });
 }
-/* el host crea la sala: le viene un codigo sorteado, se borra y se escribe el que queremos */
+/* "Crear sala" sortea el código solo; para un código fijo los tests entran por "Proyector con código" */
 async function crearSala(p, code) {
-  await p.locator('#home button', { hasText: 'Crear sala' }).click();
+  await p.locator('#home button', { hasText: 'Proyector con código' }).click();
   for (let i = 0; i < 4; i++) await p.keyboard.press('Backspace');
   await p.keyboard.type(code);
   await p.keyboard.press('Enter');
