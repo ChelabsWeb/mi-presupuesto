@@ -1,25 +1,30 @@
-# Mi Presupuesto — Central para Vos (BCU Educa)
+# Mi Presupuesto · El Trimestre de Juan — Central para Vos (BCU Educa)
 
-**[▶ Abrir la herramienta](https://chelabsweb.github.io/mi-presupuesto/)** — armá tu presupuesto en 3 pasos y 5 minutos.
+**[▶ Abrir](https://chelabsweb.github.io/mi-presupuesto/)** — el juego por equipos del **Taller 2 "Presupuesto y Opciones"** del programa Pin! (INJU/MIDES + BCU): *expandir ingresos, ordenar gastos*. Y adentro, el armador de presupuesto personal.
 
-Reemplazo moderno de la herramienta de presupuesto de bcueduca.gub.uy, construido con la cartilla del **Taller 2 "Presupuesto y Opciones"** del programa Pin! (INJU/MIDES + BCU): **expandir ingresos, ordenar gastos**.
+## El Trimestre de Juan (modo sala: 2-3 máquinas + proyector, ~25 min)
 
-- **Paso 1 · Ingresos**: las 9 fuentes del taller (salario, cuenta propia, changas, reventa, descuentos, ayuda familiar —con calculadora de la *ayuda invisible*—, devolución de impuestos, ayuda estatal, premios).
-- **Paso 2 · Gastos**: las 13 etiquetas de la cartilla — las 9 clásicas + **las 4 que todos olvidan** (deuda, imprevistos ~5%, fondo de emergencia, plan de ahorro del gran objetivo).
-- **Paso 3 · Tu plan**: balance, **detector de olvidos** (como el desafío viral de "$30.000 alcanzan"), comparación con el hogar uruguayo promedio, jugadas personalizadas según tus números, y constancia imprimible estilo recibo.
-- **El Trimestre de Juan · modo sala (taller)**: 3 máquinas + proyector, ~20 min. Los equipos son
-  *asesores de Juan Ignacio* (el personaje oficial del taller) durante 2 meses simulados:
-  - **Conseguir plata**: las ofertas pasan **de a una** (se arrastran para agarrarlas o pasarlas), con
-    solo 12 h/semana. Cada tarjeta dice cuánto rinde **por hora** y si vuelve el mes que viene. Entre
-    medio hay 3 tarjetas **PLATA RÁPIDA** sorteadas entre 5: parecen el mejor negocio y no lo son.
-  - **Repartir la plata**: **billetes que se arrastran** a donde va cada peso. Las etiquetas de amarillo
-    dan puntos; la plata sin nombre se evapora.
-  - **Subasta a ciegas**: una sola changa buena para toda la sala, cada equipo ofrece horas en secreto
-    y el que gana **las paga**. Lo único donde los equipos compiten de verdad.
-  - **El mes, día por día**: se destapan los 30 días y caen los imprevistos. El colchón los absorbe… o no.
-  - **Proyector tipo host**: código siempre visible, reloj, leaderboard en vivo y podio con análisis.
-    El puntaje va oculto hasta el final. Requiere internet (Supabase Realtime).
-- **[Guía del facilitador](GUIA-FACILITADOR.md)**: el guion minuto a minuto para quien conduce el taller.
-- Guarda tu plan en el dispositivo y te compara con el mes anterior. PWA offline, un solo archivo HTML, cero dependencias.
+Los equipos son **asesores de Juan Ignacio** (19, La Teja, gana $10.000 en un café, quiere una tableta de $8.000, 12 horas libres por semana) durante **tres meses**. Gana el mejor plan, no el que más junta.
 
-Paleta oficial BCU · Central para Vos. Mismo sistema visual que el juego [12 Meses](https://github.com/ChelabsWeb/endeudarse-bien-stand).
+- **Equipos con sticker.** Cada máquina entra con el código del proyector y **elige un animal** (Tiburones, Pulpos, Zorros…): no se tipea nada. Los mismos 12 stickers que el juego 12 Meses.
+- **Conseguir plata.** En el mes 1 las changas pasan **de a una** (a la derecha la agarran, a la izquierda pasan); en los meses 2 y 3 se compara en grilla lo que creció, lo que se pinchó y lo que cerró. Cada tarjeta dice cuánto rinde **por hora**. Entre medio hay tarjetas **PLATA RÁPIDA** sorteadas: parecen el mejor negocio y no lo son.
+- **Ponerle nombre a cada peso.** Billetes que se arrastran a cada etiqueta. Las amarillas (imprevistos, fondo, tableta, meta 2) dan puntos; en $0 restan; la plata sin nombre se evapora.
+- **El mes, día por día.** Se destapan los 30 días y caen los imprevistos ($2.000, $2.500 y $3.000: cada mes pega más fuerte). El colchón los absorbe… o Juan va al fiado, que se paga el mes siguiente.
+- **Un evento por mes** con opciones A/B/C y reloj: el cliente urgente, la oferta "imperdible" en cuotas y, en el mes 3, **la tableta en vidriera** (contado, 12 cuotas "sin interés" o pedirle a un amigo).
+- **Subasta a ciegas** entre el mes 1 y el 2: un solo mural para toda la sala, se ofrece en horas y el que gana **las paga**.
+- **Boletín del mes** en cada máquina: veredicto grande (el colchón aguantó / no alcanzó) y cada renglón con su signo y sus puntos.
+- **Proyector tipo host:** código siempre visible, reloj, guía de la fase en grande, leaderboard por plata conseguida (el puntaje va oculto), subasta cantada en vivo, reveal de quién aguantó cada mes y podio literal con análisis para la charla de cierre.
+
+Requiere internet (Supabase Realtime, solo canales; sin base de datos). **[Guía del facilitador](GUIA-FACILITADOR.md)** con el guion minuto a minuto.
+
+## Mi Presupuesto (herramienta personal)
+
+Armá tu presupuesto en 3 pasos y 5 minutos, con la cartilla del taller: las **9 fuentes de ingreso** (con calculadora de la *ayuda invisible*), las **13 etiquetas de gasto** (las 9 clásicas + las 4 que todos olvidan), balance, **detector de olvidos**, comparación con el hogar uruguayo promedio, jugadas personalizadas y constancia imprimible. Guarda el plan en el dispositivo y lo compara con el mes anterior.
+
+## Cómo está hecho
+
+Un solo `index.html` (HTML + CSS + JS vanilla, sin build), fuentes embebidas (Archivo, Archivo Black y Chivo Mono: anda sin internet salvo el modo sala), `sw.js` para offline. **Mismo sistema visual que [12 Meses](https://github.com/ChelabsWeb/endeudarse-bien-stand)**: papel cálido, tinta azul, paleta oficial BCU · Central para Vos, botones con canto, cero degradados.
+
+Tests: `cd tests && npm install && node server.js &` y `node suite.js` (Playwright; ver `tests/README.md`). Deploy: push a `main` → GitHub Pages.
+
+Stickers de equipo: [Twemoji](https://github.com/jdecked/twemoji) · CC BY 4.0. Ver [TRASPASO.md](TRASPASO.md) para retomar el proyecto.

@@ -9,11 +9,16 @@ const R = []; // resultados
 function ok(nombre, cond, detalle) { R.push([cond ? 'PASS' : 'FAIL', nombre, detalle || '']); if (!cond) console.log('  ✗', nombre, '→', detalle || ''); else console.log('  ✓', nombre); }
 
 async function tecla(p, ch) { const l = ch === ' ' ? '␣' : ch; await p.locator('#salaTeclas button').filter({ hasText: new RegExp('^' + l + '$') }).first().click(); }
-async function entrar(p, code, nom) {
-  await p.locator('#home button', { hasText: 'Entrar a una sala' }).click();
+/* el equipo se ELIGE con un sticker (idx = posición en AVATARES: 0 CHANCHOS, 1 FLAMENCOS, 2 PULPOS, 3 TIBURONES, 4 ZORROS, 5 PERROS…).
+   Si la máquina está retomando (snapshot con sticker), no hay grilla: aparece Retomar. */
+async function entrar(p, code, idx) {
+  await p.locator('#home button', { hasText: 'Entrar con código' }).click();
   for (const c of code) await tecla(p, c);
-  await tecla(p, 'LISTO'); for (const c of nom) await tecla(p, c); await tecla(p, 'LISTO');
-  await p.waitForFunction(() => document.getElementById('lobbyEstado').textContent.includes('ADENTRO'), null, { timeout: 30000 });
+  await tecla(p, 'LISTO');
+  await p.waitForFunction(() => document.querySelector('#avGrid .avBtn') || document.getElementById('btnRetomar').style.display !== 'none', null, { timeout: 30000 });
+  if (await p.locator('#btnRetomar').isVisible()) return;
+  await p.locator('#avGrid .avBtn').nth(idx || 0).click();
+  await p.waitForFunction(() => /ADENTRO|CONECTADOS/.test(document.getElementById('lobbyEstado').textContent), null, { timeout: 30000 });
 }
 /* el host crea la sala: le viene un codigo sorteado, se borra y se escribe el que queremos */
 async function crearSala(p, code) {
@@ -31,11 +36,11 @@ async function pasarSubasta(p) {
   await p.waitForSelector('#f1.on', { timeout: 10000 });
 }
 /* solo el proyector arranca: todo test que juegue necesita un host */
-async function salaLista(mk, code, nombre) {
+async function salaLista(mk, code, idx) {
   const H = await mk(), E = await mk();
   await H.goto(U); await E.goto(U);
   await crearSala(H, code);
-  await entrar(E, code, nombre);
+  await entrar(E, code, idx || 0);
   await H.waitForFunction(() => document.querySelectorAll('#espCols .eqCol').length === 1, null, { timeout: 30000 });
   await H.locator('#espArrancar').click();
   return { H, E };
@@ -51,7 +56,8 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
 (async () => {
   require('fs').mkdirSync(OUT, { recursive: true });
   /* PW_CHANNEL=chrome usa el Chrome instalado en el sistema (si no se puede bajar el chromium de playwright) */
-  const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {});
+  /* PW_EXE=ruta/a/chrome.exe usa ese Chromium (p. ej. el de ms-playwright que ya está bajado) */
+  const browser = await chromium.launch(process.env.PW_EXE ? { executablePath: process.env.PW_EXE } : process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {});
   const mk = async () => { const pg = await (await browser.newContext({ viewport: { width: 1280, height: 800 } })).newPage(); pg._errs = []; pg.on('pageerror', e => pg._errs.push(e.message)); await pg.addInitScript(() => { try { sessionStorage.setItem('cpvCoach1', '1'); sessionStorage.setItem('cpvCoach2', '1'); } catch (e) {} }); return pg; };
 
   /* ══════════ T1 · HERRAMIENTA PERSONAL: matemática exacta + persistencia ══════════ */
@@ -59,7 +65,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
   {
     const p = await mk();
     await p.goto(U); await esp(500);
-    await p.getByRole('button', { name: /Armarlo/ }).click(); await esp(300);
+    await p.getByRole('button', { name: /Armá tu presupuesto/ }).click(); await esp(300);
     await p.locator('#card_salario').click(); await p.locator('#in_salario').fill('12000');
     await p.locator('#card_flia').click(); await p.locator('#in_flia').fill('3000');
     await p.locator('#card_flia input[type=checkbox]').nth(0).check(); // techo 10000
@@ -97,12 +103,12 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
              = 31.275
      B  −11.950 − 1.000 (sin colchón, el shock 2 ahora resta 2.500) = −12.950
         (a B el colchón no lo toca: cerró el mes 1 en cero)                                     */
-  console.log('\n[T2] Trimestre completo (scores exactos: A=31.275, B=−12.950)');
+  console.log('\n[T2] Trimestre completo, 3 meses (scores exactos: A=47.700, B=−20.075)');
   const P = await mk(), A = await mk(), B = await mk();
   {
     await P.goto(U); await A.goto(U); await B.goto(U);
     await crearSala(P, 'CIEN');
-    await entrar(A, 'CIEN', 'LOS CAPOS'); await entrar(B, 'CIEN', 'TIBURONES');
+    await entrar(A, 'CIEN', 3); await entrar(B, 'CIEN', 2); // A = TIBURONES, B = PULPOS
     await P.waitForFunction(() => document.querySelectorAll('#espCols .eqCol').length === 2, null, { timeout: 30000 });
     await P.locator('#espArrancar').click();
     await aGrilla(A); await aGrilla(B);
@@ -142,7 +148,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await esp(700); await A.locator('#shockBtn').click();
     await A.waitForSelector('#inter.on', { timeout: 8000 });
     const inter = await A.locator('#interCard').textContent();
-    ok('T2.4 interludio con desglose', inter.includes('PUNTOS DEL MES 1') && inter.includes('Fuentes de ingreso'), '');
+    ok('T2.4 boletín del mes con desglose', inter.includes('PUNTOS DEL MES 1') && inter.includes('fuentes') && inter.includes('aguantó'), '');
     const ptsM1 = await A.evaluate(() => G.pts);
     ok('T2.5 pts mes 1 exactos (15.375)', ptsM1 === 15375, '' + ptsM1);
     await A.getByRole('button', { name: /Vamos al mes 2/ }).click();
@@ -168,10 +174,30 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await A.locator('#evOps2 .op2').nth(1).click();
     await A.waitForSelector('#shock.on', { timeout: 25000 });
     await esp(700); await A.locator('#shockBtn').click();
+    // A: mes 3 (el trimestre tiene tres meses)
+    await A.waitForSelector('#inter.on', { timeout: 8000 });
+    ok('T2.7b boletín del mes 2 con acumulado', (await A.locator('#interCard').textContent()).includes('ACUMULADO'));
+    await A.locator('#interBtn').click();
+    await A.waitForSelector('#f1.on', { timeout: 10000 });
+    ok('T2.7c el mes 3 arranca con lo que sostuvo', await A.evaluate(() => G.mes === 3 && !!G.ops.cari3 && !!G.ops.taller3 && !!G.ops.iva3 && G.horas === 12));
+    await A.locator('#op_bici3').click(); await esp(100);
+    await confirmar(A);
+    await A.waitForSelector('#evOv.on', { timeout: 8000 });
+    ok('T2.7d evento de la tableta en vidriera', (await A.locator('#evTit').textContent()).toLowerCase().includes('tableta'));
+    await A.locator('#evOps2 .op2').nth(1).click(); // ev3 B: al contado, ya juntó la plata (+600)
+    await A.waitForSelector('#f2.on', { timeout: 8000 });
+    await A.evaluate(() => { for (let i = 0; i < 2; i++) ajustar('snacks', 500); for (let i = 0; i < 2; i++) ajustar('personal', 500);
+      for (let i = 0; i < 4; i++) ajustar('imprev', 500); for (let i = 0; i < 3; i++) ajustar('fondo', 500); for (let i = 0; i < 4; i++) ajustar('objetivo', 500); for (let i = 0; i < 4; i++) ajustar('meta2', 500); });
+    await confirmar(A);
+    await A.waitForSelector('#evOv.on', { timeout: 8000 }); // modal sin nombre (resto 2800)
+    await A.locator('#evOps2 .op2').nth(1).click();
+    await A.waitForSelector('#shock.on', { timeout: 25000 });
+    ok('T2.7e colchón de acero al cerrar el trimestre', (await A.locator('#shockVer').textContent()).includes('ACERO'));
+    await esp(700); await A.locator('#shockBtn').click();
     // B: retomar tras recarga (está en f2 mes 1)
     await B.evaluate(() => ajustar('snacks', -500)); await esp(400); // gProg persiste (marcador legal)
     await B.reload(); await esp(800);
-    await entrar(B, 'CIEN', 'TIBURONES');
+    await entrar(B, 'CIEN', 2);
     ok('T2.8 botón Retomar visible', await B.locator('#btnRetomar').isVisible());
     await B.locator('#btnRetomar').click(); await esp(600);
     await B.evaluate(() => gTimer(2, 9999)); // idem: B sigue esperando a A
@@ -201,19 +227,34 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await B.locator('#evOps2 .op2').nth(1).click();
     await B.waitForSelector('#shock.on', { timeout: 25000 });
     await esp(700); await B.locator('#shockBtn').click();
+    // B: mes 3, con el fiado del mes 2 a cuestas y la tableta en cuotas
+    await B.waitForSelector('#inter.on', { timeout: 8000 });
+    await B.locator('#interBtn').click();
+    await B.waitForSelector('#f1.on', { timeout: 10000 });
+    ok('T2.14b el fiado del mes 2 viaja al mes 3', await B.evaluate(() => G.mes === 3 && G.fiado === 2500 && G.plan.fiado === 2500 && !!G.ops.beca3));
+    await confirmar(B);
+    await B.waitForSelector('#evOv.on', { timeout: 8000 });
+    await B.locator('#evOps2 .op2').first().click(); // ev3 A: en 12 cuotas (−800 y $850 fijos)
+    await B.waitForSelector('#f2.on', { timeout: 8000 });
+    ok('T2.14c la cuota de la tableta aparece como gasto fijo', (await B.locator('#pl_cuota').textContent()) === '$850');
+    await confirmar(B);
+    await B.waitForSelector('#evOv.on', { timeout: 8000 }); // resto 650
+    await B.locator('#evOps2 .op2').nth(1).click();
+    await B.waitForSelector('#shock.on', { timeout: 25000 });
+    await esp(700); await B.locator('#shockBtn').click();
     // podio + reveal + scores exactos
     await P.waitForFunction(() => document.getElementById('espEstado').textContent.includes('ASESORÓ') || document.getElementById('espEstado').textContent.includes('CERRADO'), null, { timeout: 30000 });
     ok('T2.15 reveal arranca', true);
     await P.waitForFunction(() => document.getElementById('espEstado').textContent.includes('TRIMESTRE CERRADO'), null, { timeout: 20000 });
     await esp(1200);
     const scores = await P.evaluate(() => Object.values(SALA.prog).map(p => ({ ini: p.ini, score: p.score })));
-    const sA = scores.find(s => s.ini === 'LOS CAPOS').score, sB = scores.find(s => s.ini === 'TIBURONES').score;
-    ok('T2.16 score A exacto', sA === 31275, '' + sA + ' (esperado 31275)');
-    ok('T2.17 score B exacto', sB === -12950, '' + sB + ' (esperado −12950)');
+    const sA = scores.find(s => s.ini === 'TIBURONES').score, sB = scores.find(s => s.ini === 'PULPOS').score;
+    ok('T2.16 score A exacto', sA === 47700, '' + sA + ' (esperado 47700)');
+    ok('T2.17 score B exacto', sB === -20075, '' + sB + ' (esperado −20075)');
     const podio = await P.locator('#espCols').textContent();
-    ok('T2.18 podio ordena A primero', podio.indexOf('LOS CAPOS') < podio.indexOf('TIBURONES'));
+    ok('T2.18 podio ordena A primero', podio.indexOf('TIBURONES') < podio.indexOf('PULPOS'));
     const analisis = await P.locator('#espMalas').textContent();
-    ok('T2.19 análisis: acero + trampa + diferencia mula', analisis.includes('DOS tormentas') && analisis.includes('plata rápida') && analisis.includes('parte del delito'));
+    ok('T2.19 análisis: acero + trampa + diferencia mula + cuotas', analisis.includes('TRES tormentas') && analisis.includes('plata rápida') && analisis.includes('parte del delito') && analisis.includes('cuotas'));
     await P.screenshot({ path: path.join(OUT, 'sui_podio.png'), fullPage: true });
     /* ══════════ T3 · REVANCHA ══════════ */
     console.log('\n[T3] Revancha');
@@ -236,7 +277,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
   /* ══════════ T4 · TIMEOUT DEL EVENTO (60s reales) ══════════ */
   console.log('\n[T4] Timeout del evento (esperando 62s…)');
   {
-    const { H, E: p } = await salaLista(mk, 'SOLO', 'UNITARIO');
+    const { H, E: p } = await salaLista(mk, 'SOLO', 0);
     ok('T4.1 el equipo no puede arrancar la partida', await p.locator('#btnArrancar').count() === 0);
     await aGrilla(p);
     await p.locator('#op_iva').click(); await confirmar(p);
@@ -257,7 +298,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
   /* ══════════ T6 · RELOJ QUE CIERRA, TECLADO Y BOTÓN "TODO" ══════════ */
   console.log('\n[T6] Cierre automático, teclado y reparto rápido');
   {
-    const { E: p } = await salaLista(mk, 'RELO', 'CRONOS');
+    const { E: p } = await salaLista(mk, 'RELO', 1);
     await aGrilla(p);
     // hace falta ingreso extra real: con el plan inicial ($11.000) y solo $10.000 de sueldo, se arranca en rojo
     for (const id of ['iva', 'beca', 'juegos', 'cari']) { await p.locator('#op_' + id).click(); await esp(80); }
@@ -312,7 +353,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
   /* ══════════ T8 · EL MERCADO DE A UNA (swipe) ══════════ */
   console.log('\n[T8] Mercado de a una');
   {
-    const { E: p } = await salaLista(mk, 'SWIP', 'DEDOS');
+    const { E: p } = await salaLista(mk, 'SWIP', 4);
     await p.waitForSelector('#swipe.on', { timeout: 25000 });
     ok('T8.1 el mes 1 arranca en el mercado de a una', true);
     const id0 = await p.evaluate(() => OPS[swIdx].id);
@@ -388,7 +429,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     const H = await mk(), E1 = await mk(), E2 = await mk();
     await H.goto(U); await E1.goto(U); await E2.goto(U);
     await crearSala(H, 'PUJA');
-    await entrar(E1, 'PUJA', 'ALTOS'); await entrar(E2, 'PUJA', 'BAJOS');
+    await entrar(E1, 'PUJA', 0); await entrar(E2, 'PUJA', 1); // CHANCHOS ofertan alto, FLAMENCOS bajo
     await H.waitForFunction(() => document.querySelectorAll('#espCols .eqCol').length === 2, null, { timeout: 30000 });
     await H.locator('#espArrancar').click();
     for (const p of [E1, E2]) await aGrilla(p);
@@ -405,8 +446,8 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await E1.waitForFunction(() => document.getElementById('subOk').textContent.includes('mes 2'), null, { timeout: 30000 });
     await E2.waitForFunction(() => document.getElementById('subOk').textContent.includes('mes 2'), null, { timeout: 30000 });
     ok('T9.4 gana el que más ofrece', (await E1.locator('#subTit').textContent()).includes('ustedes'), await E1.locator('#subTit').textContent());
-    ok('T9.5 el que pierde lo ve', (await E2.locator('#subTit').textContent()).includes('ALTOS'), await E2.locator('#subTit').textContent());
-    ok('T9.6 se muestran todas las pujas al cerrar', (await E2.locator('#subEstado').textContent()).includes('BAJOS: 2 h'));
+    ok('T9.5 el que pierde lo ve', (await E2.locator('#subTit').textContent()).includes('CHANCHOS'), await E2.locator('#subTit').textContent());
+    ok('T9.6 se muestran todas las pujas al cerrar', (await E2.locator('#subEstado').textContent()).includes('FLAMENCOS: 2 h'));
     // el ganador PAGA lo que ofertó: esas horas ya no las tiene
     await E1.locator('#subOk').click();
     await E1.waitForSelector('#f1.on', { timeout: 10000 });
@@ -425,7 +466,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     const PF = await mk(), EF = await mk();
     await PF.goto(U); await EF.goto(U);
     await crearSala(PF, 'FACI');
-    await entrar(EF, 'FACI', 'MESA UNO');
+    await entrar(EF, 'FACI', 5);
     await PF.waitForFunction(() => document.querySelectorAll('#espCols .eqCol').length === 1, null, { timeout: 30000 });
     await PF.locator('#espArrancar').click();
     await aGrilla(EF);
@@ -438,7 +479,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     ok('T7.3 el proyector cierra la fase de los equipos', true);
     // una máquina que entra tarde no puede reiniciarle la ronda a nadie: no tiene con qué
     const XF = await mk(); await XF.goto(U);
-    await entrar(XF, 'FACI', 'TARDE');
+    await entrar(XF, 'FACI', 6);
     await XF.waitForFunction(() => Object.keys(SALA.prog || {}).length > 0, null, { timeout: 30000 });
     ok('T7.4 el que entra tarde no tiene botón de arrancar', await XF.locator('#btnArrancar').count() === 0);
     // y aunque mandara un start a mano, el equipo que juega lo ignora
@@ -458,8 +499,10 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     const defs = new Set([...h.matchAll(/id="([A-Za-z0-9_]+)"/g)].map(m => m[1]));
     const faltan = usados.filter(u => !defs.has(u));
     ok('T5.1 IDs referenciados existen', faltan.length === 0, faltan.join(','));
-    ok('T5.2 sw v3', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('cpvpresu-v3'));
-    ok('T5.3 sin restos piel vieja', !h.includes('Archivo Black') && !h.includes('#F3EEE2') && !h.includes('text-shadow:3px'));
+    ok('T5.2 sw v4', fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').includes('cpvpresu-v4'));
+    ok('T5.3 misma piel que 12 Meses, fuentes embebidas (sin Google Fonts)', h.includes("'Archivo Black'") && h.includes('#F3EEE2') && h.includes("'Chivo Mono'") && !h.includes('fonts.googleapis'));
+    ok('T5.4 los 12 stickers están en el sprite', new Set([...h.matchAll(/<symbol id="av-([a-z]+)"/g)].map(m => m[1])).size === 12);
+    ok('T5.5 sin restos de la piel violeta', !h.includes('#2B0A50') && !h.includes('--cinta') && !h.includes('backdrop-filter'));
   }
 
   console.log('\n════════ RESUMEN ════════');
