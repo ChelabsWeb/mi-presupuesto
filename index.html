@@ -780,6 +780,7 @@ body.arrastrando .gCard{cursor:copy}
     </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
       <button class="btn amarillo" id="btnRetomar" style="display:none" onclick="retomarTrimestre()">Retomar el trimestre</button>
+      <button class="btn amarillo" id="btnCodigo" style="display:none" onclick="corregirCodigo()">Corregir el código</button>
       <button class="btn amarillo" id="btnRetryL" style="display:none" onclick="reintentar()">Reintentar</button>
       <button class="btn" onclick="salirSala(this)">Salir</button>
     </div>
@@ -1494,6 +1495,9 @@ function entrarSala(spec){
     ch.on('presence',{event:'sync'},()=>{ if(!SALA||SALA.ch!==ch) return;
       const st=ch.presenceState(); SALA.players={};
       Object.keys(st).forEach(k=>{ if(st[k][0]&&!st[k][0].spec) SALA.players[k]={ini:st[k][0].ini||'', av:st[k][0].av||null}; });
+      /* un equipo solo entra si hay proyector: sin él, el código no es una sala */
+      SALA.conHost=Object.keys(st).some(k=>st[k][0]&&st[k][0].spec);
+      if(!SALA.spec&&SALA.conHost&&SALA.sinSala){ SALA.sinSala=false; $('btnCodigo').style.display='none'; $('lobbyComo').style.display=''; }
       Object.keys(SALA.prog).forEach(k=>{
         if(!SALA.prog[k].fin && !SALA.players[k] && !SALA.timeouts[k]) SALA.timeouts[k]=setTimeout(()=>{ if(SALA&&SALA.prog[k]&&!SALA.players[k]){ SALA.prog[k].caido=true; pintarEsp(); } },20000);
         if(SALA.players[k]&&SALA.timeouts[k]){ clearTimeout(SALA.timeouts[k]); delete SALA.timeouts[k]; delete SALA.prog[k].caido; }
@@ -1531,7 +1535,9 @@ function entrarSala(spec){
         else if(SALA.spec){ $('espEstado').textContent='ESPERANDO EQUIPOS…'; pintarEsp(); }
         /* la partida la arranca SOLO el proyector: si la arranca un equipo, los demás no están listos */
         else { $('lobbyEstado').textContent=SALA.av?'ADENTRO · ESPERANDO QUE EL PROYECTOR ARRANQUE':'ELIJAN SU EQUIPO PARA ENTRAR';
-          $('btnRetomar').style.display=SALA.guardado?'':'none'; pintarLobby(); } }
+          $('btnRetomar').style.display=SALA.guardado?'':'none'; pintarLobby();
+          /* 6 s de gracia por si el proyector viene lento; si no aparece, el código no es una sala */
+          SALA.timeouts.host=setTimeout(()=>{ if(SALA&&SALA.ch===ch&&!SALA.spec&&!SALA.playing&&!SALA.conHost&&!SALA.guardado) sinSala(); },6000); } }
       else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'){
         if(SALA.playing){ $('gbD1').innerHTML='SIN CONEXIÓN<b class="mono" style="color:var(--rosa-noche)">RECONECTANDO…</b>'; }
         else { $(SALA.spec?'espEstado':'lobbyEstado').textContent='SIN CONEXIÓN · REVISÁ EL INTERNET'; $(SALA.spec?'btnRetryE':'btnRetryL').style.display=''; }
@@ -1545,7 +1551,7 @@ function salirSala(b){
   if(b){ delete b.dataset.arm; b.style.background=''; b.style.color=''; }
   if(SALA){ Object.values(SALA.timeouts||{}).forEach(clearTimeout); if(SALA.ch&&sbClient) sbClient.removeChannel(SALA.ch);
     try{ localStorage.removeItem('cpv_sala_'+SALA.code); }catch(e){} }
-  SALA=null; G=null; OPS=[]; lobbyPrev=0; latir(false); $('lobbyPick').style.display='none';
+  SALA=null; G=null; OPS=[]; lobbyPrev=0; latir(false); $('lobbyPick').style.display='none'; $('btnCodigo').style.display='none'; $('lobbyComo').style.display='';
   clearInterval(gTimerInt); clearTimeout(evTimer); evAl=null; m30T.forEach(clearTimeout); m30T=[];
   $('evOv').classList.remove('on');
   $('gBarra').classList.remove('on'); show('home'); attract();
@@ -1553,18 +1559,36 @@ function salirSala(b){
 let lobbyPrev=0;
 function pintarLobby(){
   if(!SALA||SALA.spec) return;
+  if(SALA.sinSala) return;
   const ks=Object.keys(SALA.players);
   $('lobbyList').innerHTML=ks.filter(k=>SALA.players[k].av).map(k=>{ const p=SALA.players[k];
     return `<div class="lobJ dsp${k===SALA.id?' yo':''}">${p.av?avSvg(p.av,'lobAv'):'<span class="sinAv">?</span>'}<span>${p.av?p.ini:'SIN EQUIPO'}${k===SALA.id?' · VOS':''}</span></div>`; }).join('');
   if(ks.length>lobbyPrev&&lobbyPrev>0) sfxCoin();
   lobbyPrev=ks.length;
-  $('lobbyPick').style.display=SALA.av?'none':'';
-  if(!SALA.av) pintarAvGrid();
+  const listo=SALA.conHost||SALA.guardado||SALA.playing;
+  $('lobbyPick').style.display=(SALA.av||!listo)?'none':'';
+  if(!SALA.av&&listo) pintarAvGrid();
   if(Date.now()>=avisoHasta){
-    if(!SALA.av) $('lobbyEstado').textContent='ELIJAN SU EQUIPO PARA ENTRAR';
+    if(!listo) $('lobbyEstado').textContent='BUSCANDO EL PROYECTOR DE LA SALA '+SALA.code+'…';
+    else if(!SALA.av) $('lobbyEstado').textContent='ELIJAN SU EQUIPO PARA ENTRAR';
     else if(ks.length>1) $('lobbyEstado').textContent=ks.length+' EQUIPOS CONECTADOS · EL PROYECTOR ARRANCA CUANDO ESTÉN TODOS';
     else $('lobbyEstado').textContent='ADENTRO · ESPERANDO QUE EL PROYECTOR ARRANQUE';
   }
+}
+/* el código no es una sala: nadie la creó desde un proyector */
+function sinSala(){
+  if(!SALA||SALA.spec) return;
+  SALA.sinSala=true; sfxNo();
+  $('lobbyEstado').textContent='NO HAY NINGUNA SALA "'+SALA.code+'" · MIRÁ EL CÓDIGO EN EL PROYECTOR';
+  $('lobbyPick').style.display='none'; $('lobbyList').innerHTML=''; $('lobbyComo').style.display='none';
+  $('btnCodigo').style.display='';
+}
+function corregirCodigo(){
+  const code=SALA?SALA.code:'';
+  if(SALA){ Object.values(SALA.timeouts||{}).forEach(clearTimeout); if(SALA.ch&&sbClient) sbClient.removeChannel(SALA.ch); }
+  SALA=null; lobbyPrev=0;
+  $('btnCodigo').style.display='none'; $('lobbyComo').style.display='';
+  sModo='equipo'; sCode=code.split(''); armarTeclasSala(); pintarSala(); show('sala'); sfxTap();
 }
 /* los stickers ya tomados por otra máquina se apagan: dos equipos no pueden ser los mismos PULPOS */
 function avTomados(){ const t={}; Object.keys(SALA.players).forEach(k=>{ if(k!==SALA.id&&SALA.players[k].av) t[SALA.players[k].av]=1; }); return t; }

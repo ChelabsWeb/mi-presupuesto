@@ -94,6 +94,7 @@ Entre el interludio del mes 1 y el mercado del mes 2 (`abrirSubasta` → `mes2Me
 - `.wizHead` es una grilla `paso/h2 | timer`: el reloj no se cae a una segunda fila con títulos largos.
 - El coach y los eventos pausan el reloj (`pausarGT`).
 - `evento3` se decide **después** de `irMes(3)`: la cuota se agrega al plan en el propio evento (`G.plan.cuota=850`), no en `irMes`.
+- **Un código sin proyector no es una sala**: el canal de Supabase se crea al entrar, así que cualquier código "existía". Ahora el equipo espera un presence con `spec:true` (`SALA.conHost`); sin él no se muestran los stickers y a los 6 s (`SALA.timeouts.host`) avisa `sinSala()` con el botón `Corregir el código`. Si el proyector se cae antes de arrancar, el lobby vuelve a "BUSCANDO EL PROYECTOR…" y se recupera solo cuando vuelve. Con partida guardada (`retomar`) no se exige proyector.
 
 ## Pendientes / ideas para seguir
 

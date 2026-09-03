@@ -503,6 +503,22 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await PF.context().close(); await EF.context().close(); await XF.context().close();
   }
 
+  /* ══════════ T11 · UN CÓDIGO SIN PROYECTOR NO ES UNA SALA ══════════ */
+  console.log('\n[T11] Código sin sala');
+  {
+    const p = await mk(); await p.goto(U);
+    await p.locator('#home button', { hasText: 'Entrar con código' }).click();
+    for (const c of 'ZZQX') await tecla(p, c); await tecla(p, 'LISTO');
+    await esp(2500);
+    ok('T11.1 sin proyector no aparecen los stickers', !(await p.locator('#lobbyPick').isVisible()) && (await p.locator('#lobbyEstado').textContent()).includes('BUSCANDO'));
+    await p.waitForFunction(() => document.getElementById('lobbyEstado').textContent.includes('NO HAY NINGUNA SALA'), null, { timeout: 15000 });
+    ok('T11.2 a los segundos avisa que la sala no existe', true);
+    await p.locator('#btnCodigo').click(); await esp(300);
+    ok('T11.3 vuelve a la pantalla de código con el código precargado', await p.locator('#sala.on').count() === 1 && (await p.evaluate(() => sCode.join(''))) === 'ZZQX');
+    ok('T11.4 sin errores JS', p._errs.length === 0, p._errs.join(';'));
+    await p.context().close();
+  }
+
   /* ══════════ T5 · ESTÁTICOS ══════════ */
   console.log('\n[T5] Chequeos estáticos');
   {

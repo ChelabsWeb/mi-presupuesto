@@ -94,6 +94,7 @@ Si sobra tiempo: **`Revancha`** en el proyector. Sortea otras trampas en otras p
 | Un equipo llegó tarde a la subasta | Se resuelve sin él a los 25 s de la primera oferta. |
 | El proyector se prendió tarde o se recargó | En el inicio, **`Proyector con código`** → el código de la sala → Enter: se pone al día solo. |
 | Dos equipos quieren el mismo sticker | No pueden: el tomado se apaga. Que elijan otro. |
+| Una máquina dice **NO HAY NINGUNA SALA** | Escribieron mal el código (o el proyector todavía no creó la sala). **`Corregir el código`** y lo escriben de nuevo mirando el proyector. |
 
 ---
 
