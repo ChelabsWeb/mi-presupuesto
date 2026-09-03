@@ -45,7 +45,7 @@ Se pasan con las **flechas del teclado** (o `Espacio`), `Esc` para salir. Cinco 
 
 | Momento | Reloj | Qué hacen | Qué decís vos |
 |---|---|---|---|
-| **Mes 1 · Conseguir plata** | 4:00 | Las changas pasan **de a una**: a la derecha la agarran, a la izquierda pasan. 12 h/semana. Con **"Ver todas juntas"** comparan en grilla. | *"Miren cuánto rinde por hora. Ese número los va a salvar."* |
+| **Mes 1 · Conseguir plata** | 4:00 | Las changas pasan **de a una**: a la derecha la agarran, a la izquierda pasan. 12 h/semana. Con **"Ver todas juntas"** comparan en grilla, y con **"Volver a verlas de a una"** retoman la pila. | *"Miren cuánto rinde por hora. Ese número los va a salvar."* |
 | **Se revela la plata rápida** | — | Si cayeron, el juego explica cada trampa y resta **−1.500** c/u. | **Pará el juego acá.** Es el momento pedagógico más fuerte. |
 | **Evento: el cliente urgente** | 1:00 | Cobrar $1.500 y faltar al parcial / negociar el plazo / rechazar. | *"¿Seguro que son solo dos opciones?"* |
 | **Mes 1 · Repartir** | 3:15 | Arrastran billetes ($500/$1.000/$5.000) a cada etiqueta. Las **amarillas dan puntos**; en $0 restan **−1.500**. | *"Cada peso con nombre. La plata sin nombre se gasta sola."* |

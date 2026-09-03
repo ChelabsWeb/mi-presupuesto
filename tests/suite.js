@@ -385,6 +385,14 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await p.locator('#swNo').click();
     await p.waitForSelector('#f1.on', { timeout: 8000 });
     ok('T8.8 al terminar la pila cae en la grilla', true);
+    ok('T8.8b sin pila no hay botón de volver', !(await p.locator('#f1Swipe').isVisible()));
+    // de la grilla se puede volver a la pila mientras queden changas sin ver
+    await p.evaluate(() => { swIdx = 3; pintarF1(); });
+    ok('T8.8c con pila pendiente aparece el botón', await p.locator('#f1Swipe').isVisible());
+    await p.locator('#f1Swipe').click();
+    await p.waitForSelector('#swipe.on', { timeout: 8000 });
+    ok('T8.8d vuelve a la pila donde la dejó', await p.evaluate(() => swIdx >= 3 && !G.ops[OPS[swIdx].id]));
+    await p.locator('#swVerTodas').click(); await p.waitForSelector('#f1.on', { timeout: 8000 });
     ok('T8.9 sin errores JS', p._errs.length === 0, p._errs.join(';'));
     await p.context().close();
   }

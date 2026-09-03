@@ -802,6 +802,7 @@ body.arrastrando .gCard{cursor:copy}
       <div class="lado pts"><div class="l">PUNTOS</div><b class="mono" id="horasPts">0</b></div>
     </div></div>
     <div class="caja" id="f1Caso"></div>
+    <button class="btn" id="f1Swipe" style="display:none;margin:-4px 0 12px" onclick="volverSwipe()"><svg class="ic" style="transform:rotate(180deg)"><use href="#i-flecha"/></svg> Volver a verlas de a una</button>
     <div class="cards" id="cardsOp"></div>
   </div>
 </section>
@@ -1904,6 +1905,14 @@ function pintarF1(){
     </div>`;
   }).join('');
   pintarHoras();
+  $('f1Swipe').style.display=(G.mes===1&&swIdx<OPS.length)?'':'none';
+}
+/* de la grilla a la pila: sigue donde la dejaron, salteando lo que ya agarraron en la grilla */
+function volverSwipe(){
+  if(!G||G.mes!==1) return;
+  while(swIdx<OPS.length&&G.ops[OPS[swIdx].id]) swIdx++;
+  if(swIdx>=OPS.length){ $('f1Swipe').style.display='none'; sfxNo(); return; }
+  sfxTap(); pintarSwipe(); show('swipe'); gBarra(); gProg();
 }
 function togOp(id){
   const o=OPS.find(x=>x.id===id);
