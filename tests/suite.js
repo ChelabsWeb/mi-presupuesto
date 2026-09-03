@@ -103,7 +103,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
              = 31.275
      B  −11.950 − 1.000 (sin colchón, el shock 2 ahora resta 2.500) = −12.950
         (a B el colchón no lo toca: cerró el mes 1 en cero)                                     */
-  console.log('\n[T2] Trimestre completo, 3 meses (scores exactos: A=47.700, B=−20.075)');
+  console.log('\n[T2] Trimestre completo, 3 meses (scores exactos: A=47.700, B=−20.025)');
   const P = await mk(), A = await mk(), B = await mk();
   {
     await P.goto(U); await A.goto(U); await B.goto(U);
@@ -222,9 +222,8 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     await confirmar(B); // plan en rojo
     ok('T2.14 guard plan en rojo', (await B.locator('#gbD2').textContent()).includes('ROJO'));
     await B.evaluate(() => { for (let i = 0; i < 6; i++) ajustar('personal', -500); for (let i = 0; i < 2; i++) ajustar('snacks', -500); });
-    await confirmar(B);
-    await B.waitForSelector('#evOv.on', { timeout: 8000 }); // resto 100
-    await B.locator('#evOps2 .op2').nth(1).click();
+    await confirmar(B); await esp(500);
+    ok('T2.14d un vuelto de $100 no pide destino ni resta', await B.locator('#evOv.on').count() === 0);
     await B.waitForSelector('#shock.on', { timeout: 25000 });
     await esp(700); await B.locator('#shockBtn').click();
     // B: mes 3, con el fiado del mes 2 a cuestas y la tableta en cuotas
@@ -250,7 +249,7 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     const scores = await P.evaluate(() => Object.values(SALA.prog).map(p => ({ ini: p.ini, score: p.score })));
     const sA = scores.find(s => s.ini === 'TIBURONES').score, sB = scores.find(s => s.ini === 'PULPOS').score;
     ok('T2.16 score A exacto', sA === 47700, '' + sA + ' (esperado 47700)');
-    ok('T2.17 score B exacto', sB === -20075, '' + sB + ' (esperado −20075)');
+    ok('T2.17 score B exacto', sB === -20025, '' + sB + ' (esperado −20025)');
     const podio = await P.locator('#espCols').textContent();
     ok('T2.18 podio ordena A primero', podio.indexOf('TIBURONES') < podio.indexOf('PULPOS'));
     const analisis = await P.locator('#espMalas').textContent();
@@ -365,6 +364,12 @@ async function confirmar(p) { await esp(600); await p.locator('#gbSig').click();
     const id1 = await p.evaluate(() => OPS[swIdx].id);
     await p.locator('#swNo').click(); await esp(250);
     ok('T8.4 el botón la descarta', await p.evaluate(i => !G.ops[i], id1) && await p.evaluate(() => swIdx) === 2);
+    // flechas del teclado: → la agarra, ← pasa (en las notebooks del taller el trackpad es lento)
+    const idK = await p.evaluate(() => OPS[swIdx].id);
+    await p.keyboard.press('ArrowRight'); await esp(450);
+    ok('T8.4b la flecha derecha la agarra', await p.evaluate(i => !!G.ops[i], idK) && await p.evaluate(() => swIdx) === 3, '' + await p.evaluate(() => swIdx));
+    await p.keyboard.press('ArrowLeft'); await esp(450);
+    ok('T8.4c la flecha izquierda pasa', await p.evaluate(() => swIdx) === 4);
     // arrastrar a la derecha = la agarra
     const id2 = await p.evaluate(() => OPS[swIdx].id);
     const c = await p.locator('#swCard').boundingBox();

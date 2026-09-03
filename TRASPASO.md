@@ -57,11 +57,11 @@ PW_EXE=C:/Users/.../ms-playwright/chromium-1228/chrome-win64/chrome.exe node sui
 ```
 
 - **T1** herramienta personal, **T2** el trimestre completo de 3 meses con dos equipos, **T3** revancha, **T4** timeout real de 60s, **T5** estáticos, **T6** reloj que cierra + teclado + billetes + TODO, **T7** control del facilitador, **T8** swipe, **T9** subasta, **T10** tutorial.
-- **T2 tiene puntajes exactos calculados a mano**: `TIBURONES (A) = 47.700`, `PULPOS (B) = −20.075`. Dependen de **todas** las constantes de la economía. Si tocás una, recalculá a mano y actualizá. El camino y la cuenta de cada equipo, mes por mes:
+- **T2 tiene puntajes exactos calculados a mano**: `TIBURONES (A) = 47.700`, `PULPOS (B) = −20.025`. Dependen de **todas** las constantes de la economía. Si tocás una, recalculá a mano y actualizá. El camino y la cuenta de cada equipo, mes por mes:
   - **A** mes 1: cari+perros+cafe+iva+juegos+trampa (−1.500), evento B (+500), plan snacks 0 / subs 0 / personal 1.500 / imprev 2.000 / fondo 2.000 / objetivo 7.500 → extra 7.000 + destino 5.875 + fuentes 1.000 − austero 1.000 + tableta 1.500 + golpe 2.000 = **15.375**.
     Mes 2: suelta perros2, suma taller2 (extra 7.400, 3 fuentes), evento B (+400), imprev 2.000 / fondo 1.500 / objetivo 4.000 / meta2 500, resto 4.400 (−2.200), soltó perros (+500), austero (−1.000), golpe +2.500 → **28.275**.
     Mes 3: + bici3 (extra 8.300, 4 fuentes), evento B contado (+600), snacks 1.000 / personal 2.500 / imprev 2.000 / fondo 1.500 / objetivo 2.000 / meta2 2.000, resto 2.800 (−1.400), golpe +3.000, acero +1.500, tableta +1.500, meta2 +500 → **47.700**.
-  - **B** mes 1: solo beca, evento C (+200), plan por defecto → 3 olvidadas (−4.500), golpe −2.000 → **−5.300**. Mes 2: fiado 2.000, evento A (−600, −$1.900), recorta personal/snacks, resto 100 (−50), 3 olvidadas, austero, golpe −2.500 → **−12.950**. Mes 3: fiado 2.500, evento A cuotas (−800, cuota $850), resto 650 (−325), 2 olvidadas (la tableta ya no cuenta), austero, golpe −3.000 → **−20.075**.
+  - **B** mes 1: solo beca, evento C (+200), plan por defecto → 3 olvidadas (−4.500), golpe −2.000 → **−5.300**. Mes 2: fiado 2.000, evento A (−600, −$1.900), recorta personal/snacks, resto 100 (vuelto: 0), 3 olvidadas, austero, golpe −2.500 → **−12.900**. Mes 3: fiado 2.500, evento A cuotas (−800, cuota $850), resto 650 (−325), 2 olvidadas (la tableta ya no cuenta), austero, golpe −3.000 → **−20.025**.
 - Los tests desactivan el tutorial (coach) vía `sessionStorage` para poder correr directo.
 - Ojo con la subasta en los tests: ofertar 0 la deja desierta y no toca los scores.
 
@@ -69,7 +69,7 @@ PW_EXE=C:/Users/.../ms-playwright/chromium-1228/chrome-win64/chrome.exe node sui
 
 - Juan gana $10.000 fijo + lo que consigan en changas/ventas (12 h en el mes 1, 11 en el 2, 12 en el 3).
 - **Trampas "PLATA RÁPIDA"** (5; salen 3 sorteadas por ronda con el `seed` del `start`, iguales en toda la sala). Al confirmar se anulan y restan −1.500 c/u.
-- **Repartir:** las etiquetas amarillas dan puntos (`ptsDest` con rendimiento decreciente a partir de $4.000); en $0 restan; la plata sin nombre resta la mitad.
+- **Repartir:** las etiquetas amarillas dan puntos (`ptsDest` con rendimiento decreciente a partir de $4.000); en $0 restan; la plata sin nombre resta la mitad **a partir de $500** (menos es vuelto: con billetes de $500 no se puede dejar en cero, así que no pide destino ni resta).
 - **Golpes:** los imprevistos de cada mes suman exactamente el umbral (`MESES[n].umbral`); aguantarlos ±`MESES[n].pts`. El colchón sobrante pasa al mes siguiente **sin etiqueta** (`G.arr`); si no alcanzó, el faltante viaja como **fiado** (fila fija al mínimo).
 - Detalle: `scoreAhora`, `cerrarMes`, `irMes`, `mercadoMes2/3`, `evento1/2/3`, `finDelEquipo`.
 
@@ -87,7 +87,9 @@ Entre el interludio del mes 1 y el mercado del mes 2 (`abrirSubasta` → `mes2Me
 - La tarjeta de reparto es `role="button"` (no `<button>`, no se pueden anidar botones).
 - El reloj se pinta en `.screen.on .gtimer` (`pintarGT`), porque la fase 1 pasa por dos pantallas.
 - `.opCard` necesita `overflow:visible` para que el badge PLATA RÁPIDA no se recorte (el recorte de 2 líneas vive en `.tt`).
-- La carta del mercado (`.swCard`) es una grilla de filas de altura fija: no cambia de tamaño entre changas. Si agregás una fila, sumala a `grid-template-rows`.
+- La carta del mercado (`.swCard`) es una grilla de filas de altura fija: no cambia de tamaño entre changas. Si agregás una fila, sumala a `grid-template-rows`. Se decide con el dedo, los botones o las flechas ← → (`swVolar`); desde la grilla se vuelve a la pila con `volverSwipe` (saltea lo ya agarrado).
+- Al arrancar pasados de horas (mes 2 y 3), `pintarHoras` marca con `.peor` la changa elegida que menos rinde por hora.
+- El reveal "PASÓ EL MES n" del proyector queda hasta que algún equipo arranca el mes siguiente (o 60 s).
 - Twemoji se pinta con relleno: nunca le pongas la clase `ic` (que fuerza `fill:none`) a un `e-…`.
 - `.wizHead` es una grilla `paso/h2 | timer`: el reloj no se cae a una segunda fila con títulos largos.
 - El coach y los eventos pausan el reloj (`pausarGT`).

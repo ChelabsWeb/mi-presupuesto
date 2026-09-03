@@ -364,7 +364,7 @@ footer{padding:14px;text-align:center;font-size:11px;font-weight:700;letter-spac
 #swBarra .l{display:block;font-family:var(--font-display);font-weight:600;letter-spacing:.06em;font-size:9.5px;color:var(--tinta2);text-transform:uppercase}
 #swBarra b{font-family:var(--font-display);font-weight:700;font-size:clamp(16px,2.8vw,22px);font-variant-numeric:tabular-nums}
 #swBarra .sinh b{color:var(--rojo)}
-#swPila{position:relative;width:100%;height:clamp(400px,54vh,440px)}
+#swPila{position:relative;width:100%;height:clamp(372px,51vh,440px)}
 .swCard{position:absolute;inset:0;background:var(--crema);border:2.5px solid var(--tinta);border-radius:16px;box-shadow:var(--edge2);
   display:grid;grid-template-rows:auto 72px 50px 30px 46px 60px 34px;row-gap:6px;align-content:center;justify-items:center;
   padding:14px 18px 16px;text-align:center;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;overflow:hidden}
@@ -630,6 +630,14 @@ body.arrastrando .gCard{cursor:copy}
 #interCard .mas{width:100%;text-align:center;padding:10px;font-family:var(--font-display);font-weight:600;font-size:13px;color:var(--tinta2);letter-spacing:.06em;text-transform:uppercase;border:none;border-top:1.5px solid var(--linea);background:var(--crema);cursor:pointer}
 #interCard.abierto .mas .ab{display:none} #interCard .mas .ce{display:none} #interCard.abierto .mas .ce{display:inline}
 
+/* celular: dos tarjetas por fila, si no hay que scrollear diez tarjetas con el reloj corriendo */
+@media(max-width:640px){.gCards{grid-template-columns:repeat(2,1fr);gap:9px}.gCard{height:172px;padding:28px 8px 10px}.gCard .nm{font-size:12px}.gCard .mt{font-size:19px}.gCard .td{padding:0 8px;font-size:9.5px}}
+/* teclado: solo tiene sentido donde hay teclado */
+.kbdHint{font-size:12px;font-weight:700;color:var(--tinta2);text-align:center}
+@media(hover:none){.kbdHint{display:none}}
+/* mes 2 y 3: cuando arrancan pasados de horas, se señala la que menos rinde por hora */
+.opCard.peor{outline:3px dashed var(--rojo);outline-offset:3px}
+.opCard .badgeP{position:absolute;bottom:-11px;left:12px;background:var(--rojo);color:var(--crema);border:2px solid var(--tinta);border-radius:6px;padding:2px 8px;font-family:var(--font-display);font-size:10.5px;font-weight:600;letter-spacing:.06em}
 @media print{ #barra,#gBarra,#resuBtns,.noprint,#muteBtn{display:none!important} }
 @media (prefers-reduced-motion: reduce){ *{animation:none!important;transition:none!important} }
 </style></head>
@@ -845,7 +853,7 @@ body.arrastrando .gCard{cursor:copy}
 
 <!-- ========= SALA: el mercado, de a una (mes 1) ========= -->
 <section class="screen" id="swipe">
-  <div class="wiz" style="align-items:center;display:flex;flex-direction:column;justify-content:center;gap:11px;max-width:560px;min-height:100vh;padding-bottom:96px">
+  <div class="wiz" style="align-items:center;display:flex;flex-direction:column;justify-content:center;gap:9px;max-width:560px;min-height:100vh;padding-bottom:96px">
     <div class="wizHead" style="width:100%;justify-content:space-between">
       <div class="paso dsp">MES 1 · CONSEGUIR PLATA</div>
       <div class="gtimer mono" id="timerSw">4:00</div>
@@ -857,9 +865,10 @@ body.arrastrando .gCard{cursor:copy}
     </div>
     <div id="swPila"></div>
     <div id="swBtns">
-      <button class="swB no" id="swNo" onclick="swDecide(0)">✕<span>Paso</span></button>
-      <button class="swB si" id="swSi" onclick="swDecide(1)">✓<span>La agarro</span></button>
+      <button class="swB no" id="swNo" onclick="swVolar(0)">✕<span>Paso</span></button>
+      <button class="swB si" id="swSi" onclick="swVolar(1)">✓<span>La agarro</span></button>
     </div>
+    <div class="kbdHint">Con el teclado: ← paso · → la agarro</div>
     <button class="btn" id="swVerTodas" onclick="swSalir()" style="padding:9px 18px;font-size:14px">Ver todas juntas</button>
   </div>
 </section>
@@ -1856,6 +1865,20 @@ function swSuelta(e){
   c.style.opacity='0';
   swDecide(dx>0?1:0, true);
 }
+/* la carta vuela igual con botón, con flecha del teclado o con el dedo */
+function swVolar(si){
+  const c=$('swCard'); if(!c||swDrag||!G) return;
+  if(si&&$('swSi').disabled){ sfxNo(); return; }
+  c.classList.add('va');
+  c.style.transform='translateX('+(si?900:-900)+'px) rotate('+(si?32:-32)+'deg)';
+  c.style.opacity='0';
+  swDecide(si?1:0, true);
+}
+document.addEventListener('keydown',e=>{
+  if(!$('swipe').classList.contains('on')||$('evOv').classList.contains('on')||$('coachOv').classList.contains('on')) return;
+  if(e.key==='ArrowRight'){ e.preventDefault(); swVolar(1); }
+  else if(e.key==='ArrowLeft'){ e.preventDefault(); swVolar(0); }
+});
 function swDecide(si, yaAnimado){
   if(!G||swIdx>=OPS.length) return;
   const o=OPS[swIdx];
@@ -1944,6 +1967,13 @@ function pintarHoras(){
     const el=$('op_'+o.id); if(!el) return;
     el.classList.toggle('nohay', !G.ops[o.id] && !o.bloq && !o.fija && o.h>libres);
   });
+  /* pasados de horas (arranque del mes 2 y 3): la que menos rinde por hora se marca sola */
+  document.querySelectorAll('.opCard.peor').forEach(el=>{ el.classList.remove('peor'); const b=el.querySelector('.badgeP'); if(b) b.remove(); });
+  if(libres<0){
+    const peor=OPS.filter(o=>G.ops[o.id]&&!o.fija&&o.h>0).sort((a,b)=>(a.m/a.h)-(b.m/b.h))[0];
+    const el=peor&&$('op_'+peor.id);
+    if(el){ el.classList.add('peor'); const b=document.createElement('div'); b.className='badgeP'; b.textContent='La que menos rinde'; el.appendChild(b); }
+  }
   $('horasFill').style.width=Math.min(100,horasTot()*100/G.horas)+'%';
   $('horasFill').style.visibility=horasTot()>0?'':'hidden';
   $('horasFill').style.background=horasTot()>=G.horas?'var(--rojo)':'var(--azul)';
@@ -2074,9 +2104,9 @@ function flotarPts(elId,n,txt){
 function pintarPlaton(){
   if(!G||G.fase!==2) return;
   const disp=disponible(), resto=disp-asignado(), el=$('platon');
-  el.classList.toggle('listo',resto===0);
+  el.classList.toggle('listo',resto>=0&&resto<500);
   el.classList.toggle('rojo',resto<0);
-  $('platonLbl').textContent = resto>0?'TE QUEDA POR REPARTIR':resto===0?'¡TODO REPARTIDO!':'¡SE PASARON!';
+  $('platonLbl').textContent = resto>=500?'TE QUEDA POR REPARTIR':resto>0?'VUELTO · YA ESTÁ':resto===0?'¡TODO REPARTIDO!':'¡SE PASARON!';
   $('platonN').textContent = resto===0?'✓':fmt(resto);
   /* la barra se LLENA con lo que ya tiene nombre: terminar es verla completa, no verla vacía */
   $('platonBar').firstElementChild.style.width=Math.max(0,Math.min(100, disp>0?asignado()*100/disp:0))+'%';
@@ -2146,7 +2176,7 @@ function gBarra(){
     const resto=disponible()-asignado();
     /* lo que falta repartir ya está arriba y gigante: acá abajo alcanza con el estado */
     $('gbD1').style.display='none'; $('gbD3').style.display='none';
-    $('gbD2').innerHTML=(resto<0?'¡PLAN EN ROJO!':resto>0?'FALTA REPARTIR':'TODO REPARTIDO')+'<b class="mono">'+(resto===0?'✓':fmt(resto))+'</b>';
+    $('gbD2').innerHTML=(resto<0?'¡PLAN EN ROJO!':resto>=500?'FALTA REPARTIR':resto>0?'VUELTO · NO CUENTA':'TODO REPARTIDO')+'<b class="mono">'+(resto===0?'✓':fmt(resto))+'</b>';
     $('gbD2').classList.toggle('neg',resto<0);
     $('gbD2').classList.toggle('warn',resto>0);
     $('gbSig').innerHTML='Confirmar el plan <svg class="ic"><use href="#i-flecha"/></svg>';
@@ -2276,7 +2306,8 @@ const confirmarFase=conLock(function(){
     setTimeout(gBarra,3000);
     return;
   }
-  if(resto>0){
+  /* menos de $500 es vuelto: con billetes de $500 no se puede dejar en cero y no vale castigarlo */
+  if(resto>=500){
     abrirEvento({kick:'Ojo', tit:'Quedan '+fmt(resto)+' sin nombre',
       txt:'La plata sin nombre se evapora: la mitad se pierde. ¿Le dan un destino?',
       seg:0, auto:0, ops:['Darle un destino','Confirmar igual'],
@@ -2364,7 +2395,7 @@ function cerrarMes(){
   /* lo que castiga */
   if(olv){ G.pts-=olv*1500; linea('Etiquetas en $0', -olv*1500, olv+' de las que dan puntos · lo que no etiquetás, te etiqueta'); }
   else linea('Ninguna etiqueta en $0', 0, 'imprevistos, fondo y meta con plata');
-  if(resto>0){ G.pts-=Math.round(resto/2); linea('Plata sin nombre', -Math.round(resto/2), fmt(resto)+' sin repartir · la mitad se evapora'); }
+  if(resto>=500){ G.pts-=Math.round(resto/2); linea('Plata sin nombre', -Math.round(resto/2), fmt(resto)+' sin repartir · la mitad se evapora'); }
   const vida=(G.plan.snacks||0)+(G.plan.subs||0)+(G.plan.personal||0);
   if(vida<2000){ G.pts-=1000; G.austero=true; linea('Vida a agua y laburo', -1000, 'un plan que no se banca también se cae'); }
   if(n===1){ if(G.plan.objetivo>=2000){ G.pts+=1500; linea('La tableta arrancó fuerte', 1500, fmt(G.plan.objetivo)+' en el primer mes'); } else if(G.plan.objetivo>=1000){ G.pts+=800; linea('La tableta arrancó', 800, fmt(G.plan.objetivo)+' en el primer mes'); } }
@@ -2387,7 +2418,7 @@ function cerrarMes(){
   $('shockNums').innerHTML='<div><small>Guardado</small><b>'+fmt(cubre)+'</b></div><div><small>Golpes</small><b>'+fmt(M.umbral)+'</b></div>';
   $('shockFx').textContent=(ok?'+':'−')+M.pts.toLocaleString('es-UY')+' puntos'; $('shockFx').className=ok?'ok':'mal';
   const chips=[];
-  if(resto>0) chips.push('<span class="chipR menos">−'+Math.round(resto/2).toLocaleString('es-UY')+' · '+fmt(resto)+' sin nombre</span>');
+  if(resto>=500) chips.push('<span class="chipR menos">−'+Math.round(resto/2).toLocaleString('es-UY')+' · '+fmt(resto)+' sin nombre</span>');
   if(vida<2000) chips.push('<span class="chipR menos">−1.000 · a agua y laburo</span>');
   if(n===TOTAL_MESES&&[1,2,3].every(i=>G['shock'+i+'Ok'])) chips.push('<span class="chipR mas">+1.500 · COLCHÓN DE ACERO</span>');
   $('shockVer').innerHTML=chips.join('');
@@ -2866,17 +2897,18 @@ function revelarMesSiToca(vivos, mesMax){
     if(!vivos.every(r=>paso(r,n))) break;
     if(!vivos.some(r=>r['shock'+n+'Ok']!=null)) break;
     SALA.revelados[n]=true;
-    el.classList.add('on');
+    el.classList.add('on'); el.dataset.mes=n;
     el.innerHTML='<div class="dsp rTit">PASÓ EL MES '+n+'</div><div class="rSub">'+MESES[n].golpe+' y compañía: '+fmt(MESES[n].umbral)+' de golpes. ¿Quién tenía colchón?</div>'
       +'<div class="rows">'+vivos.map(r=>'<div class="rEq" data-id="'+r.id+'">'+avSvg(r.av)+'<span>'+r.ini+'</span><span class="v">···</span></div>').join('')+'</div>';
     const its=[...el.querySelectorAll('.rEq')];
     const red=setInterval(sfxTick,140); setTimeout(()=>clearInterval(red),900);
     its.forEach((it,j)=>setTimeout(()=>{ const r=vivos.find(v=>v.id===it.dataset.id); if(!r) return; const ok=!!r['shock'+n+'Ok'];
       it.classList.add('rev',ok?'ok':'mal'); it.querySelector('.v').textContent=ok?'AGUANTÓ ✓':'SE FUNDIÓ ✗'; ok?sfxCoin():sfxNo(); },1000+j*700));
-    setTimeout(()=>{ if(SALA&&$('espectador').classList.contains('on')) el.classList.remove('on'); },1000+its.length*700+9000);
+    setTimeout(()=>{ if(SALA&&$('espectador').classList.contains('on')&&el.dataset.mes==String(n)) el.classList.remove('on'); },1000+its.length*700+60000);
     return true;
   }
-  /* la tarjeta de reveal se va sola a los segundos; si el mes ya avanzó, también */
+  /* se va cuando algún equipo ya arrancó el mes siguiente (o a los 60 s) */
+  if(el.classList.contains('on')&&vivos.some(r=>(r.mes||1)>+el.dataset.mes)) el.classList.remove('on');
   return el.classList.contains('on');
 }
 /* redoble y reveal del último al primero: el podio se descubre, no se filtra */

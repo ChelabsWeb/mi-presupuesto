@@ -45,14 +45,14 @@ Se pasan con las **flechas del teclado** (o `Espacio`), `Esc` para salir. Cinco 
 
 | Momento | Reloj | Qué hacen | Qué decís vos |
 |---|---|---|---|
-| **Mes 1 · Conseguir plata** | 4:00 | Las changas pasan **de a una**: a la derecha la agarran, a la izquierda pasan. 12 h/semana. Con **"Ver todas juntas"** comparan en grilla, y con **"Volver a verlas de a una"** retoman la pila. | *"Miren cuánto rinde por hora. Ese número los va a salvar."* |
+| **Mes 1 · Conseguir plata** | 4:00 | Las changas pasan **de a una**: a la derecha la agarran, a la izquierda pasan (o con las flechas del teclado). 12 h/semana. Con **"Ver todas juntas"** comparan en grilla, y con **"Volver a verlas de a una"** retoman la pila. | *"Miren cuánto rinde por hora. Ese número los va a salvar."* |
 | **Se revela la plata rápida** | — | Si cayeron, el juego explica cada trampa y resta **−1.500** c/u. | **Pará el juego acá.** Es el momento pedagógico más fuerte. |
 | **Evento: el cliente urgente** | 1:00 | Cobrar $1.500 y faltar al parcial / negociar el plazo / rechazar. | *"¿Seguro que son solo dos opciones?"* |
 | **Mes 1 · Repartir** | 3:15 | Arrastran billetes ($500/$1.000/$5.000) a cada etiqueta. Las **amarillas dan puntos**; en $0 restan **−1.500**. | *"Cada peso con nombre. La plata sin nombre se gasta sola."* |
 | **El mes, día por día** | ~7 s | Pasan los 30 días y caen **dos imprevistos ($2.000)**. | Callate y dejá que lo miren. |
 | **Cierre del mes 1** | — | Zafan con **$2.000** entre imprevistos + fondo. El proyector **revela quién aguantó**; cada máquina ve su **boletín del mes** (cada renglón con sus puntos). | *"¿Quién tenía colchón?"* |
 | **Subasta a ciegas** | ~1 min | **Un solo mural para toda la sala.** Ofrecen **horas en secreto**; el proyector **canta las ofertas de menor a mayor** y se lo lleva el que más puso, que **las paga**. | *"Ojo: esas horas ya no las tienen para el resto del mes."* El momento más ruidoso. |
-| **Mes 2 · Renegociar** | 3:00 | El mercado cambió: ofertas que crecieron, otras que se pincharon, puertas cerradas. Ahora **11 h**. | *"Sostener también es decidir. ¿Qué sueltan?"* |
+| **Mes 2 · Renegociar** | 3:00 | El mercado cambió: ofertas que crecieron, otras que se pincharon, puertas cerradas. Ahora **11 h**: arrancan pasados y el juego marca **la changa que menos rinde**. | *"Sostener también es decidir. ¿Qué sueltan?"* |
 | **Evento: la oferta imperdible** | 1:00 | Auriculares 40% off en 6 cuotas "sin interés". | *"¿La oferta es hoy, o el precio es hoy?"* |
 | **Mes 2 · Repartir** | 4:00 | Se desbloquea la **meta 2** si la tableta quedó asegurada. El colchón que sobró del mes 1 vuelve **sin etiqueta**. | — |
 | **El mes 2, día por día** | ~7 s | Otros dos imprevistos, **$2.500**. Uno no es un gasto: es plata que no llega. | *"El colchón sirve para los dos."* |
@@ -117,7 +117,7 @@ El proyector ya te da el análisis. Sumale:
 |---|---|
 | Cada peso de ingreso extra | Cada trampa PLATA RÁPIDA: **−1.500** |
 | Cada peso guardado con nombre (con rendimiento decreciente) | Cada etiqueta amarilla en $0: **−1.500** |
-| 3 fuentes distintas: **+1.000** (mes 1), **+800** (meses 2 y 3) | Plata sin repartir: **se evapora la mitad** |
+| 3 fuentes distintas: **+1.000** (mes 1), **+800** (meses 2 y 3) | Plata sin repartir: **se evapora la mitad** (desde $500; menos es vuelto y no cuenta) |
 | Aguantar los golpes: **+2.000 / +2.500 / +3.000** | No aguantarlos: **−2.000 / −2.500 / −3.000** |
 | Los tres, *Colchón de acero*: **+1.500** | Dejar a Juan a agua y laburo (menos de $2.000 para vivir): **−1.000** |
 | La tableta al contado: **+1.500** · Meta 2 en marcha: **+500** | La tableta en cuotas: **−800** (y sin bonus) · pedírsela a un amigo: **−400** |
